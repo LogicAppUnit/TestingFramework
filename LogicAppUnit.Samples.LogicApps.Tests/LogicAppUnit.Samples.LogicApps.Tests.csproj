@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>LogicAppUnit.Samples.LogicApps.Tests</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="BuiltInConnectorWorkflowTest\MockData\ServiceBus_Request_LanguageCode.json" />
+    <None Remove="BuiltInConnectorWorkflowTest\MockData\ServiceBus_Request_NoLanguageCode.json" />
+    <None Remove="BuiltInConnectorWorkflowTest\MockData\SQL_Request.json" />
+    <None Remove="BuiltInConnectorWorkflowTest\MockData\SQL_Request_en_GB.json" />
+    <None Remove="BuiltInConnectorWorkflowTest\MockData\SQL_Request_xx_GB.json" />
+    <None Remove="HttpWorkflowTest\MockData\SystemTwo_Request.json" />
+    <None Remove="ManagedApiConnectorWorkflowTest\MockData\Outlook_Request.json" />
+    <None Remove="ManagedApiConnectorWorkflowTest\MockData\Salesforce_Request.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="BuiltInConnectorWorkflowTest\MockData\ServiceBus_Request_LanguageCode.json" />
+    <EmbeddedResource Include="BuiltInConnectorWorkflowTest\MockData\ServiceBus_Request_NoLanguageCode.json" />
+    <EmbeddedResource Include="BuiltInConnectorWorkflowTest\MockData\SQL_Request_xx_GB.json" />
+    <EmbeddedResource Include="BuiltInConnectorWorkflowTest\MockData\SQL_Request_en_GB.json" />
+    <EmbeddedResource Include="HttpWorkflowTest\MockData\SystemTwo_Request.json" />
+    <EmbeddedResource Include="ManagedApiConnectorWorkflowTest\MockData\Outlook_Request.json" />
+    <EmbeddedResource Include="ManagedApiConnectorWorkflowTest\MockData\Salesforce_Request.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LogicAppUnit\LogicAppUnit.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="testConfiguration.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

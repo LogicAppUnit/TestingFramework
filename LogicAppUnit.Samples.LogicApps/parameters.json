@@ -1,0 +1,22 @@
+{
+  "ServiceOne-Url": {
+    "type": "String",
+    "value": "@appsetting('ServiceOne-Url')"
+  },
+  "ServiceOne-Authentication-APIKey": {
+    "type": "String",
+    "value": "@appsetting('ServiceOne-Authentication-APIKey')"
+  },
+  "ServiceOne-Authentication-WebHook-APIKey": {
+    "type": "String",
+    "value": "@appsetting('ServiceOne-Authentication-WebHook-APIKey')"
+  },
+  "ServiceTwo-Url": {
+    "type": "String",
+    "value": "@appsetting('ServiceTwo-Url')"
+  },
+  "ServiceTwo-Authentication-APIKey": {
+    "type": "String",
+    "value": "@appsetting('ServiceTwo-Authentication-APIKey')"
+  }
+}

@@ -1,0 +1,5 @@
+
+# CA1307: Specify StringComparison for clarity
+#   Clarity of intent is not required, this is non-localizable code.
+[*.cs]
+dotnet_diagnostic.CA1307.severity = none

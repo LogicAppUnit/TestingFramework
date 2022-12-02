@@ -1,0 +1,23 @@
+{
+  "entityName": "customer-topic",
+  "message": {
+    "contentData": {
+      "id": 54624,
+      "title": "Mr",
+      "firstName": "Peter",
+      "lastName": "Smith",
+      "dateOfBirth": "1970-04-25",
+      "language": {
+        "code": "en-GB",
+        "name": "English (United Kingdom)"
+      }
+    },
+    "contentType": "application/json",
+    "sessionId": "54624",
+    "userProperties": {
+      "entityId": 54624,
+      "entityType": "customer"
+    },
+    "messageId": "ff421d65-5be6-4084-b748-af490100c9a5"
+  }
+}

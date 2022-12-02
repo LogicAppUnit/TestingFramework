@@ -1,0 +1,284 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Validate_API_Key": {
+                "type": "If",
+                "expression": {
+                    "and": [
+                        {
+                            "equals": [
+                                "@triggerOutputs()?['headers']?['x-api-key']",
+                                "@parameters('ServiceOne-Authentication-WebHook-APIKey')"
+                            ]
+                        }
+                    ]
+                },
+                "actions": {
+                    "Get_Customer_Details_from_Service_One": {
+                        "type": "Http",
+                        "inputs": {
+                            "method": "GET",
+                            "uri": "@{parameters('ServiceOne-Url')}/customers/@{triggerBody()?['customerId']}",
+                            "headers": {
+                                "x-api-key": "ApiKey @{parameters('ServiceOne-Authentication-APIKey')}"
+                            }
+                        },
+                        "runAfter": {},
+                        "operationOptions": "DisableAsyncPattern, SuppressWorkflowHeaders"
+                    },
+                    "Get_Customer_Details_Success": {
+                        "type": "If",
+                        "expression": {
+                            "and": [
+                                {
+                                    "equals": [
+                                        "@outputs('Get_Customer_Details_from_Service_One')['statusCode']",
+                                        200
+                                    ]
+                                }
+                            ]
+                        },
+                        "actions": {
+                            "Parse_Customer": {
+                                "type": "ParseJson",
+                                "inputs": {
+                                    "content": "@body('Get_Customer_Details_from_Service_One')",
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer"
+                                            },
+                                            "title": {
+                                                "type": "string"
+                                            },
+                                            "firstName": {
+                                                "type": "string"
+                                            },
+                                            "lastName": {
+                                                "type": "string"
+                                            },
+                                            "dateOfBirth": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            },
+                                            "languageCode": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            },
+                                            "address": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "line1": {
+                                                        "type": "string"
+                                                    },
+                                                    "line2": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "line3": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "town": {
+                                                        "type": "string"
+                                                    },
+                                                    "county": {
+                                                        "type": "string"
+                                                    },
+                                                    "postcode": {
+                                                        "type": "string"
+                                                    },
+                                                    "countryCode": {
+                                                        "type": "string"
+                                                    },
+                                                    "countryName": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "runAfter": {}
+                            },
+                            "Update_Customer_Details_in_Service_Two": {
+                                "type": "Http",
+                                "inputs": {
+                                    "method": "PUT",
+                                    "uri": "@{parameters('ServiceTwo-Url')}/membership/customers/@{triggerBody()?['customerId']}",
+                                    "headers": {
+                                        "x-api-key": "ApiKey @{parameters('ServiceTwo-Authentication-APIKey')}",
+                                        "Content-Type": "application/json"
+                                    },
+                                    "body": {
+                                        "header": {
+                                            "correlationId": "@{triggerBody()?['id']}",
+                                            "dateUpdated": "@triggerBody()?['timestamp']"
+                                        },
+                                        "customerType": "individual",
+                                        "title": "@body('Parse_Customer')?['title']",
+                                        "name": "@concat(body('Parse_Customer')?['firstName'], ' ', body('Parse_Customer')?['lastName'])",
+                                        "addresses": [
+                                            {
+                                                "addressType": "@appsetting('ServiceTwo-DefaultAddressType')",
+                                                "addressLine1": "@body('Parse_Customer')?['address']?['line1']",
+                                                "addressLine2": "@body('Parse_Customer')?['address']?['line2']",
+                                                "addressLine3": "@body('Parse_Customer')?['address']?['line3']",
+                                                "town": "@body('Parse_Customer')?['address']?['town']",
+                                                "county": "@body('Parse_Customer')?['address']?['county']",
+                                                "postalCode": "@body('Parse_Customer')?['address']?['postcode']"
+                                            }
+                                        ]
+                                    }
+                                },
+                                "runAfter": {
+                                    "Parse_Customer": [
+                                        "Succeeded"
+                                    ]
+                                },
+                                "operationOptions": "DisableAsyncPattern, SuppressWorkflowHeaders"
+                            },
+                            "Update_Customer_Details_Success": {
+                                "type": "If",
+                                "expression": {
+                                    "and": [
+                                        {
+                                            "equals": [
+                                                "@outputs('Update_Customer_Details_in_Service_Two')['statusCode']",
+                                                200
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "actions": {
+                                    "Success_Response": {
+                                        "type": "Response",
+                                        "kind": "http",
+                                        "inputs": {
+                                            "statusCode": 200,
+                                            "body": "Webhook processed successfully"
+                                        },
+                                        "runAfter": {}
+                                    }
+                                },
+                                "runAfter": {
+                                    "Update_Customer_Details_in_Service_Two": [
+                                        "Succeeded",
+                                        "FAILED",
+                                        "SKIPPED",
+                                        "TIMEDOUT"
+                                    ]
+                                },
+                                "else": {
+                                    "actions": {
+                                        "Failed_Update_Response": {
+                                            "type": "Response",
+                                            "kind": "http",
+                                            "inputs": {
+                                                "statusCode": 500,
+                                                "body": "Unable to update customer details: @{body('Update_Customer_Details_in_Service_Two')}"
+                                            },
+                                            "runAfter": {}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "runAfter": {
+                            "Get_Customer_Details_from_Service_One": [
+                                "Succeeded",
+                                "TIMEDOUT",
+                                "SKIPPED",
+                                "FAILED"
+                            ]
+                        },
+                        "else": {
+                            "actions": {
+                                "Failed_Get_Response": {
+                                    "type": "Response",
+                                    "kind": "http",
+                                    "inputs": {
+                                        "statusCode": "@outputs('Get_Customer_Details_from_Service_One')['statusCode']",
+                                        "body": "Unable to get customer details: @{body('Get_Customer_Details_from_Service_One')}"
+                                    },
+                                    "runAfter": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "runAfter": {},
+                "else": {
+                    "actions": {
+                        "Unauthorized_Response": {
+                            "type": "Response",
+                            "kind": "http",
+                            "inputs": {
+                                "statusCode": 401,
+                                "body": "Invalid/No authorization header passed"
+                            },
+                            "runAfter": {}
+                        }
+                    }
+                }
+            }
+        },
+        "triggers": {
+            "manual": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "schema": {
+                        "properties": {
+                            "correlationId": {
+                                "type": "string"
+                            },
+                            "customerId": {
+                                "type": "integer"
+                            },
+                            "expiryTime": {
+                                "type": "string"
+                            },
+                            "id": {
+                                "type": "string"
+                            },
+                            "resourceId": {
+                                "type": "string"
+                            },
+                            "resourceURI": {
+                                "type": "string"
+                            },
+                            "sourceSystem": {
+                                "type": "string"
+                            },
+                            "timestamp": {
+                                "type": "string"
+                            },
+                            "type": {
+                                "type": "string"
+                            },
+                            "webhookId": {
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "method": "POST"
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {}
+    },
+    "kind": "Stateful"
+}

@@ -1,0 +1,6 @@
+{
+  "query": "SELECT LanguageName, LanguageCode FROM config.Languages WITH (NOLOCK) WHERE LanguageCode = @LanguageCode",
+  "queryParameters": {
+    "LanguageCode": "en-GB"
+  }
+}

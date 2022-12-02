@@ -1,0 +1,248 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Send_message_to_Topic": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "entityName": "customer-topic",
+                        "message": {
+                            "contentData": "@outputs('Compose_new_message')",
+                            "contentType": "application/json",
+                            "sessionId": "@triggerOutputs()?['body']?['sessionId']",
+                            "userProperties": {
+                                "entityId": "@body('Parse_Customer')?['id']",
+                                "entityType": "customer"
+                            },
+                            "messageId": "@triggerOutputs()?['body']?['messageId']"
+                        }
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "serviceBus",
+                        "operationId": "sendMessage",
+                        "serviceProviderId": "/serviceProviders/serviceBus"
+                    }
+                },
+                "runAfter": {
+                    "Compose_new_message": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Parse_Customer": {
+                "type": "ParseJson",
+                "inputs": {
+                    "content": "@triggerOutputs()?['body']?['contentData']",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "title": {
+                                "type": "string"
+                            },
+                            "firstName": {
+                                "type": "string"
+                            },
+                            "lastName": {
+                                "type": "string"
+                            },
+                            "dateOfBirth": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "languageCode": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "address": {
+                                "type": "object",
+                                "properties": {
+                                    "line1": {
+                                        "type": "string"
+                                    },
+                                    "line2": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "line3": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "town": {
+                                        "type": "string"
+                                    },
+                                    "county": {
+                                        "type": "string"
+                                    },
+                                    "postcode": {
+                                        "type": "string"
+                                    },
+                                    "countryCode": {
+                                        "type": "string"
+                                    },
+                                    "countryName": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "runAfter": {
+                    "Initialize_Language_Name": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Is_there_a_Language_Code": {
+                "type": "If",
+                "expression": {
+                    "and": [
+                        {
+                            "not": {
+                                "equals": [
+                                    "@string(body('Parse_Customer')?['languageCode'])",
+                                    ""
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "actions": {
+                    "Execute_Query_to_get_Language_Name": {
+                        "type": "ServiceProvider",
+                        "inputs": {
+                            "parameters": {
+                                "query": "SELECT LanguageName, LanguageCode FROM config.Languages WITH (NOLOCK) WHERE LanguageCode = @LanguageCode",
+                                "queryParameters": {
+                                    "LanguageCode": "@body('Parse_Customer')?['languageCode']"
+                                }
+                            },
+                            "serviceProviderConfiguration": {
+                                "connectionName": "sql",
+                                "operationId": "executeQuery",
+                                "serviceProviderId": "/serviceProviders/sql"
+                            },
+                            "retryPolicy": {
+                                "type": "fixed",
+                                "count": 2,
+                                "interval": "PT5S"
+                            }
+                        },
+                        "runAfter": {}
+                    },
+                    "Did_we_get_a_Language_Name": {
+                        "type": "If",
+                        "expression": {
+                            "and": [
+                                {
+                                    "greater": [
+                                        "@length(body('Execute_Query_to_get_Language_Name'))",
+                                        0
+                                    ]
+                                }
+                            ]
+                        },
+                        "actions": {
+                            "Set_Language_Name": {
+                                "type": "SetVariable",
+                                "inputs": {
+                                    "name": "languageName",
+                                    "value": "@body('Execute_Query_to_get_Language_Name')[0][0]?['LanguageName']"
+                                },
+                                "runAfter": {}
+                            }
+                        },
+                        "runAfter": {
+                            "Execute_Query_to_get_Language_Name": [
+                                "Succeeded"
+                            ]
+                        },
+                        "else": {
+                            "actions": {
+                                "Terminate": {
+                                    "type": "Terminate",
+                                    "inputs": {
+                                        "runStatus": "Failed",
+                                        "runError": {
+                                            "code": "500",
+                                            "message": "Language Code '@{body('Parse_Customer')?['languageCode']}' is not valid"
+                                        }
+                                    },
+                                    "runAfter": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "runAfter": {
+                    "Parse_Customer": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Compose_new_message": {
+                "type": "Compose",
+                "inputs": {
+                    "id": "@body('Parse_Customer')?['id']",
+                    "title": "@body('Parse_Customer')?['title']",
+                    "firstName": "@body('Parse_Customer')?['firstName']",
+                    "lastName": "@body('Parse_Customer')?['lastName']",
+                    "dateOfBirth": "@body('Parse_Customer')?['dateOfBirth']",
+                    "language": {
+                        "code": "@body('Parse_Customer')?['languageCode']",
+                        "name": "@variables('languageName')"
+                    }
+                },
+                "runAfter": {
+                    "Is_there_a_Language_Code": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Initialize_Language_Name": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "languageName",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "runAfter": {}
+            }
+        },
+        "triggers": {
+            "When_messages_are_available_in_a_queue": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "queueName": "pending-queue",
+                        "isSessionsEnabled": false
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "serviceBus",
+                        "operationId": "receiveQueueMessages",
+                        "serviceProviderId": "/serviceProviders/serviceBus"
+                    }
+                },
+                "splitOn": "@triggerOutputs()?['body']"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {}
+    },
+    "kind": "Stateful"
+}

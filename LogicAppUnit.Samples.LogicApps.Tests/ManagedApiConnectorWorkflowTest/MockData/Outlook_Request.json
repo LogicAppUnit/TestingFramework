@@ -1,0 +1,7 @@
+{
+  "To": "update-notification@test-example.net",
+  "Subject": "TEST ENVIRONMENT: Customer 54624 (Peter Smith) has been updated",
+  "Body": "<p><u><strong>Notification</strong></u><br>\n<br>\nCustomer 54624 has been updated.</p>",
+  "From": "integration@test-example.net",
+  "Importance": "Normal"
+}

@@ -1,0 +1,20 @@
+﻿{
+  "azurite": {
+    "queueServicePort": 10003
+  },
+
+  "logging": {
+    "writeFunctionRuntineStartupLogs": false
+  },
+
+  "workflow": {
+    "externalApiUrlsToMock": [
+      "https://external-service-one.testing.net",
+      "https://external-service-two.testing.net"
+    ],
+    "builtInConnectorsToMock": [
+      "executeQuery",
+      "sendMessage"
+    ]
+  }
+}
