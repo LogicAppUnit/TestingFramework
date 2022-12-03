@@ -31,7 +31,7 @@
         Skipped,
 
         /// <summary>
-        /// The action succeeded..
+        /// The action succeeded.
         /// </summary>
         Succeeded,
 
