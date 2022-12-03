@@ -8,6 +8,15 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Title>Logic App Unit Testing Framework</Title>
+    <Description>Unit testing framework for Standard Logic Apps.</Description>
+    <RepositoryUrl>https://github.com/LogicAppUnit/TestingFramework</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageId>$(AssemblyName)</PackageId>
+    <PackageProjectUrl>https://github.com/LogicAppUnit/TestingFramework</PackageProjectUrl>
+    <PackageTags>azure logic-apps unit-testing</PackageTags>
+    <PackageLicenseFile>License.md</PackageLicenseFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
