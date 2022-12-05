@@ -185,6 +185,10 @@ namespace LogicAppUnit.Hosting
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
+
+                // Kill any remaining function host processes so that we can then delete the working directory
+                KillFunctionHostProcesses();
+
                 Directory.Delete(this.WorkingDirectory, recursive: true);
 
                 throw;

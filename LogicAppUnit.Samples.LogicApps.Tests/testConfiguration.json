@@ -1,8 +1,4 @@
 ﻿{
-  "azurite": {
-    "queueServicePort": 10003
-  },
-
   "logging": {
     "writeFunctionRuntineStartupLogs": false
   },
