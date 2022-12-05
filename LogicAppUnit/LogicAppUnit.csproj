@@ -14,9 +14,10 @@
     <RepositoryUrl>https://github.com/LogicAppUnit/TestingFramework</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageId>$(AssemblyName)</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
     <PackageProjectUrl>https://github.com/LogicAppUnit/TestingFramework</PackageProjectUrl>
     <PackageTags>azure logic-apps unit-testing</PackageTags>
-    <PackageLicenseFile>License.md</PackageLicenseFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -43,13 +44,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LogicAppUnit.Hosting\LogicAppUnit.Hosting.csproj" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" Version="3.1.10" />
   </ItemGroup>
 
 </Project>
