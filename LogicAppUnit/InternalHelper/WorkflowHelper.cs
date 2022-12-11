@@ -103,7 +103,7 @@ namespace LogicAppUnit.InternalHelper
 
             if (httpActions.Count > 0)
             {
-                Console.WriteLine("Updating workflow HTTP actions to remove any existing Retry and replace with Retry 'None':");
+                Console.WriteLine("Updating workflow HTTP actions to remove any existing Retry policies and replace with a 'none' policy:");
                 var retryObj = new { type = "none" };
 
                 httpActions.ForEach(x => {

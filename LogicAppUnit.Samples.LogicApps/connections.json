@@ -22,10 +22,10 @@
   "managedApiConnections": {
     "salesforce": {
       "api": {
-        "id": "/subscriptions/55fa7b53-831e-4016-b0a5-8083c9315eee/providers/Microsoft.Web/locations/uksouth/managedApis/salesforce"
+        "id": "/subscriptions/c1661296-a732-44b9-8458-d1a0dd19815e/providers/Microsoft.Web/locations/uksouth/managedApis/salesforce"
       },
       "connection": {
-        "id": "/subscriptions/55fa7b53-831e-4016-b0a5-8083c9315eee/resourceGroups/rg-uks-01/providers/Microsoft.Web/connections/salesforce01"
+        "id": "/subscriptions/c1661296-a732-44b9-8458-d1a0dd19815e/resourceGroups/rg-uks-01/providers/Microsoft.Web/connections/salesforce01"
       },
       "connectionRuntimeUrl": "https://7606763fdc09952f.10.common.logic-uksouth.azure-apihub.net/apim/salesforce/fba515601ef14f9193eee596a9dcfd1c/",
       "authentication": {
@@ -36,10 +36,10 @@
     },
     "outlook": {
       "api": {
-        "id": "/subscriptions/55fa7b53-831e-4016-b0a5-8083c9315eee/providers/Microsoft.Web/locations/uksouth/managedApis/outlook"
+        "id": "/subscriptions/c1661296-a732-44b9-8458-d1a0dd19815e/providers/Microsoft.Web/locations/uksouth/managedApis/outlook"
       },
       "connection": {
-        "id": "/subscriptions/55fa7b53-831e-4016-b0a5-8083c9315eee/resourceGroups/rg-uks-01/providers/Microsoft.Web/connections/outlook01"
+        "id": "/subscriptions/c1661296-a732-44b9-8458-d1a0dd19815e/resourceGroups/rg-uks-01/providers/Microsoft.Web/connections/outlook01"
       },
       "connectionRuntimeUrl": "https://7606763fdc09952f.10.common.logic-uksouth.azure-apihub.net/apim/outlook/79a0bc680716416e90e17323b581695d/",
       "authentication": {
