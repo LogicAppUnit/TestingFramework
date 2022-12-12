@@ -13,7 +13,7 @@ namespace LogicAppUnit.Hosting
     /// <summary>
     /// The function test host.
     /// </summary>
-    public class WorkflowTestHost : IDisposable
+    internal class WorkflowTestHost : IDisposable
     {
         /// <summary>
         /// Get or sets the output data.

@@ -9,7 +9,7 @@ namespace LogicAppUnit.Hosting
     /// <summary>
     /// The test setup class.
     /// </summary>
-    public class TestEnvironment
+    internal class TestEnvironment
     {
         /// <summary>
         /// Flow runtime webhook extension uri base path.

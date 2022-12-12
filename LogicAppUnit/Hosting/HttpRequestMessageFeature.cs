@@ -12,7 +12,7 @@ namespace LogicAppUnit.Hosting
     /// <summary>
     /// Http request message feature.
     /// </summary>
-    public class HttpRequestMessageFeature
+    internal class HttpRequestMessageFeature
     {
         /// <summary>
         /// The request message.

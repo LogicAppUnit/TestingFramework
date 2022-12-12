@@ -10,7 +10,7 @@ namespace LogicAppUnit.Hosting
     /// <summary>
     /// Flow callback URL definition.
     /// </summary>
-    public class CallbackUrlDefinition
+    internal class CallbackUrlDefinition
     {
         /// <summary>
         /// Gets or sets the value.
