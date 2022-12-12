@@ -19,24 +19,6 @@ namespace LogicAppUnit.Helper
         private const string PlainTextContentType = "text/plain";
         private const string XmlContentType = "application/xml";
 
-        #region Files
-
-        /// <summary>
-        /// Read the contents of a file using the given path.
-        /// </summary>
-        /// <param name="path">Path of the file to be read.</param>
-        /// <returns>The file content, as a <see cref="string"/>.</returns>
-        public static string ReadFromPath(string path)
-        {
-            if (string.IsNullOrEmpty(path))
-                throw new ArgumentNullException(nameof(path));
-
-            var fullPath = Path.GetFullPath(path);
-            return File.ReadAllText(fullPath);
-        }
-
-        #endregion // Files
-
         #region HTTP Content
 
         /// <summary>

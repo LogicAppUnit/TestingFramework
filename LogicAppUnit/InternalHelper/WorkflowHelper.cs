@@ -12,18 +12,56 @@ namespace LogicAppUnit.InternalHelper
     /// <summary>
     /// Helper class to manage the workflow file.
     /// </summary>
-    internal static class WorkflowHelper
+    internal class WorkflowHelper
     {
+        private readonly string _workflowName;
+        private readonly JObject _jObjectWorkflow;
+
         /// <summary>
-        /// Carry out all the required modifications to the workflow so that it can be run it independently of any external dependencies.
+        /// Initializes a new instance of the <see cref="WorkflowHelper"/> class.
         /// </summary>
-        /// <param name="workflowTestInput">The workflow to be modified.</param>
-        /// <param name="builtInConnectorsToMock">List of the built-in connector types to be mocked.</param>
-        internal static void SetupWorkflowForExecution(ref WorkflowTestInput[] workflowTestInput, List<string> builtInConnectorsToMock)
+        /// <param name="workflowName">Name of the workflow.</param>
+        /// <param name="workflowContent">The contents of the workflow definition file.</param>
+        public WorkflowHelper(string workflowName, string workflowContent)
         {
-            AddJsonToSkipHttpRetry(ref workflowTestInput);
-            ReplaceOtherTriggerTypesWithHttp(ref workflowTestInput);
-            ReplaceBuiltInConnectorActionsWithHttp(ref workflowTestInput, builtInConnectorsToMock);
+            if (string.IsNullOrEmpty(workflowName))
+                throw new ArgumentNullException(nameof(workflowName));
+            if (string.IsNullOrEmpty(workflowContent))
+                throw new ArgumentNullException(nameof(workflowContent));
+
+            _workflowName = workflowName;
+            _jObjectWorkflow = JObject.Parse(workflowContent);
+        }
+
+        /// <summary>
+        /// Returns the workflow definition content.
+        /// </summary>
+        /// <returns>The workflow definition content.</returns>
+        public override string ToString()
+        {
+            return _jObjectWorkflow.ToString();
+        }
+
+        /// <summary>
+        /// Gets the name of the workflow.
+        /// </summary>
+        public string WorkflowName
+        {
+            get
+            {
+                return _workflowName; 
+            }
+        }
+
+        /// <summary>
+        /// Gets the type of the workflow, either <i>Stateless</i> or <i>Stateful</i>.
+        /// </summary>
+        public WorkflowType WorkflowType
+        {
+            get
+            {
+                return (WorkflowType)Enum.Parse(typeof(WorkflowType), _jObjectWorkflow["kind"].ToString());
+            }
         }
 
         #region Mock External workflow calls
@@ -92,14 +130,14 @@ namespace LogicAppUnit.InternalHelper
         #endregion // Mock External workflow calls
 
         /// <summary>
-        /// Update all HTTP actions to include a retry policy of 'none' so that when we mock our HTTP calls from the workflow, any configured retries for a failed HTTP call won't happen.
-        /// This change will reduce the time that it takes to execute a workflow when testing scenarios that include failed HTTP calls.
+        /// Update all HTTP actions to include a retry policy of 'none' so that when making HTTP calls from the workflow, any configured retries for a failed HTTP call won't happen.
         /// </summary>
-        /// <param name="workflowTestInput">The workflow to be modified.</param>
-        private static void AddJsonToSkipHttpRetry(ref WorkflowTestInput[] workflowTestInput)
+        /// <remarks>
+        /// This change will reduce the time that it takes to execute a workflow when testing scenarios that include failed HTTP calls.
+        /// </remarks>
+        public void AddJsonToSkipHttpRetry()
         {
-            var jObject = JObject.Parse(workflowTestInput[0].WorkflowDefinition);
-            var httpActions = jObject.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "Http").Select(x => x["inputs"] as JObject).ToList();
+            var httpActions = _jObjectWorkflow.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "Http").Select(x => x["inputs"] as JObject).ToList();
 
             if (httpActions.Count > 0)
             {
@@ -115,27 +153,23 @@ namespace LogicAppUnit.InternalHelper
                     Console.WriteLine($"    {((JProperty)x.Parent.Parent.Parent).Name}");
                 });
             }
-
-            workflowTestInput[0].WorkflowDefinition = jObject.ToString();
         }
 
         /// <summary>
-        /// In order to test a logic app workflow free of any external dependencies, it must have a HTTP trigger. So replace any other trigger types with a HTTP trigger. 
+        /// Replace any non-HTTP trigger with a HTTP trigger so that the workflow can be started by the testing framework using a HTTP request.
         /// </summary>
-        /// <param name="workflowTestInput">The workflow to be modified.</param>
-        private static void ReplaceOtherTriggerTypesWithHttp(ref WorkflowTestInput[] workflowTestInput)
+        public void ReplaceTriggersWithHttp()
         {
             // The HTTP trigger is called a 'Request' action
             const string HttpTriggerName = "Request";
 
-            var jObject = JObject.Parse(workflowTestInput[0].WorkflowDefinition);
-            var trigger = jObject.SelectTokens("$.definition.triggers.*").Where(x => x["type"].ToString() != HttpTriggerName).FirstOrDefault();
+            var trigger = _jObjectWorkflow.SelectTokens("$.definition.triggers.*").Where(x => x["type"].ToString() != HttpTriggerName).FirstOrDefault();
 
             if (trigger != null)
             {
                 Console.WriteLine($"Replacing workflow trigger '{((JProperty)trigger.Parent).Name}' with a HTTP Request trigger.");
 
-                var triggerBlock = jObject.SelectToken("$.definition.triggers") as JObject;
+                var triggerBlock = _jObjectWorkflow.SelectToken("$.definition.triggers") as JObject;
                 triggerBlock.RemoveAll();
                 triggerBlock.Add("manual", JObject.FromObject(new
                 {
@@ -148,29 +182,22 @@ namespace LogicAppUnit.InternalHelper
                     }
                 }));
             }
-
-            workflowTestInput[0].WorkflowDefinition = jObject.ToString();
         }
 
         /// <summary>
         /// Replace actions using Built-In connectors with HTTP actions so that their dependencies can be easily mocked.
         /// </summary>
-        /// <param name="workflowTestInput">The workflow to be modified.</param>
         /// <param name="builtInConnectorsToMock">List of the built-in connector types to be mocked.</param>
         /// <remarks>
         /// The body of the HTTP POST request represents the <i>parameters</i> section of Built-In connector which allows test cases to assert this information.
         /// </remarks>
-        private static void ReplaceBuiltInConnectorActionsWithHttp(ref WorkflowTestInput[] workflowTestInput, List<string> builtInConnectorsToMock)
+        public void ReplaceBuiltInConnectorActionsWithHttp(List<string> builtInConnectorsToMock)
         {
-            var jObject = JObject.Parse(workflowTestInput[0].WorkflowDefinition);
-
             Console.WriteLine("Replacing workflow actions using a built-in connector with a HTTP action for the mock test server:");
 
             // Start with the 'top-level' actions, then move recursively down through the workflow definition to replace all of the built-in connectors
-            var actionsBlock = jObject.SelectToken("$.definition.actions") as JObject;
+            var actionsBlock = _jObjectWorkflow.SelectToken("$.definition.actions") as JObject;
             ReplaceBuiltInActionsWithHttpActions(actionsBlock, builtInConnectorsToMock);
-
-            workflowTestInput[0].WorkflowDefinition = jObject.ToString();
         }
 
         /// <summary>

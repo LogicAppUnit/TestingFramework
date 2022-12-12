@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using LogicAppUnit.Helper;
 using LogicAppUnit.Hosting;
 using LogicAppUnit.InternalHelper;
 using System;
@@ -15,28 +14,30 @@ namespace LogicAppUnit
     /// </summary>
     public abstract class WorkflowTestBase
     {
-        private readonly static HttpClient client;
+        private readonly static HttpClient _client;
 
-        private TestConfiguration testConfig;
-        private WorkflowTestInput[] workflowTestInput;
-        private DirectoryInfo artifactDirectory;
-        private string localSettings;
-        private string parameters;
-        private string connections;
-        private string host;
-        private string workflowName;
-        private bool workflowIsInitialised = false;
+        private TestConfiguration _testConfig;
+        private DirectoryInfo _artifactDirectory;
+
+        private WorkflowHelper _workflowDefinition;
+        private SettingsHelper _localSettings;
+        private ConnectionHelper _connections;
+
+        private string _parameters;
+        private string _host;
+
+        private bool _workflowIsInitialised = false;
 
         /// <summary>
         /// Static initializer for a new instance of the <see cref="WorkflowTestBase"/> class.
         /// </summary>
         static WorkflowTestBase()
         {
-            if (client == null)
+            if (_client == null)
             {
                 var serviceProvider = new ServiceCollection().AddHttpClient().BuildServiceProvider();
                 var httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();
-                client = httpClientFactory.CreateClient("funcAppClient");
+                _client = httpClientFactory.CreateClient("funcAppClient");
             }
         }
 
@@ -45,7 +46,7 @@ namespace LogicAppUnit
         /// </summary>
         protected static void Close()
         {
-            client?.Dispose();
+            _client?.Dispose();
         }
 
         /// <summary>
@@ -90,46 +91,43 @@ namespace LogicAppUnit
             LoggingHelper.LogBanner("Initializing test");
 
             // Load the test configuration settings
-            testConfig = new ConfigurationBuilder()
+            _testConfig = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile(testConfigFilename, false, false)
                 .Build()
                 .Get<TestConfiguration>();
-            if (testConfig == null)
+            if (_testConfig == null)
                 throw new TestException($"The test configuration could not be loaded. Ensure that the test project includes a '{testConfigFilename}' file, it is copied to the output directory and it is formatted correctly.");
 
             // Make sure Azurite is running
             // If Azurite is not running we want to fail the tests quickly, not wait for the tests to run and then fail
-            if (testConfig.Azurite.EnableAzuritePortCheck && !AzuriteHelper.IsRunning(testConfig.Azurite))
-                throw new TestException($"Azurite is not running on ports {testConfig.Azurite.BlobServicePort} (Blob service), {testConfig.Azurite.QueueServicePort} (Queue service) and {testConfig.Azurite.TableServicePort} (Table service). Logic App workflows cannot run unless all three services are running in Azurite");
-
-            // Name of the workflow
-            this.workflowName = workflowName;
-
-            // JSON definition of the workflow
-            var workflowDefinition = ContentHelper.ReadFromPath(Path.Combine(logicAppBasePath, workflowName, Constants.WORKFLOW));
-
-            // Paths to the Logic App files
-            // The name of the local setting file can be set in the test configuration
-            localSettings = ContentHelper.ReadFromPath(Path.Combine(logicAppBasePath, SetLocalSettingsFile(localSettingsFilename)));
-            parameters = ContentHelper.ReadFromPath(Path.Combine(logicAppBasePath, Constants.PARAMETERS));
-            connections = ContentHelper.ReadFromPath(Path.Combine(logicAppBasePath, Constants.CONNECTIONS));
-            host = ContentHelper.ReadFromPath(Path.Combine(logicAppBasePath, Constants.HOST));
+            if (_testConfig.Azurite.EnableAzuritePortCheck && !AzuriteHelper.IsRunning(_testConfig.Azurite))
+                throw new TestException($"Azurite is not running on ports {_testConfig.Azurite.BlobServicePort} (Blob service), {_testConfig.Azurite.QueueServicePort} (Queue service) and {_testConfig.Azurite.TableServicePort} (Table service). Logic App workflows cannot run unless all three services are running in Azurite");
 
             // Set up the workflow
-            workflowTestInput = new WorkflowTestInput[] { new WorkflowTestInput(workflowName, workflowDefinition) };
-            WorkflowHelper.SetupWorkflowForExecution(ref workflowTestInput, testConfig.Workflow.BuiltInConnectorsToMock);
+            _workflowDefinition = new WorkflowHelper(workflowName, ReadFromPath(Path.Combine(logicAppBasePath, workflowName, Constants.WORKFLOW)));
+            Console.WriteLine($"Workflow '{_workflowDefinition.WorkflowName}' is {_workflowDefinition.WorkflowType}");
+            _workflowDefinition.AddJsonToSkipHttpRetry();
+            _workflowDefinition.ReplaceTriggersWithHttp();
+            _workflowDefinition.ReplaceBuiltInConnectorActionsWithHttp(_testConfig.Workflow.BuiltInConnectorsToMock);
 
             // Set up the connections
-            ConnectionHelper.ReplaceManagedApiConnectionUrlsToFallBackOnMockServer(ref connections);
+            _connections = new ConnectionHelper(ReadFromPath(Path.Combine(logicAppBasePath, Constants.CONNECTIONS), optional: true));
+            _connections.ReplaceManagedApiConnectionUrlsWithMockServer();
 
             // Set up the local settings
-            SettingsHelper.ReplaceExternalUrlsToFallBackOnMockServer(ref localSettings, testConfig.Workflow.ExternalApiUrlsToMock);
+            // The name of the local setting file can be set in the test configuration
+            _localSettings = new SettingsHelper(ReadFromPath(Path.Combine(logicAppBasePath, SetLocalSettingsFile(localSettingsFilename))));
+            _localSettings.ReplaceExternalUrlsWithMockServer(_testConfig.Workflow.ExternalApiUrlsToMock);
 
             // Set up the artifacts (schemas, maps)
             SetArtifactDirectory(logicAppBasePath);
 
-            workflowIsInitialised = true;
+            // Other files needed to test the workflow, but we don't need to update these
+            _parameters = ReadFromPath(Path.Combine(logicAppBasePath, Constants.PARAMETERS), optional: true);
+            _host = ReadFromPath(Path.Combine(logicAppBasePath, Constants.HOST));
+
+            _workflowIsInitialised = true;
         }
 
         /// <summary>
@@ -155,18 +153,20 @@ namespace LogicAppUnit
         protected TestRunner CreateTestRunner(Dictionary<string, string> localSettingsOverrides)
         {
             // Make sure that the workflow has been initialised
-            if (!workflowIsInitialised)
+            if (!_workflowIsInitialised)
                 throw new TestException("Cannot create the test runner because the workflow has not been initialised using Initialize()");
 
-            // Update the local settings if anything needs to  been overridden
-            string localSettingsWithOverrides = localSettings;
-            if (localSettings != null && localSettingsOverrides != null && localSettingsOverrides.Count > 0)
+            // Update the local settings if anything needs to be overridden
+            if (localSettingsOverrides != null && localSettingsOverrides.Count > 0)
             {
-                localSettingsWithOverrides = SettingsHelper.ReplaceSettingOverrides(localSettings, localSettingsOverrides);
+                _localSettings.ReplaceSettingOverrides(localSettingsOverrides);
             }
 
-            return new TestRunner(testConfig.Logging, client, workflowName, workflowTestInput, localSettingsWithOverrides, parameters, connections, host, artifactDirectory);
-
+            return new TestRunner(
+                _testConfig.Logging,
+                _client,
+                _workflowDefinition.WorkflowName, _workflowDefinition.ToString(),
+                _localSettings.ToString(), _host, _parameters, _connections.ToString(), _artifactDirectory);
         }
 
         /// <summary>
@@ -184,8 +184,8 @@ namespace LogicAppUnit
             // 3 - The default 'local.settings.json'
             if (!string.IsNullOrEmpty(localSettingsFileFromInitialize))
                 localSettingsFile = localSettingsFileFromInitialize;
-            else if (!string.IsNullOrEmpty(testConfig.LocalSettingsFilename))
-                localSettingsFile = testConfig.LocalSettingsFilename;
+            else if (!string.IsNullOrEmpty(_testConfig.LocalSettingsFilename))
+                localSettingsFile = _testConfig.LocalSettingsFilename;
             else
                 localSettingsFile = Constants.LOCAL_SETTINGS;
 
@@ -206,14 +206,42 @@ namespace LogicAppUnit
             DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(logicAppBasePath, Constants.ARTIFACTS_FOLDER));
             if (directoryInfo.Exists)
             {
-                artifactDirectory = directoryInfo;
+                _artifactDirectory = directoryInfo;
                 Console.WriteLine($"Using artifacts directory: {Path.Combine(directoryInfo.Parent.Name, directoryInfo.Name)}");
             }
             else
             {
-                artifactDirectory = null;
+                _artifactDirectory = null;
                 Console.WriteLine("Artifacts directory does not exist.");
             }
+        }
+
+        /// <summary>
+        /// Read the contents of a file using the given path.
+        /// </summary>
+        /// <param name="path">Path of the file to be read.</param>
+        /// <param name="optional"><c>true</c> if the file is option, otherwise <c>false</c>.</param>
+        /// <returns>The file content, as a <see cref="string"/>, or <c>null</c> if the file is optional and does not exist.</returns>
+        private static string ReadFromPath(string path, bool optional = false)
+        {
+            if (string.IsNullOrEmpty(path))
+                throw new ArgumentNullException(nameof(path));
+
+            var fullPath = Path.GetFullPath(path);
+
+            if (!File.Exists(fullPath))
+            {
+                if (optional)
+                {
+                    return null;
+                }
+                else
+                {
+                    throw new TestException($"File {fullPath} does not exist and it is a mandatory file for a Logic App");
+                }
+            }
+
+            return File.ReadAllText(fullPath);
         }
     }
 }
