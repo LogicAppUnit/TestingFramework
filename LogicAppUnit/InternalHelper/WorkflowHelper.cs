@@ -47,7 +47,7 @@ namespace LogicAppUnit.InternalHelper
             var realDummyWorkflowMap = AddWorkflowTestInputForDummyWorkflows(ref workflowTestInput, dummyWorkflowInput);
 
             // Now lets replace every real workflow hook from our main (parent) workflow with the dummy workflow names.
-            var jObject = JObject.Parse(workflowTestInput[0].FlowDefinition);
+            var jObject = JObject.Parse(workflowTestInput[0].WorkflowDefinition);
             var realWorkflows = jObject.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "Workflow").Select(x => x["inputs"] as JObject).ToList();
             if (realWorkflows.Count > 0)
             {
@@ -58,7 +58,7 @@ namespace LogicAppUnit.InternalHelper
                     workflow.Add("host", JObject.FromObject(new { workflow = new { id = dummyWorkflowName } }));
                 });
             }
-            workflowTestInput[0].FlowDefinition = jObject.ToString();
+            workflowTestInput[0].WorkflowDefinition = jObject.ToString();
         }
 
         /// <summary>
@@ -98,12 +98,12 @@ namespace LogicAppUnit.InternalHelper
         /// <param name="workflowTestInput">The workflow to be modified.</param>
         private static void AddJsonToSkipHttpRetry(ref WorkflowTestInput[] workflowTestInput)
         {
-            var jObject = JObject.Parse(workflowTestInput[0].FlowDefinition);
+            var jObject = JObject.Parse(workflowTestInput[0].WorkflowDefinition);
             var httpActions = jObject.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "Http").Select(x => x["inputs"] as JObject).ToList();
 
             if (httpActions.Count > 0)
             {
-                Console.WriteLine("Updating workflow HTTP actions to remove any existing Retry policies and replace with a 'none' policy:");
+                Console.WriteLine("Updating workflow HTTP actions to remove any existing Retry and replace with Retry 'None':");
                 var retryObj = new { type = "none" };
 
                 httpActions.ForEach(x => {
@@ -116,7 +116,7 @@ namespace LogicAppUnit.InternalHelper
                 });
             }
 
-            workflowTestInput[0].FlowDefinition = jObject.ToString();
+            workflowTestInput[0].WorkflowDefinition = jObject.ToString();
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace LogicAppUnit.InternalHelper
             // The HTTP trigger is called a 'Request' action
             const string HttpTriggerName = "Request";
 
-            var jObject = JObject.Parse(workflowTestInput[0].FlowDefinition);
+            var jObject = JObject.Parse(workflowTestInput[0].WorkflowDefinition);
             var trigger = jObject.SelectTokens("$.definition.triggers.*").Where(x => x["type"].ToString() != HttpTriggerName).FirstOrDefault();
 
             if (trigger != null)
@@ -149,7 +149,7 @@ namespace LogicAppUnit.InternalHelper
                 }));
             }
 
-            workflowTestInput[0].FlowDefinition = jObject.ToString();
+            workflowTestInput[0].WorkflowDefinition = jObject.ToString();
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace LogicAppUnit.InternalHelper
         /// </remarks>
         private static void ReplaceBuiltInConnectorActionsWithHttp(ref WorkflowTestInput[] workflowTestInput, List<string> builtInConnectorsToMock)
         {
-            var jObject = JObject.Parse(workflowTestInput[0].FlowDefinition);
+            var jObject = JObject.Parse(workflowTestInput[0].WorkflowDefinition);
 
             Console.WriteLine("Replacing workflow actions using a built-in connector with a HTTP action for the mock test server:");
 
@@ -170,7 +170,7 @@ namespace LogicAppUnit.InternalHelper
             var actionsBlock = jObject.SelectToken("$.definition.actions") as JObject;
             ReplaceBuiltInActionsWithHttpActions(actionsBlock, builtInConnectorsToMock);
 
-            workflowTestInput[0].FlowDefinition = jObject.ToString();
+            workflowTestInput[0].WorkflowDefinition = jObject.ToString();
         }
 
         /// <summary>

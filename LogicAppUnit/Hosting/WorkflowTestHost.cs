@@ -69,10 +69,10 @@ namespace LogicAppUnit.Hosting
                 {
                     foreach (var input in inputs)
                     {
-                        if (!string.IsNullOrEmpty(input.FunctionName))
+                        if (!string.IsNullOrEmpty(input.WorkflowName))
                         {
-                            Directory.CreateDirectory(Path.Combine(this.WorkingDirectory, input.FunctionName));
-                            File.WriteAllText(Path.Combine(this.WorkingDirectory, input.FunctionName, input.Filename), input.FlowDefinition);
+                            Directory.CreateDirectory(Path.Combine(this.WorkingDirectory, input.WorkflowName));
+                            File.WriteAllText(Path.Combine(this.WorkingDirectory, input.WorkflowName, input.WorkflowFilename), input.WorkflowDefinition);
                         }
                     }
                 }
