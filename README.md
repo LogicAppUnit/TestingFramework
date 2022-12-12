@@ -36,8 +36,8 @@ You can get the *LogicAppUnit* testing framework package from nuget: https://www
   - [Setting up a Test](#setting-up-a-test)
   - [Running a Test](#running-a-test)
   - [Checking (Asserting) the Test Execution](#checking-asserting-the-test-execution)
-- [Azurite](#azurite)
 - [Test Configuration](#test-configuration)
+- [Azurite](#azurite)
 - [Local Settings file](#local-settings-file)
   - [Overriding Settings Values in a Test](#overriding-settings-values-in-a-test)
 - [Test Execution Logs](#test-execution-logs)
@@ -175,6 +175,17 @@ Assert.AreEqual(
 The `ContentHelper.FormatJson()` method is part of the testing framework and formats JSON into a consistent format to enable reliable string comparison between the actual request and the expected request. `ContentHelper.FormatXml()` can be used for the comparison of XML.
 
 
+# Test Configuration
+
+Each test project that uses the testing framework must include a `testConfiguration.json` file which is used to configure the framework. If this file does not exist, the tests will not run. 
+
+The various test configuration options are described in the following sections. If no configuration options are required, the file should contain an empty JSON document:
+
+```json
+{}
+```
+
+
 # Azurite
 
 Standard Logic Apps have a dependency on Azure Storage services such as Blob, File Share, Queue and Table for metadata, run-time state and run history. When Standard Logic apps are run in a local development environment, Azurite is used to emulate the Azure Storage services. If Azurite is not installed or is not running in the local environment, workflows cannot be run.
@@ -210,16 +221,8 @@ If you have configured Azurite to use different ports, the automatic check can b
 }
 ```
 
+This Azurite port check can be disabled by setting the `azurite.enableAzuritePortCheck` option in the `testConfiguration.json` file to `false`. The default is `true`.
 
-# Test Configuration
-
-Each test project that uses the testing framework must include a `testConfiguration.json` file which is used to configure the framework. If this file does not exist, the tests will not run. 
-
-The various test configuration options are described in the following sections. If no configuration options are required, the file should contain an empty JSON document:
-
-```json
-{}
-```
 
 
 # Local Settings file
@@ -592,6 +595,7 @@ The previous sections describe how the `testConfigursation.json` file can be use
 | Setting name | Optional? | Permitted values | Description |
 |:-------------|:----------|:-----------------|:------------|
 | localSettingsFilename | Yes | Valid filename | Name of the setting file to be used, if different from the default of `local.settings.json`. |
+| azurite.enableAzuritePortCheck | Yes | `true` <br /> `false` | `true` if the framework is to check that Azurite is running and listening on the required ports, otherwise `false`. Default is `true`. |
 | azurite.blobServicePort | Yes | 0 -> 65535 | Port number of the Azurite Blob service, if different from the default port 10000. |
 | azurite.queueServicePort | Yes | 0 -> 65535 | Port number of the Azurite Queue service, if different from the default port 10001. |
 | azurite.tableServicePort | Yes | 0 -> 65535 | Port number of the Azurite Table service, if different from the default port 10002. |

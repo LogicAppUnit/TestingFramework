@@ -58,6 +58,11 @@ namespace LogicAppUnit
     public class TestConfigurationAzurite
     {
         /// <summary>
+        /// <c>true</c> if the test framework checks that Azurite is running and listening on the required ports, otherwise <c>false</c>.
+        /// </summary>
+        public bool EnableAzuritePortCheck { get; set; } = true;
+
+        /// <summary>
         /// Port number used by the Blob service.
         /// </summary>
         public int BlobServicePort { get; set; } = 10000;

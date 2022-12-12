@@ -100,7 +100,7 @@ namespace LogicAppUnit
 
             // Make sure Azurite is running
             // If Azurite is not running we want to fail the tests quickly, not wait for the tests to run and then fail
-            if (!AzuriteHelper.IsRunning(testConfig.Azurite))
+            if (testConfig.Azurite.EnableAzuritePortCheck && !AzuriteHelper.IsRunning(testConfig.Azurite))
                 throw new TestException($"Azurite is not running on ports {testConfig.Azurite.BlobServicePort} (Blob service), {testConfig.Azurite.QueueServicePort} (Queue service) and {testConfig.Azurite.TableServicePort} (Table service). Logic App workflows cannot run unless all three services are running in Azurite");
 
             // Name of the workflow
