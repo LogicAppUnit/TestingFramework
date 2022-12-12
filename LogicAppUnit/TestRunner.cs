@@ -18,7 +18,7 @@ using System.Threading;
 namespace LogicAppUnit
 {
     /// <summary>
-    /// This call is created to wrap common stuff of logic app unit testing.
+    /// Runs a workflow in an isolated test environment and makes available the run execution history.
     /// </summary>
     public class TestRunner : IDisposable
     {
@@ -309,7 +309,7 @@ namespace LogicAppUnit
         }
 
         /// <summary>
-        /// This function returns the output responses of provided actions to the end user, so that they can verify the expected results.
+        /// Gets the output responses of provided actions to the end user, so that they can verify the expected results.
         /// </summary>
         /// <param name="workflowActionVerifiers"></param>
         /// <returns></returns>
