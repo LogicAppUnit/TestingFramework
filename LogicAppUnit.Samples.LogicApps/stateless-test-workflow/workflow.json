@@ -1,0 +1,65 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Failed_Response": {
+                "inputs": {
+                    "body": "Blob '@{triggerOutputs()['relativePathParameters']['blobName']}' failed to upload to storage container '@{triggerOutputs()['relativePathParameters']['containerName']}'",
+                    "statusCode": 500
+                },
+                "kind": "http",
+                "runAfter": {
+                    "Upload_Blob": [
+                        "FAILED",
+                        "TIMEDOUT"
+                    ]
+                },
+                "type": "Response"
+            },
+            "Success_Response": {
+                "inputs": {
+                    "body": "Blob '@{triggerOutputs()['relativePathParameters']['blobName']}' has been uploaded to storage container '@{triggerOutputs()['relativePathParameters']['containerName']}'",
+                    "statusCode": 200
+                },
+                "kind": "http",
+                "runAfter": {
+                    "Upload_Blob": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Response"
+            },
+            "Upload_Blob": {
+                "inputs": {
+                    "parameters": {
+                        "blobName": "@triggerOutputs()['relativePathParameters']['blobName']",
+                        "containerName": "@triggerOutputs()['relativePathParameters']['containerName']",
+                        "content": "@triggerBody()"
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "azureBlob",
+                        "operationId": "uploadBlob",
+                        "serviceProviderId": "/serviceProviders/AzureBlob"
+                    }
+                },
+                "runAfter": {},
+                "type": "ServiceProvider"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "manual": {
+                "inputs": {
+                    "method": "POST",
+                    "relativePath": "{containerName}/{blobName}",
+                    "schema": {}
+                },
+                "kind": "Http",
+                "operationOptions": "SuppressWorkflowHeadersOnResponse",
+                "type": "Request"
+            }
+        }
+    },
+    "kind": "Stateless"
+}

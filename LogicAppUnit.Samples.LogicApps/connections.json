@@ -17,6 +17,15 @@
         "id": "/serviceProviders/sql"
       },
       "displayName": "sqlConnection"
+    },
+    "azureBlob": {
+      "parameterValues": {
+        "connectionString": "@appsetting('AzureBlob-ConnectionString')"
+      },
+      "serviceProvider": {
+        "id": "/serviceProviders/AzureBlob"
+      },
+      "displayName": "storageBlobConnection"
     }
   },
   "managedApiConnections": {

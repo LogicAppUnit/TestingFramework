@@ -10,7 +10,8 @@
     ],
     "builtInConnectorsToMock": [
       "executeQuery",
-      "sendMessage"
+      "sendMessage",
+      "uploadBlob"
     ]
   }
 }

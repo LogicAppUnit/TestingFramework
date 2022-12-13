@@ -1,0 +1,20 @@
+﻿{
+  "blobName": "thisIsMyBlob",
+  "containerName": "thisIsMyContainer",
+  "content": {
+    "customerType": "individual",
+    "title": "Mr",
+    "name": "Peter Smith",
+    "addresses": [
+      {
+        "addressType": "physical",
+        "addressLine1": "8 High Street",
+        "addressLine2": null,
+        "addressLine3": null,
+        "town": "Luton",
+        "county": "Bedfordshire",
+        "postalCode": "LT12 6TY"
+      }
+    ]
+  }
+}
