@@ -87,6 +87,7 @@ namespace LogicAppUnit
                 throw new ArgumentNullException(nameof(workflowName));
 
             const string testConfigFilename = "testConfiguration.json";
+            const string workflowOperationOptionsRunHistory = "WithStatelessRunHistory";
 
             LoggingHelper.LogBanner("Initializing test");
 
@@ -126,6 +127,20 @@ namespace LogicAppUnit
             // Other files needed to test the workflow, but we don't need to update these
             _parameters = ReadFromPath(Path.Combine(logicAppBasePath, Constants.PARAMETERS), optional: true);
             _host = ReadFromPath(Path.Combine(logicAppBasePath, Constants.HOST));
+
+            // If this is a stateless workflow and the 'OperationOptions' is not 'WithStatelessRunHistory'...
+            if (_workflowDefinition.WorkflowType == WorkflowType.Stateless && _localSettings.GetWorkflowOperationOptionsValue(_workflowDefinition.WorkflowName) != workflowOperationOptionsRunHistory)
+            {
+                if (_testConfig.Workflow.AutoConfigureWithStatelessRunHistory)
+                {
+                    string newSetting = _localSettings.SetWorkflowOperationOptionsValue(_workflowDefinition.WorkflowName, workflowOperationOptionsRunHistory);
+                    Console.WriteLine($"Workflow is stateless, creating new setting: {newSetting}");
+                }
+                else
+                {
+                    throw new TestException($"The workflow is stateless and the 'Workflows.{_workflowDefinition.WorkflowName}.OperationOptions' setting is not configured for 'WithStatelessRunHistory'. This means that the workflow execution history will not be created and therefore the workflow cannot be tested. Set the 'workflow.autoConfigureWithStatelessRunHistory` option to 'true' in 'testConfiguration.json' so that the testing framework creates this setting automatically when running the test");
+                }
+            }
 
             _workflowIsInitialised = true;
         }

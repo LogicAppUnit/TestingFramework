@@ -95,5 +95,52 @@ namespace LogicAppUnit.InternalHelper
                 }
             }
         }
+
+        /// <summary>
+        /// Get the value for a setting.
+        /// </summary>
+        /// <param name="settingName">The name of the setting.</param>
+        /// <returns>The value of the setting, or <c>null</c> if the setting does not exist.</returns>
+        public string GetSettingValue(string settingName)
+        {
+            if (settingName == null)
+                throw new ArgumentNullException(nameof(settingName));
+
+            var setting = _jObjectSettings.SelectToken("Values").Children<JProperty>().Where(x => x.Name == settingName).FirstOrDefault();
+
+            return setting?.Value.ToString();
+        }
+
+        /// <summary>
+        /// Get the value of the <i>OperationOptions</i> setting for a workflow.
+        /// </summary>
+        /// <param name="workflowName">The name of the workflow.</param>
+        /// <returns>The value of the setting, or <c>null</c> if the setting does not exist.</returns>
+        public string GetWorkflowOperationOptionsValue(string workflowName)
+        {
+            if (workflowName == null)
+                throw new ArgumentNullException(nameof(workflowName));
+
+            return GetSettingValue($"Workflows.{workflowName}.OperationOptions");
+        }
+
+        /// <summary>
+        /// Set the value of the <i>OperationOptions</i> setting for a workflow.
+        /// </summary>
+        /// <param name="workflowName">The name of the workflow.</param>
+        /// <param name="value">The value to be set.</param>
+        /// <returns>The setting that has been created.</returns>
+        public string SetWorkflowOperationOptionsValue(string workflowName, string value)
+        {
+            if (workflowName == null)
+                throw new ArgumentNullException(nameof(workflowName));
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+
+            string settingName = $"Workflows.{workflowName}.OperationOptions";
+            _jObjectSettings["Values"][settingName] = value;
+
+            return $"{settingName} = {value}";
+        }
     }
 }

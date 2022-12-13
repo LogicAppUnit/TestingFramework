@@ -16,7 +16,6 @@
     "ServiceTwo-Authentication-APIKey": "servicetwo-auth-apikey",
     "ServiceTwo-DefaultAddressType": "business",
     "Sql_ConnectionString": "any-sql-connection-string",
-    "ServiceBus_ConnectionString": "any-servicebus-connection-string",
-    "Workflows.stateless-test-workflow.OperationOptions": "WithStatelessRunHistory"
+    "ServiceBus_ConnectionString": "any-servicebus-connection-string"
   }
 }

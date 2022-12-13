@@ -12,6 +12,7 @@
       "executeQuery",
       "sendMessage",
       "uploadBlob"
-    ]
+    ],
+    "autoConfigureWithStatelessRunHistory": true
   }
 }
