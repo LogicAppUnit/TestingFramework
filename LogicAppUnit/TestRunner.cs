@@ -235,6 +235,19 @@ namespace LogicAppUnit
         /// <returns>The response from the workflow.</returns>
         public HttpResponseMessage TriggerWorkflow(HttpContent content, HttpMethod method, Dictionary<string, string> requestHeaders = null)
         {
+            return TriggerWorkflow(content, method, string.Empty, requestHeaders);
+        }
+
+        /// <summary>
+        /// Trigger a workflow using a request body, a relative path and optional request headers.
+        /// </summary>
+        /// <param name="content">The content (including any content headers) for running the workflow, or <c>null</c> if there is no content.</param>
+        /// <param name="method">The HTTP method, this needs to match the method defined in the HTTP trigger in the workflow.</param>
+        /// <param name="relativePath">The relative path to be used in the trigger. The path must already be URL-encoded.</param>
+        /// <param name="requestHeaders">The request headers.</param>
+        /// <returns>The response from the workflow.</returns>
+        public HttpResponseMessage TriggerWorkflow(HttpContent content, HttpMethod method, string relativePath, Dictionary<string, string> requestHeaders = null)
+        {
             // Get the callback information for the workflow, including the trigger URL
             CallbackUrlDefinition callbackDef = GetWorkflowCallbackDefinition();
 
@@ -243,7 +256,7 @@ namespace LogicAppUnit
             {
                 Content = content,
                 Method = method,
-                RequestUri = callbackDef.Value
+                RequestUri = callbackDef.ValueWithRelativePath(relativePath)
             };
 
             if (requestHeaders != null)
@@ -257,6 +270,7 @@ namespace LogicAppUnit
             LoggingHelper.LogBanner("Starting workflow execution");
 
             // Run the workflow and wait for completion
+            Console.WriteLine($"Workflow trigger: {httpRequestMessage.Method} {httpRequestMessage.RequestUri}");
             HttpResponseMessage response = PollAndReturnFinalWorkflowResponse(httpRequestMessage);
 
             // Copy the collection of mock requests from the thread-safe collection into a List that is accessible to the test case
