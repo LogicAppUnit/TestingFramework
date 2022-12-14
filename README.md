@@ -17,6 +17,7 @@ The testing framework includes these high-level capabilities:
 - Programmatic access to the workflow run history to enable assertion of workflow run status, response status, action status and more.
 - Programmatic access to the requests sent to the mock HTTP server to enable assertion of the data sent from the workflow to external service and APIs.
 - Override specific local settings for a test case to enable more testing scenarios (e.g. feature flags).
+- Automatically enable run history for stateless workflows by creating the `Workflows.<workflow name>.OperationOptions` setting.
 
 This code repository includes three projects:
 
@@ -42,6 +43,7 @@ You can get the *LogicAppUnit* testing framework package from nuget: https://www
   - [Overriding Settings Values in a Test](#overriding-settings-values-in-a-test)
 - [Test Execution Logs](#test-execution-logs)
   - [Disable Functions runtime start-up logging](#disable-functions-runtime-start-up-logging)
+- [Stateless Workflows](#stateless-workflows)
 - [Handling Workflow Dependencies](#handling-workflow-dependencies)
   - [Workflow Triggers](#workflow-triggers)
   - [Workflow Actions and Built-In Connectors](#workflow-actions-and-built-in-connectors)
@@ -117,24 +119,26 @@ testRunner.AddApiMocks = (request) =>
 };
 ```
 
-The `ContentHelper` class is part of the testing framework and contains methods that are useful when creating content (JSON, XML and plain text) for the mocked responses.
+The `ContentHelper` class is part of the testing framework and contains methods that are useful when creating HTTP content (JSON, XML and plain text) for the mocked responses.
 
 ## Running a Test
 
-The next step is to run the workflow, using the `TestRunner.TriggerWorkflow()` method. This example uses HTTP POST but other HTTP methods are supported:
+The next step is to run the workflow. The `TestRunner.TriggerWorkflow()` method creates a HTTP request for the workflow trigger. This example uses HTTP POST but other HTTP methods can be used:
 
 ```c#
 HttpResponseMessage workflowResponse = testRunner.TriggerWorkflow(FunctionToGetTriggerContent(), HttpMethod.Post);
 ```
 
-An overload of the `TestRunner.TriggerWorkflow()` method allows you to set the request headers. The method will complete when the workflow execution has completed.
+The `TriggerWorkflow()` will complete when the workflow execution has completed.
+
+Request headers can be set using the `TestRunner.TriggerWorkflow(HttpContent content, HttpMethod method, Dictionary<string, string> requestHeaders)` overload. 
 
 If the HTTP trigger is configured to use a relative path, the path can be set using the `TestRunner.TriggerWorkflow(HttpContent content, HttpMethod method, string relativePath)` overload. The relative path must be URL-encoded by the test case, this is not done by the test runner.
 
-The trigger URL for the workflow is logged to the test execution log. This example is for a worklfow that uses a relative path (`/thisIsMyContainer/thisIsMyBlob`):
+The trigger URL for the workflow is logged to the test execution log. This example is for a workflow that uses a relative path (`/thisIsMyContainer/thisIsMyBlob`):
 
 ```txt
-Workflow trigger: POST http://localhost:7071/api/stateless-test-workflow/triggers/manual/invoke/thisIsMyContainer/thisIsMyBlob?api-version=2022-05-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=X6iao4DL03l1c1C-KRqfsl9hr0G_ipOjg_h77STbAWQ
+Workflow trigger: POST http://localhost:7071/api/stateless-test-workflow/triggers/manual/invoke/thisIsMyContainer/thisIsMyBlob?api-version=2022-05-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=123ao4DL03l1c1C-KRqfsl9hr0G_ipOjg_h77STbAWQ
 ```
 
 
@@ -283,6 +287,7 @@ The test execution log includes:
 - Functions runtime workflow execution logs
 - Summary of the requests that were received by the mock HTTP server that is managed by the testing framework
 
+
 ## Disable Functions runtime start-up logging
 
 The Functions runtime start-up logs can be verbose and are not usually needed when authoring or running tests, unless the test is failing because the Functions runtime is not starting up correctly.
@@ -296,6 +301,27 @@ To reduce the volume of logging, the inclusion of the Functions runtime start-up
 ```
 
 The setting is optional. If it is not included, the default value is `false`.
+
+
+# Stateless Workflows
+
+The testing framework must have access to the workflow run history to be able to check (assert) the workflow execution. With stateless Logic Apps, the run history is not stored unless the  `Workflows.<workflow name>.OperationOptions` setting is set to `WithStatelessRunHistory` in the settings file.
+
+The testing framework will automatically check if this setting exists for a stateless workflow. If the setting does not exist, and the `workflow.autoConfigureWithStatelessRunHistory` configuration option is set to `true` in `testConfiguration.json`, the framework will automatically create the setting so that the run history is stored. You will then see this in the test execution log:
+
+```txt
+ Workflow is stateless, creating new setting: Workflows.<workflow name>.OperationOptions = WithStatelessRunHistory
+```
+
+If the `workflow.autoConfigureWithStatelessRunHistory` configuration option is set to `false`, the test will fail:
+
+```txt
+LogicAppUnit.TestException: The workflow is stateless and the 'Workflows.<workflow name>.OperationOptions' setting is not configured for 'WithStatelessRunHistory'.
+This means that the workflow execution history will not be created and therefore the workflow cannot be tested.
+Set the 'workflow.autoConfigureWithStatelessRunHistory` option to 'true' in 'testConfiguration.json' so that the testing framework creates this setting automatically when running the test.
+```
+
+The default value for the `workflow.autoConfigureWithStatelessRunHistory` configuration option is `true`.
 
 
 # Handling Workflow Dependencies
@@ -611,4 +637,4 @@ The previous sections describe how the `testConfiguration.json` file can be used
 | logging.writeFunctionRuntineStartupLogs | Yes | `true` <br /> `false` | `true` if the start-up logs are to be included in the test execution logs, otherwise `false`. Default is `false`. |
 | workflow.externalApiUrlsToMock | Yes | List of host names | List of host names that are to be replaced in the settings file with the URL of the mock HTTP server. |
 | workflow.builtInConnectorsToMock | Yes | List of connector names | List of built-in connector names where actions using these connectors are to be replaced with HTTP actions pointing at the mock HTTP server. |
-
+| workflow.autoConfigureWithStatelessRunHistory | Yes | `true` <br /> `false` | `true` if the testing framework automatically sets the `Workflows.<workflow name>.OperationOptions` setting to `WithStatelessRunHistory` for stateless workflows, otherwise `false`. Default is `false`. |
