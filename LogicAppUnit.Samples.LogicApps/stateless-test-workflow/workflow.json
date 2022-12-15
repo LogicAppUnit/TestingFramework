@@ -3,37 +3,38 @@
         "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
         "actions": {
             "Failed_Response": {
-                "inputs": {
-                    "body": "Blob '@{triggerOutputs()['relativePathParameters']['blobName']}' failed to upload to storage container '@{triggerOutputs()['relativePathParameters']['containerName']}'",
-                    "statusCode": 500
-                },
+                "type": "Response",
                 "kind": "http",
+                "inputs": {
+                    "statusCode": 500,
+                    "body": "Blob '@{triggerOutputs()['relativePathParameters']['blobName']}' failed to upload to storage container '@{triggerOutputs()['relativePathParameters']['containerName']}'"
+                },
                 "runAfter": {
                     "Upload_Blob": [
                         "FAILED",
                         "TIMEDOUT"
                     ]
-                },
-                "type": "Response"
+                }
             },
             "Success_Response": {
-                "inputs": {
-                    "body": "Blob '@{triggerOutputs()['relativePathParameters']['blobName']}' has been uploaded to storage container '@{triggerOutputs()['relativePathParameters']['containerName']}'",
-                    "statusCode": 200
-                },
+                "type": "Response",
                 "kind": "http",
+                "inputs": {
+                    "statusCode": 200,
+                    "body": "Blob '@{triggerOutputs()['relativePathParameters']['blobName']}' has been uploaded to storage container '@{triggerOutputs()['relativePathParameters']['containerName']}'"
+                },
                 "runAfter": {
                     "Upload_Blob": [
                         "Succeeded"
                     ]
-                },
-                "type": "Response"
+                }
             },
             "Upload_Blob": {
+                "type": "ServiceProvider",
                 "inputs": {
                     "parameters": {
-                        "blobName": "@triggerOutputs()['relativePathParameters']['blobName']",
                         "containerName": "@triggerOutputs()['relativePathParameters']['containerName']",
+                        "blobName": "@triggerOutputs()['relativePathParameters']['blobName']",
                         "content": "@triggerBody()"
                     },
                     "serviceProviderConfiguration": {
@@ -42,24 +43,26 @@
                         "serviceProviderId": "/serviceProviders/AzureBlob"
                     }
                 },
-                "runAfter": {},
-                "type": "ServiceProvider"
+                "runAfter": {}
+            }
+        },
+        "triggers": {
+            "manual": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "schema": {},
+                    "method": "POST",
+                    "relativePath": "{containerName}/{blobName}"
+                },
+                "operationOptions": "SuppressWorkflowHeadersOnResponse",
+                "correlation": {
+                    "clientTrackingId": "@concat(triggerOutputs()['relativePathParameters']['containerName'], '-', triggerOutputs()['relativePathParameters']['blobName'])"
+                }
             }
         },
         "contentVersion": "1.0.0.0",
-        "outputs": {},
-        "triggers": {
-            "manual": {
-                "inputs": {
-                    "method": "POST",
-                    "relativePath": "{containerName}/{blobName}",
-                    "schema": {}
-                },
-                "kind": "Http",
-                "operationOptions": "SuppressWorkflowHeadersOnResponse",
-                "type": "Request"
-            }
-        }
+        "outputs": {}
     },
     "kind": "Stateless"
 }

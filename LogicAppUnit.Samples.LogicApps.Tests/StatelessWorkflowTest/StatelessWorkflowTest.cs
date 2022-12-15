@@ -52,6 +52,9 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.StatelessWorkflowTest
                 Assert.AreEqual($"Blob '{blobName}' has been uploaded to storage container '{containerName}'", workflowResponse.Content.ReadAsStringAsync().Result);
                 Assert.AreEqual("text/plain; charset=utf-8", workflowResponse.Content.Headers.ContentType.ToString());
 
+                // Check the Client Tracking Id
+                Assert.AreEqual($"{containerName}-{blobName}", testRunner.WorkflowClientTrackingId);
+
                 // Check action result
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Upload_Blob"));
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Success_Response"));
@@ -105,6 +108,9 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.StatelessWorkflowTest
                 testRunner.ExceptionWrapper(() => Assert.AreEqual(HttpStatusCode.InternalServerError, workflowResponse.StatusCode));
                 Assert.AreEqual($"Blob '{blobName}' failed to upload to storage container '{containerName}'", workflowResponse.Content.ReadAsStringAsync().Result);
                 Assert.AreEqual("text/plain; charset=utf-8", workflowResponse.Content.Headers.ContentType.ToString());
+
+                // Check the Client Tracking Id
+                Assert.AreEqual($"{containerName}-{blobName}", testRunner.WorkflowClientTrackingId);
 
                 // Check action result
                 Assert.AreEqual(ActionStatus.Failed, testRunner.GetWorkflowActionStatus("Upload_Blob"));

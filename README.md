@@ -179,13 +179,27 @@ You can also check the requests sent to the mock HTTP server, using the `TestRun
 var request = testRunner.MockRequests.First(r => r.RequestUri.AbsolutePath == "/api/v1.1/membership/customers/1234");
 Assert.AreEqual(HttpMethod.Put, request.Method);
 Assert.AreEqual("application/json", request.ContentHeaders["Content-Type"].First());
-Assert.AreEqual("ApiKey auth-apikey", request.Headers["x-api-key"].First());
+Assert.AreEqual("expected-api-key", request.Headers["x-api-key"].First());
 Assert.AreEqual(
     ContentHelper.FormatJson(ResourceHelper.GetAssemblyResourceAsString($"{GetType().Namespace}.MockData.ExpectedRequest.json")),
     ContentHelper.FormatJson(request.Content));
 ```
 
 The `ContentHelper.FormatJson()` method is part of the testing framework and formats JSON into a consistent format to enable reliable string comparison between the actual request and the expected request. `ContentHelper.FormatXml()` can be used for the comparison of XML.
+
+You can also check the workflow's Client Tracking Id using the `TestRunner.WorkflowClientTrackingId` property:
+
+```c#
+// Check the Client Tracking Id
+Assert.AreEqual("expected-tracking-id", testRunner.WorkflowClientTrackingId);
+```
+
+The `TestRunner.WorkflowRunId` property will give you the workflow's Run Id:
+
+```c#
+// Get the Run Id
+string runId = testRunner.WorkflowRunId);
+```
 
 
 # Test Configuration

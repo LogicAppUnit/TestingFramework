@@ -1,6 +1,6 @@
 ﻿{
-  "blobName": "thisIsMyBlob",
   "containerName": "thisIsMyContainer",
+  "blobName": "thisIsMyBlob",
   "content": {
     "customerType": "individual",
     "title": "Mr",

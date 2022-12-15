@@ -11,10 +11,12 @@ LogicAppUnit Testing Framework:
 - Improved handling of stateless workflows:
   - Added a new configuration option `workflow.autoConfigureWithStatelessRunHistory` to `testConfiguration.json` to control whether the testing framework automatically configures the workflow `OperationOptions` setting to `WithStatelessRunHistory`. If this option is not set for stateless workflows, the workflow run history is not stored. The default value for this configuration option is `true`.
   - If a stateless workflow is tested and the `OperationOptions` setting is not set to `WithStatelessRunHistory`, and `workflow.autoConfigureWithStatelessRunHistory` is set to `false`, the test fails with a `TestException` error.
+- Added the `TestRunner.WorkflowClientTrackingId` property so that tests can assert a workflow's client tracking id.
+- Improvements to `Readme.md`.
 
 LogicAppUnit.Samples.LogicApps.Tests:
 
-- Added a `StatelessWorkflowTest` workflow and unit tests to demonstrate the use of the testing framework with a stateless workflow and a relative path configured in the HTTP trigger.
+- Added a `StatelessWorkflowTest` workflow and unit tests to demonstrate the use of the testing framework with a stateless workflow, a custom client tracking id and a relative path configured in the HTTP trigger.
 
 
 ## 1.0.0
