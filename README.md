@@ -1,6 +1,6 @@
 # LogicAppUnit Testing Framework
 
-[<img align="right" src="https://raw.github.com/LogicAppUnit/TestingFramework/features/changes2/LogicAppUnit.png" width="120" />]
+[<img align="right" src="https://raw.github.com/LogicAppUnit/TestingFramework/main/LogicAppUnit.png" width="120" />]
 LogicAppUnit is a testing framework that simplifies the creation of automated unit tests for Standard Logic Apps running in a *local development environment*, or on a *build server as part of a DevOps pipeline*. Standard Logic Apps do not include an out-of-the-box testing capability and this framework has been designed to fill this gap. The framework is based on the [Logic Apps Sample Test Framework](https://techcommunity.microsoft.com/t5/integrations-on-azure-blog/automated-testing-with-logic-apps-standard/ba-p/2960623) that was developed by Henry Liu, and includes additional functionality to make it easier to author and run tests and validate (assert) the results.
 
 It is important to mention what this framework does not do. It does not support the testing of:
