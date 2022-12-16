@@ -108,7 +108,7 @@ namespace LogicAppUnit
             // Set up the workflow
             _workflowDefinition = new WorkflowHelper(workflowName, ReadFromPath(Path.Combine(logicAppBasePath, workflowName, Constants.WORKFLOW)));
             Console.WriteLine($"Workflow '{_workflowDefinition.WorkflowName}' is {_workflowDefinition.WorkflowType}");
-            _workflowDefinition.AddJsonToSkipHttpRetry();
+            _workflowDefinition.ReplaceRetryPoliciesWithNone();
             _workflowDefinition.ReplaceTriggersWithHttp();
             _workflowDefinition.ReplaceBuiltInConnectorActionsWithHttp(_testConfig.Workflow.BuiltInConnectorsToMock);
 

@@ -135,13 +135,13 @@ namespace LogicAppUnit.InternalHelper
         /// <remarks>
         /// This change will reduce the time that it takes to execute a workflow when testing scenarios that include failed HTTP calls.
         /// </remarks>
-        public void AddJsonToSkipHttpRetry()
+        public void ReplaceRetryPoliciesWithNone()
         {
             var httpActions = _jObjectWorkflow.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "Http").Select(x => x["inputs"] as JObject).ToList();
 
             if (httpActions.Count > 0)
             {
-                Console.WriteLine("Updating workflow HTTP actions to remove any existing Retry and replace with Retry 'None':");
+                Console.WriteLine("Updating workflow HTTP actions to remove any existing Retry policies and replace with a 'none' policy:");
                 var retryObj = new { type = "none" };
 
                 httpActions.ForEach(x => {
