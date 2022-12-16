@@ -655,7 +655,7 @@ The previous sections describe how the `testConfiguration.json` file can be used
 | logging.writeFunctionRuntineStartupLogs | Yes | `true` <br /> `false` | `true` if the start-up logs are to be included in the test execution logs, otherwise `false`. Default is `false`. |
 | workflow.externalApiUrlsToMock | Yes | List of host names | List of host names that are to be replaced in the settings file with the URL of the mock HTTP server. |
 | workflow.builtInConnectorsToMock | Yes | List of connector names | List of built-in connector names where actions using these connectors are to be replaced with HTTP actions pointing at the mock HTTP server. |
-| workflow.autoConfigureWithStatelessRunHistory | Yes | `true` <br /> `false` | `true` if the testing framework automatically sets the `Workflows.<workflow name>.OperationOptions` setting to `WithStatelessRunHistory` for stateless workflows, otherwise `false`. Default is `false`. |
+| workflow.autoConfigureWithStatelessRunHistory | Yes | `true` <br /> `false` | `true` if the testing framework automatically sets the `Workflows.<workflow name>.OperationOptions` setting to `WithStatelessRunHistory` for stateless workflows, otherwise `false`. Default is `true`. |
 
 
 # Future Improvements and Changes
