@@ -1,6 +1,6 @@
 # LogicAppUnit Testing Framework
 
-[<img align="right" src="https://raw.github.com/LogicAppUnit/TestingFramework/features/changes2/LogicAppUnit.png" width="120" />](https://www.dotnetfoundation.org/)
+[<img align="right" src="https://raw.github.com/LogicAppUnit/TestingFramework/features/changes2/LogicAppUnit.png" width="120" />]
 LogicAppUnit is a testing framework that simplifies the creation of automated unit tests for Standard Logic Apps running in a *local development environment*, or on a *build server as part of a DevOps pipeline*. Standard Logic Apps do not include an out-of-the-box testing capability and this framework has been designed to fill this gap. The framework is based on the [Logic Apps Sample Test Framework](https://techcommunity.microsoft.com/t5/integrations-on-azure-blog/automated-testing-with-logic-apps-standard/ba-p/2960623) that was developed by Henry Liu, and includes additional functionality to make it easier to author and run tests and validate (assert) the results.
 
 It is important to mention what this framework does not do. It does not support the testing of:
@@ -30,6 +30,8 @@ This code repository includes three projects:
 
 You can get the *LogicAppUnit* testing framework package from nuget: https://www.nuget.org/packages/LogicAppUnit/
 
+The best way to understand how the framework works and how to write test using it is to read this information and look at the example tests in the *LogicAppUnit.Samples.LogicApps.Tests* project.
+
 
 # Contents
 
@@ -52,6 +54,7 @@ You can get the *LogicAppUnit* testing framework package from nuget: https://www
   - [External URLs configured in the `local.settings.json` file](#external-urls-configured-in-the-local.settings.json-file)
   - [Retry Policies](#retry-policies)
 - [Summary of Test Configuration Options](#summary-of-test-configuration-options)
+- [Future Improvements and Changes](#future-improvements-and-changes)
 <!--/TOC-->
 
 
@@ -653,3 +656,12 @@ The previous sections describe how the `testConfiguration.json` file can be used
 | workflow.externalApiUrlsToMock | Yes | List of host names | List of host names that are to be replaced in the settings file with the URL of the mock HTTP server. |
 | workflow.builtInConnectorsToMock | Yes | List of connector names | List of built-in connector names where actions using these connectors are to be replaced with HTTP actions pointing at the mock HTTP server. |
 | workflow.autoConfigureWithStatelessRunHistory | Yes | `true` <br /> `false` | `true` if the testing framework automatically sets the `Workflows.<workflow name>.OperationOptions` setting to `WithStatelessRunHistory` for stateless workflows, otherwise `false`. Default is `false`. |
+
+
+# Future Improvements and Changes
+
+This is a list of possible future improvements and changes for the framework. Please create a new issue in GitHub if there are other features that you would like to see.
+
+- Ability to mock an `Invoke workflow` action to remove dependencies on a called workflow.
+- Improve the creation of the mocked responses using the mock HTTP server, perhaps using Fluent notation to create the responses.
+- Reduce the number of dependent packages.

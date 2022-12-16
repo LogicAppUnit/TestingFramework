@@ -1,10 +1,8 @@
-## 1.1.0
-
-*19th December 2022*
+# 1.1.0 (19th December 2022)
 
 LogicAppUnit Testing Framework:
 
-- Changed the visability of the `LogicAppUnit.Hosting` classes from `public` to `internal`. These classes are not for use by test authors.
+- Changed the visibility of the `LogicAppUnit.Hosting` classes from `public` to `internal`. These classes are not for use by test authors.
 - Added a new configuration option `azurite.enableAzuritePortCheck` to `testConfiguration.json` to enable or disable the Azurite port checks.
 - Refactored the internal classes that update the workflow definition, local settings and connection files.
 - The Test Runner (`LogicAppUnit.TestRunner`) now supports workflow HTTP triggers with relative paths.
@@ -19,8 +17,6 @@ LogicAppUnit.Samples.LogicApps.Tests:
 - Added a `StatelessWorkflowTest` workflow and unit tests to demonstrate the use of the testing framework with a stateless workflow, a custom client tracking id and a relative path configured in the HTTP trigger.
 
 
-## 1.0.0
-
-*9th December 2022*
+# 1.0.0 (9th December 2022)
 
 - Initial version.
