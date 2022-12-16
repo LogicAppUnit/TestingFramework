@@ -26,6 +26,9 @@
     <None Remove="HttpWorkflowTest\MockData\SystemTwo_Request.json" />
     <None Remove="ManagedApiConnectorWorkflowTest\MockData\Outlook_Request.json" />
     <None Remove="ManagedApiConnectorWorkflowTest\MockData\Salesforce_Request.json" />
+    <None Remove="StatelessWorkflowTest\MockData\UploadBlobRequest.json" />
+    <None Remove="StatelessWorkflowTest\MockData\UploadBlobResponseFailed.json" />
+    <None Remove="StatelessWorkflowTest\MockData\WorkflowRequest.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,6 +39,9 @@
     <EmbeddedResource Include="HttpWorkflowTest\MockData\SystemTwo_Request.json" />
     <EmbeddedResource Include="ManagedApiConnectorWorkflowTest\MockData\Outlook_Request.json" />
     <EmbeddedResource Include="ManagedApiConnectorWorkflowTest\MockData\Salesforce_Request.json" />
+    <EmbeddedResource Include="StatelessWorkflowTest\MockData\UploadBlobRequest.json" />
+    <EmbeddedResource Include="StatelessWorkflowTest\MockData\UploadBlobResponseFailed.json" />
+    <EmbeddedResource Include="StatelessWorkflowTest\MockData\WorkflowRequest.json" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,5 +1,6 @@
 # LogicAppUnit Testing Framework
 
+[<img align="right" src="https://raw.github.com/LogicAppUnit/TestingFramework/features/changes2/LogicAppUnit.png" width="120" />]
 LogicAppUnit is a testing framework that simplifies the creation of automated unit tests for Standard Logic Apps running in a *local development environment*, or on a *build server as part of a DevOps pipeline*. Standard Logic Apps do not include an out-of-the-box testing capability and this framework has been designed to fill this gap. The framework is based on the [Logic Apps Sample Test Framework](https://techcommunity.microsoft.com/t5/integrations-on-azure-blog/automated-testing-with-logic-apps-standard/ba-p/2960623) that was developed by Henry Liu, and includes additional functionality to make it easier to author and run tests and validate (assert) the results.
 
 It is important to mention what this framework does not do. It does not support the testing of:
@@ -17,6 +18,7 @@ The testing framework includes these high-level capabilities:
 - Programmatic access to the workflow run history to enable assertion of workflow run status, response status, action status and more.
 - Programmatic access to the requests sent to the mock HTTP server to enable assertion of the data sent from the workflow to external service and APIs.
 - Override specific local settings for a test case to enable more testing scenarios (e.g. feature flags).
+- Automatically enable run history for stateless workflows by creating the `Workflows.<workflow name>.OperationOptions` setting.
 
 This code repository includes three projects:
 
@@ -28,6 +30,8 @@ This code repository includes three projects:
 
 You can get the *LogicAppUnit* testing framework package from nuget: https://www.nuget.org/packages/LogicAppUnit/
 
+The best way to understand how the framework works and how to write test using it is to read this information and look at the example tests in the *LogicAppUnit.Samples.LogicApps.Tests* project.
+
 
 # Contents
 
@@ -36,12 +40,13 @@ You can get the *LogicAppUnit* testing framework package from nuget: https://www
   - [Setting up a Test](#setting-up-a-test)
   - [Running a Test](#running-a-test)
   - [Checking (Asserting) the Test Execution](#checking-asserting-the-test-execution)
-- [Azurite](#azurite)
 - [Test Configuration](#test-configuration)
+- [Azurite](#azurite)
 - [Local Settings file](#local-settings-file)
   - [Overriding Settings Values in a Test](#overriding-settings-values-in-a-test)
 - [Test Execution Logs](#test-execution-logs)
   - [Disable Functions runtime start-up logging](#disable-functions-runtime-start-up-logging)
+- [Stateless Workflows](#stateless-workflows)
 - [Handling Workflow Dependencies](#handling-workflow-dependencies)
   - [Workflow Triggers](#workflow-triggers)
   - [Workflow Actions and Built-In Connectors](#workflow-actions-and-built-in-connectors)
@@ -49,6 +54,7 @@ You can get the *LogicAppUnit* testing framework package from nuget: https://www
   - [External URLs configured in the `local.settings.json` file](#external-urls-configured-in-the-local.settings.json-file)
   - [Retry Policies](#retry-policies)
 - [Summary of Test Configuration Options](#summary-of-test-configuration-options)
+- [Future Improvements and Changes](#future-improvements-and-changes)
 <!--/TOC-->
 
 
@@ -117,17 +123,28 @@ testRunner.AddApiMocks = (request) =>
 };
 ```
 
-The `ContentHelper` class is part of the testing framework and contains methods that are useful when creating content (JSON, XML and plain text) for the mocked responses.
+The `ContentHelper` class is part of the testing framework and contains methods that are useful when creating HTTP content (JSON, XML and plain text) for the mocked responses.
 
 ## Running a Test
 
-The next step is to run the workflow, using the `TestRunner.TriggerWorkflow()` method. This example uses HTTP POST but other HTTP methods are supported:
+The next step is to run the workflow. The `TestRunner.TriggerWorkflow()` method creates a HTTP request for the workflow trigger. This example uses HTTP POST but other HTTP methods can be used:
 
 ```c#
-HttpResponseMessage workflowResponse = testRunner.TriggerWorkflow(GetTriggerContent(), HttpMethod.Post);
+HttpResponseMessage workflowResponse = testRunner.TriggerWorkflow(FunctionToGetTriggerContent(), HttpMethod.Post);
 ```
 
-An overload of the `TestRunner.TriggerWorkflow()` method allows you to set the request headers. The method will complete when the workflow execution has completed.
+The `TriggerWorkflow()` will complete when the workflow execution has completed.
+
+Request headers can be set using the `TestRunner.TriggerWorkflow(HttpContent content, HttpMethod method, Dictionary<string, string> requestHeaders)` overload. 
+
+If the HTTP trigger is configured to use a relative path, the path can be set using the `TestRunner.TriggerWorkflow(HttpContent content, HttpMethod method, string relativePath)` overload. The relative path must be URL-encoded by the test case, this is not done by the test runner.
+
+The trigger URL for the workflow is logged to the test execution log. This example is for a workflow that uses a relative path (`/thisIsMyContainer/thisIsMyBlob`):
+
+```txt
+Workflow trigger: POST http://localhost:7071/api/stateless-test-workflow/triggers/manual/invoke/thisIsMyContainer/thisIsMyBlob?api-version=2022-05-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=123ao4DL03l1c1C-KRqfsl9hr0G_ipOjg_h77STbAWQ
+```
+
 
 ## Checking (Asserting) the Test Execution
 
@@ -166,13 +183,38 @@ You can also check the requests sent to the mock HTTP server, using the `TestRun
 var request = testRunner.MockRequests.First(r => r.RequestUri.AbsolutePath == "/api/v1.1/membership/customers/1234");
 Assert.AreEqual(HttpMethod.Put, request.Method);
 Assert.AreEqual("application/json", request.ContentHeaders["Content-Type"].First());
-Assert.AreEqual("ApiKey auth-apikey", request.Headers["x-api-key"].First());
+Assert.AreEqual("expected-api-key", request.Headers["x-api-key"].First());
 Assert.AreEqual(
     ContentHelper.FormatJson(ResourceHelper.GetAssemblyResourceAsString($"{GetType().Namespace}.MockData.ExpectedRequest.json")),
     ContentHelper.FormatJson(request.Content));
 ```
 
 The `ContentHelper.FormatJson()` method is part of the testing framework and formats JSON into a consistent format to enable reliable string comparison between the actual request and the expected request. `ContentHelper.FormatXml()` can be used for the comparison of XML.
+
+You can also check the workflow's Client Tracking Id using the `TestRunner.WorkflowClientTrackingId` property:
+
+```c#
+// Check the Client Tracking Id
+Assert.AreEqual("expected-tracking-id", testRunner.WorkflowClientTrackingId);
+```
+
+The `TestRunner.WorkflowRunId` property will give you the workflow's Run Id:
+
+```c#
+// Get the Run Id
+string runId = testRunner.WorkflowRunId;
+```
+
+
+# Test Configuration
+
+Each test project that uses the testing framework must include a `testConfiguration.json` file which is used to configure the framework. If this file does not exist, the tests will not run. 
+
+The various test configuration options are described in the following sections. If no configuration options are required, the file should contain an empty JSON document:
+
+```json
+{}
+```
 
 
 # Azurite
@@ -210,16 +252,8 @@ If you have configured Azurite to use different ports, the automatic check can b
 }
 ```
 
+This Azurite port check can be disabled by setting the `azurite.enableAzuritePortCheck` option in the `testConfiguration.json` file to `false`. The default is `true`.
 
-# Test Configuration
-
-Each test project that uses the testing framework must include a `testConfiguration.json` file which is used to configure the framework. If this file does not exist, the tests will not run. 
-
-The various test configuration options are described in the following sections. If no configuration options are required, the file should contain an empty JSON document:
-
-```json
-{}
-```
 
 
 # Local Settings file
@@ -271,6 +305,7 @@ The test execution log includes:
 - Functions runtime workflow execution logs
 - Summary of the requests that were received by the mock HTTP server that is managed by the testing framework
 
+
 ## Disable Functions runtime start-up logging
 
 The Functions runtime start-up logs can be verbose and are not usually needed when authoring or running tests, unless the test is failing because the Functions runtime is not starting up correctly.
@@ -284,6 +319,27 @@ To reduce the volume of logging, the inclusion of the Functions runtime start-up
 ```
 
 The setting is optional. If it is not included, the default value is `false`.
+
+
+# Stateless Workflows
+
+The testing framework must have access to the workflow run history to be able to check (assert) the workflow execution. With stateless Logic Apps, the run history is not stored unless the  `Workflows.<workflow name>.OperationOptions` setting is set to `WithStatelessRunHistory` in the settings file.
+
+The testing framework will automatically check if this setting exists for a stateless workflow. If the setting does not exist, and the `workflow.autoConfigureWithStatelessRunHistory` configuration option is set to `true` in `testConfiguration.json`, the framework will automatically create the setting so that the run history is stored. You will then see this in the test execution log:
+
+```txt
+ Workflow is stateless, creating new setting: Workflows.<workflow name>.OperationOptions = WithStatelessRunHistory
+```
+
+If the `workflow.autoConfigureWithStatelessRunHistory` configuration option is set to `false`, the test will fail:
+
+```txt
+LogicAppUnit.TestException: The workflow is stateless and the 'Workflows.<workflow name>.OperationOptions' setting is not configured for 'WithStatelessRunHistory'.
+This means that the workflow execution history will not be created and therefore the workflow cannot be tested.
+Set the 'workflow.autoConfigureWithStatelessRunHistory` option to 'true' in 'testConfiguration.json' so that the testing framework creates this setting automatically when running the test.
+```
+
+The default value for the `workflow.autoConfigureWithStatelessRunHistory` configuration option is `true`.
 
 
 # Handling Workflow Dependencies
@@ -393,7 +449,7 @@ When unit testing a workflow with a built-in connector, any dependency on an ext
 
 Replacing the connector like this does not affect the functionality of the workflow action or change the behaviour. Every action generates an *input* JSON message which is then sent to the external service via the connector. The action then generates an *output* JSON message which is then processed by the rest of the workflow. The structure of the *input* and *output* JSON messages differs for each type of action and connector, but as long as the same message structures are used in the request and responses for the HTTP connector and mock HTTP server, the rest of the workflow will execute in exactly the same way.
 
-The testing framework will only replace actions for the built-in connectors that are listed in the `workflow.builtInConnectorsToMock` section in the `testConfiguration.json` file. The example below will enable the update of all actions that use the `executeQuery` (SQL Server) and `sendMessage` (Service Bus) connectors:
+The testing framework will only replace actions using built-in connectors where the action's `operationId` is listed in the `workflow.builtInConnectorsToMock` section in the `testConfiguration.json` file. The example below will enable the update of all actions that use the `executeQuery` (SQL Server) and `sendMessage` (Service Bus) operations:
 
 ```json
 "workflow": {
@@ -413,7 +469,7 @@ As an example, this is an `Execute Query` action that runs a SQL query against a
         "parameters": {
             "query": "SELECT LanguageName, LanguageCode FROM config.Languages WHERE LanguageCode = @LanguageCode",
             "queryParameters": {
-"LanguageCode": "@body('Parse_Customer')?['languageCode']"
+                "LanguageCode": "@body('Parse_Customer')?['languageCode']"
             }
         },
         "serviceProviderConfiguration": {
@@ -436,7 +492,7 @@ The testing framework will replace the action with a HTTP action that calls the 
         "body": {
             "query": "SELECT LanguageName, LanguageCode FROM config.Languages WHERE LanguageCode = @LanguageCode",
             "queryParameters": {
-"LanguageCode": "@body('Parse_Customer')?['languageCode']"
+                "LanguageCode": "@body('Parse_Customer')?['languageCode']"
             }
         },
         "retryPolicy": {
@@ -491,7 +547,7 @@ As an example, this is a managed API connection in the `connections.json` file f
 The testing framework will replace the host name in the `connectionRuntimeUrl` attribute (`https://7606763fdc09952f.10.common.logic-uksouth.azure-apihub.net`) with the host name of the mock HTTP server:
 
 ```json
-    "connectionRuntimeUrl": "http://local-server-name:7075/apim/salesforce/fba515601ef14f9193eee596a9dcfd1c/",
+"connectionRuntimeUrl": "http://local-server-name:7075/apim/salesforce/fba515601ef14f9193eee596a9dcfd1c/",
 ```
 
 When the workflow is run, any request generated by actions using the connection will be sent to the mock HTTP server instead of the Microsoft-hosted API connector. 
@@ -587,15 +643,25 @@ Updating workflow HTTP actions to remove any existing Retry policies and replace
 
 # Summary of Test Configuration Options
 
-The previous sections describe how the `testConfigursation.json` file can be used to configure the test setup and execution. This is a summary of all of the available configuration attributes:
+The previous sections describe how the `testConfiguration.json` file can be used to configure the test setup and execution. This is a summary of all of the available configuration attributes:
 
 | Setting name | Optional? | Permitted values | Description |
 |:-------------|:----------|:-----------------|:------------|
 | localSettingsFilename | Yes | Valid filename | Name of the setting file to be used, if different from the default of `local.settings.json`. |
+| azurite.enableAzuritePortCheck | Yes | `true` <br /> `false` | `true` if the framework is to check that Azurite is running and listening on the required ports, otherwise `false`. Default is `true`. |
 | azurite.blobServicePort | Yes | 0 -> 65535 | Port number of the Azurite Blob service, if different from the default port 10000. |
 | azurite.queueServicePort | Yes | 0 -> 65535 | Port number of the Azurite Queue service, if different from the default port 10001. |
 | azurite.tableServicePort | Yes | 0 -> 65535 | Port number of the Azurite Table service, if different from the default port 10002. |
 | logging.writeFunctionRuntineStartupLogs | Yes | `true` <br /> `false` | `true` if the start-up logs are to be included in the test execution logs, otherwise `false`. Default is `false`. |
 | workflow.externalApiUrlsToMock | Yes | List of host names | List of host names that are to be replaced in the settings file with the URL of the mock HTTP server. |
 | workflow.builtInConnectorsToMock | Yes | List of connector names | List of built-in connector names where actions using these connectors are to be replaced with HTTP actions pointing at the mock HTTP server. |
+| workflow.autoConfigureWithStatelessRunHistory | Yes | `true` <br /> `false` | `true` if the testing framework automatically sets the `Workflows.<workflow name>.OperationOptions` setting to `WithStatelessRunHistory` for stateless workflows, otherwise `false`. Default is `false`. |
 
+
+# Future Improvements and Changes
+
+This is a list of possible future improvements and changes for the framework. Please create a new issue in GitHub if there are other features that you would like to see.
+
+- Ability to mock an `Invoke workflow` action to remove dependencies on a called workflow.
+- Improve the creation of the mocked responses using the mock HTTP server, perhaps using Fluent notation to create the responses.
+- Reduce the number of dependent packages.

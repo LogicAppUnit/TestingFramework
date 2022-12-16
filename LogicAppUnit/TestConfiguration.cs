@@ -58,6 +58,11 @@ namespace LogicAppUnit
     public class TestConfigurationAzurite
     {
         /// <summary>
+        /// <c>true</c> if the test framework checks that Azurite is running and listening on the required ports, otherwise <c>false</c>.
+        /// </summary>
+        public bool EnableAzuritePortCheck { get; set; } = true;
+
+        /// <summary>
         /// Port number used by the Blob service.
         /// </summary>
         public int BlobServicePort { get; set; } = 10000;
@@ -87,5 +92,10 @@ namespace LogicAppUnit
         /// List of built-in connectors where the actions are to be replaced with HTTP actions referencing the test mock server.
         /// </summary>
         public List<string> BuiltInConnectorsToMock { get; set; } = new List<string>();
+
+        /// <summary>
+        /// <c>true</c> if the test framework automatically configures the <i>OperationOptions</i> setting to <i>WithStatelessRunHistory</i> for a stateless workflow, otherwise <c>false</c>.
+        /// </summary>
+        public bool AutoConfigureWithStatelessRunHistory { get; set; } = true;
     }
 }

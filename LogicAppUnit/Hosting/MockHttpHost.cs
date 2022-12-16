@@ -20,7 +20,7 @@ namespace LogicAppUnit.Hosting
     /// <summary>
     /// The mock HTTP host.
     /// </summary>
-    public class MockHttpHost : IDisposable
+    internal class MockHttpHost : IDisposable
     {
         /// <summary>
         /// The web host.

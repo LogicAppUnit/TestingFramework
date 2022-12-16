@@ -10,7 +10,9 @@
     ],
     "builtInConnectorsToMock": [
       "executeQuery",
-      "sendMessage"
-    ]
+      "sendMessage",
+      "uploadBlob"
+    ],
+    "autoConfigureWithStatelessRunHistory": true
   }
 }

@@ -1,0 +1,7 @@
+﻿{
+  "statusCode": "BadRequest",
+  "body": {
+    "code": "ServiceProviderActionFailed",
+    "message": "The service provider action failed with error code 'BadRequest' and error message 'The specified blob named 'thisIsMyBlob' in container 'thisIsMyContainer' already exists.'."
+  }
+}
