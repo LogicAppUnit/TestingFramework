@@ -43,7 +43,11 @@
                         "serviceProviderId": "/serviceProviders/AzureBlob"
                     }
                 },
-                "runAfter": {}
+                "runAfter": {},
+                "trackedProperties": {
+                    "blobName": "@{triggerOutputs()['relativePathParameters']['blobName']}",
+                    "containerName": "@{triggerOutputs()['relativePathParameters']['containerName']}"
+                }
             }
         },
         "triggers": {
