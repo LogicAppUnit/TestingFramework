@@ -1,0 +1,101 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Loop_for_each_iteration": {
+                "type": "Until",
+                "expression": "@equals(variables('loopCounter'), triggerBody()?['numberOfIterations'])",
+                "limit": {
+                    "count": 60,
+                    "timeout": "PT1H"
+                },
+                "actions": {
+                    "Call_Service": {
+                        "type": "Http",
+                        "inputs": {
+                            "method": "POST",
+                            "uri": "@{parameters('ServiceOne-Url')}/doSomethingInsideLoop",
+                            "headers": {
+                                "Content-Type": "application/json"
+                            },
+                            "body": {
+                                "iterationNumber": "@variables('loopCounter')"
+                            }
+                        },
+                        "runAfter": {},
+                        "operationOptions": "DisableAsyncPattern, SuppressWorkflowHeaders"
+                    },
+                    "Increment_Loop_Counter": {
+                        "type": "IncrementVariable",
+                        "inputs": {
+                            "name": "loopCounter",
+                            "value": 1
+                        },
+                        "runAfter": {
+                            "Call_Service": [
+                                "Succeeded",
+                                "FAILED"
+                            ]
+                        }
+                    }
+                },
+                "runAfter": {
+                    "Initialize_variable": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Initialize_variable": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "loopCounter",
+                            "type": "integer",
+                            "value": 0
+                        }
+                    ]
+                },
+                "runAfter": {}
+            },
+            "Response": {
+                "type": "Response",
+                "kind": "http",
+                "inputs": {
+                    "statusCode": 200,
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "body": {
+                        "numberOfIterations": "@variables('loopCounter')"
+                    }
+                },
+                "runAfter": {
+                    "Loop_for_each_iteration": [
+                        "Succeeded"
+                    ]
+                }
+            }
+        },
+        "triggers": {
+            "manual": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "schema": {
+                        "properties": {
+                            "numberOfIterations": {
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "method": "POST"
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {}
+    },
+    "kind": "Stateful"
+}
