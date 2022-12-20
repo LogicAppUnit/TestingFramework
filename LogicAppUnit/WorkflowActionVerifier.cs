@@ -16,7 +16,7 @@
         public ActionStatus ActionStatusExpected { get; set; }
 
         /// <summary>
-        /// Repitition number for the action to be verified.
+        /// Repetition number for the action to be verified.
         /// </summary>
         public int RepetitionNumber { get; set; }
     }
