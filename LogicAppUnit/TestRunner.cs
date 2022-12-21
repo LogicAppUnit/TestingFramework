@@ -175,7 +175,7 @@ namespace LogicAppUnit
         /// <summary>
         /// Gets the workflow action so that it can be asserted in a test.
         /// </summary>
-        /// <param name="actionName">The action name.</param>
+        /// <param name="actionName">The name of the action.</param>
         /// <returns>The action as a JSON object.</returns>
         public JToken GetWorkflowAction(string actionName)
         {
@@ -185,7 +185,7 @@ namespace LogicAppUnit
             var getActionFromRunHistory = _apiHelper.ActionsContent(WorkflowRunId).Where(actionResult => actionResult["name"].ToString().Equals(actionName)).FirstOrDefault();
 
             if (getActionFromRunHistory == null)
-                throw new TestException($"Action '{actionName}' was not found in the workflow run history");
+                throw new TestException($"Action '{actionName}' was not found in the workflow run history.");
 
             return getActionFromRunHistory["properties"];
         }
@@ -193,7 +193,7 @@ namespace LogicAppUnit
         /// <summary>
         /// Gets the workflow action status indicating whether the action completed successfully or not.
         /// </summary>
-        /// <param name="actionName">The name of the action to be checked.</param>
+        /// <param name="actionName">The name of the action.</param>
         public ActionStatus GetWorkflowActionStatus(string actionName)
         {
             JToken actionRunProperties = GetWorkflowAction(actionName);
@@ -201,9 +201,29 @@ namespace LogicAppUnit
         }
 
         /// <summary>
+        /// Gets the input for a workflow action.
+        /// </summary>
+        /// <param name="actionName">The name of the action.</param>
+        /// <returns>The input.</returns>
+        public JToken GetWorkflowActionInput(string actionName)
+        {
+            return GetWorkflowActionMessage(actionName, "input");
+        }
+
+        /// <summary>
+        /// Gets the output for a workflow action.
+        /// </summary>
+        /// <param name="actionName">The name of the action.</param>
+        /// <returns>The output.</returns>
+        public JToken GetWorkflowActionOutput(string actionName)
+        {
+            return GetWorkflowActionMessage(actionName, "output");
+        }
+
+        /// <summary>
         /// Gets the number of repetitions for a workflow action. An action in an Until or a ForEach loop can be run multiple times.
         /// </summary>
-        /// <param name="actionName">The number of repetitions.</param>
+        /// <param name="actionName">The name of the action.</param>
         public int GetWorkflowActionRepetitionCount(string actionName)
         {
             JToken actionRunProperties = GetWorkflowAction(actionName);
@@ -231,7 +251,7 @@ namespace LogicAppUnit
         /// <summary>
         /// Gets the workflow action for a specific repetition so that it can be asserted in a test.
         /// </summary>
-        /// <param name="actionName">The action name.</param>
+        /// <param name="actionName">The name of the action.</param>
         /// <param name="repetitionNumber">The repetition number.</param>
         /// <returns>The action repetition as a JSON object.</returns>
         public JToken GetWorkflowActionRepetition(string actionName, int repetitionNumber)
@@ -242,7 +262,7 @@ namespace LogicAppUnit
             JToken actionRunProperties = GetWorkflowAction(actionName);
 
             if (!(actionRunProperties as JObject).ContainsKey("repetitionCount"))
-                throw new TestException($"Action '{actionName}' was not part of a repetition running inside a loop");
+                throw new TestException($"Action '{actionName}' was not part of a repetition running inside a loop.");
 
             int repetitionCount = actionRunProperties["repetitionCount"].Value<int>();
 
@@ -252,7 +272,7 @@ namespace LogicAppUnit
             IEnumerable<JToken> value = _apiHelper.ActionRepetitonsContent(WorkflowRunId, actionName);
 
             if (value.Count() != repetitionCount)
-                throw new TestException($"Repetitions for action '{actionName}' did not run properly, could not find {repetitionCount} repetitions.");
+                throw new TestException($"Repetitions for action '{actionName}' did not run properly, could not find {repetitionCount} repetitions in the workflow run history.");
 
             JToken repetition = value.Where(rep => rep["properties"]["repetitionIndexes"][0]["itemIndex"].Value<int>() == repetitionNumber - 1).First();
 
@@ -262,7 +282,7 @@ namespace LogicAppUnit
         /// <summary>
         /// Gets the workflow action status for a repetition, indicating whether the action completed successfully or not.
         /// </summary>
-        /// <param name="actionName">The name of the action to be checked.</param>
+        /// <param name="actionName">The name of the action.</param>
         /// <param name="repetitionNumber">The repetition number.</param>
         public ActionStatus GetWorkflowActionStatus(string actionName, int repetitionNumber)
         {
@@ -389,58 +409,30 @@ namespace LogicAppUnit
             }
         }
 
+        #region Private methods
+
         /// <summary>
-        /// Gets the output responses of provided actions to the end user, so that they can verify the expected results.
+        /// Gets the input or output for an action.
         /// </summary>
-        /// <param name="workflowActionVerifiers"></param>
-        /// <returns></returns>
-        public Dictionary<string, HttpResponseMessage> GetWorkflowActionOutputResponse(List<WorkflowActionVerifier> workflowActionVerifiers)
+        /// <param name="actionName">The name of the action.</param>
+        /// <param name="messageType">Either 'input' or 'output'.</param>
+        /// <returns>The input or output.</returns>
+        private JToken GetWorkflowActionMessage(string actionName, string messageType)
         {
-            var workflowActionOutputMap = new Dictionary<string, HttpResponseMessage>();
+            JToken actionRunProperties = GetWorkflowAction(actionName);
+            string uri = actionRunProperties[$"{messageType}sLink"]?["uri"]?.Value<string>();
 
-            workflowActionVerifiers.ForEach((workflowActionVerifier) =>
+            if (string.IsNullOrEmpty(uri))
             {
-                var getActionFromRunHistory = _apiHelper.ActionsContent(WorkflowRunId).Where(actionResult => actionResult["name"].ToString().Equals(workflowActionVerifier.ActionName)).FirstOrDefault();
-                string url = GetActionOutputUri(getActionFromRunHistory, workflowActionVerifier);
-                var actionRunResponse = _client.GetAsync(url).Result;
-                workflowActionOutputMap.Add(workflowActionVerifier.ActionName, actionRunResponse);
-            });
-
-            return workflowActionOutputMap;
-        }
-
-        private string GetActionOutputUri(JToken getActionFromRunHistory, WorkflowActionVerifier workflowActionVerifier)
-        {
-            if (getActionFromRunHistory == null || !(getActionFromRunHistory as JObject).ContainsKey("properties"))
-                throw new TestException($"Action named '{workflowActionVerifier.ActionName}' or its properties not found in the run history");
-
-            if ((getActionFromRunHistory["properties"] as JObject).ContainsKey("outputsLink"))
-                return getActionFromRunHistory["properties"]["outputsLink"]["uri"].Value<string>();
-
-            if ((getActionFromRunHistory["properties"] as JObject).ContainsKey("repetitionCount"))
-            {
-                int repetitionCount = getActionFromRunHistory["properties"]["repetitionCount"].Value<int>();
-
-                if (workflowActionVerifier.RepetitionNumber <= 0 || workflowActionVerifier.RepetitionNumber > repetitionCount)
-                    throw new TestException($"The action '{workflowActionVerifier.ActionName}' has run inside a loop, so in order to access the run history of particular repetition, you must pass valid repetition number");
-
-                var actionRepetitionRunURI = TestEnvironment.GetRunActionRepetitionsRequestUri(_workflowName, WorkflowRunId, workflowActionVerifier.ActionName);
-                var actionRepetitionRunResult = _client.GetAsync(actionRepetitionRunURI).Result.Content.ReadAsAsync<JToken>().Result;
-                var value = actionRepetitionRunResult["value"].Value<IEnumerable<JToken>>();
-
-                if (value.Count() != repetitionCount)
-                    throw new TestException($"Repetition for action '{workflowActionVerifier.ActionName}' did not run properly. We didn't find all the repetition runs.");
-
-                var specificRepetition = value.ElementAt(workflowActionVerifier.RepetitionNumber - 1);
-
-                if ((specificRepetition as JObject).ContainsKey("properties") && (specificRepetition["properties"] as JObject).ContainsKey("outputsLink"))
-                    return specificRepetition["properties"]["outputsLink"]["uri"].Value<string>();
+                // Give a better error message to the test author if this action was skipped
+                if (actionRunProperties["status"].ToString() == ActionStatus.Skipped.ToString())
+                    throw new TestException($"Action '{actionName}' does not have any {messageType} because the action was skipped.");
+                else
+                    throw new TestException($"Action '{actionName}' does not have any {messageType}.");
             }
 
-            throw new TestException($"Output run history for action '{workflowActionVerifier.ActionName}' not found. This might mean the action has failed creating output.");
+            return _apiHelper.GetActionMessage(uri, messageType);
         }
-
-        #region Private methods
 
         /// <summary>
         /// Get the callback definition for the workflow trigger. 
@@ -510,7 +502,7 @@ namespace LogicAppUnit
                 }
             }
 
-            throw new TestException($"Workflow is taking more than {Constants.MAX_TIME_MINUTES_WHILE_POLLING_WORKFLOW_RESULT} minutes for its execution");
+            throw new TestException($"Workflow is taking more than {Constants.MAX_TIME_MINUTES_WHILE_POLLING_WORKFLOW_RESULT} minutes for its execution.");
         }
 
         /// <summary>
@@ -519,9 +511,6 @@ namespace LogicAppUnit
         /// <param name="httpRequestMessage">Request message for the mocked API call.</param>
         /// <param name="mockDefinedInTestCase">Delegate function that sets the response message for the mocked API call.</param>
         /// <returns>The response message.</returns>
-        /// <remarks>
-        /// We will always have Archive actions in our workflow. In order to avoid repetition of mocking code for these Archive API calls,
-        /// we add the mocked response by default with every test case execution.</remarks>
         private HttpResponseMessage WrapApiMockDefinedInTestCase(HttpRequestMessage httpRequestMessage, Func<HttpRequestMessage, HttpResponseMessage> mockDefinedInTestCase = null)
         {
             if (httpRequestMessage == null)
