@@ -12,7 +12,7 @@ namespace LogicAppUnit.InternalHelper
     /// </summary>
     internal class WorkflowApiHelper
     {
-        private const string StatelessWarningMessage = "If this is a stateless workflow, make sure that the 'Workflows.<workflow name>.OperationOptions' setting is set to 'WithStatelessRunHistory";
+        private const string StatelessWarningMessage = "If this is a stateless workflow, make sure that the 'Workflows.<workflow name>.OperationOptions' setting is set to 'WithStatelessRunHistory'.";
 
         private readonly HttpClient _client;
         private readonly string _workflowName;
@@ -98,6 +98,29 @@ namespace LogicAppUnit.InternalHelper
         #region REST API calls
 
         /// <summary>
+        /// Gets the input message or output message for an action.
+        /// </summary>
+        /// <param name="url">URL to get the action message.</param>
+        /// <param name="messageType">Either 'input' or 'output'.</param>
+        /// <returns>The action message.</returns>
+        public JToken GetActionMessage(string url, string messageType)
+        {
+            if (string.IsNullOrEmpty(url))
+                throw new ArgumentNullException(nameof(url));
+            if (string.IsNullOrEmpty(messageType))
+                throw new ArgumentNullException(nameof(messageType));
+
+            JToken actionMessageContent;
+            using (var actionContentResponse = _client.GetAsync(url).Result)
+            {
+                actionContentResponse.EnsureSuccessStatusCode();
+                actionMessageContent = actionContentResponse.Content.ReadAsAsync<JToken>().Result;
+            }
+
+            return actionMessageContent;
+        }
+
+        /// <summary>
         /// Get the workflow run response.
         /// </summary>
         /// <param name="url">URL to get the workflow run response.</param>
@@ -108,9 +131,12 @@ namespace LogicAppUnit.InternalHelper
                 throw new ArgumentNullException(nameof(url));
 
             // Documentation: https://learn.microsoft.com/en-us/rest/api/logic/workflow-runs/list
-            var workflowRunResponse = _client.GetAsync(url).Result;
-            workflowRunResponse.EnsureSuccessStatusCode();
-            JToken responseContent = workflowRunResponse.Content.ReadAsAsync<JToken>().Result;
+            JToken responseContent;
+            using (var workflowRunResponse = _client.GetAsync(url).Result)
+            {
+                workflowRunResponse.EnsureSuccessStatusCode();
+                responseContent = workflowRunResponse.Content.ReadAsAsync<JToken>().Result;
+            }
 
             if (!responseContent["value"].Any())
                 throw new TestException($"There is no workflow run response. {StatelessWarningMessage}");
@@ -129,9 +155,12 @@ namespace LogicAppUnit.InternalHelper
                 throw new ArgumentNullException(nameof(url));
 
             // Documentation: https://learn.microsoft.com/en-us/rest/api/logic/workflow-run-actions/list
-            var actionsResponse = _client.GetAsync(url).Result;
-            actionsResponse.EnsureSuccessStatusCode();
-            JToken actionsContent = actionsResponse.Content.ReadAsAsync<JToken>().Result;
+            JToken actionsContent;
+            using (var actionsResponse = _client.GetAsync(url).Result)
+            {
+                actionsResponse.EnsureSuccessStatusCode();
+                actionsContent = actionsResponse.Content.ReadAsAsync<JToken>().Result;
+            }
 
             // Use recursion to get all the results
             if ((actionsContent as JObject).ContainsKey("nextLink"))
@@ -160,9 +189,12 @@ namespace LogicAppUnit.InternalHelper
                 throw new ArgumentNullException(nameof(url));
 
             // Documentation: https://learn.microsoft.com/en-us/rest/api/logic/workflow-run-action-repetitions
-            var actionRepetitionsResponse = _client.GetAsync(url).Result;
-            actionRepetitionsResponse.EnsureSuccessStatusCode();
-            JToken actionRepetitionsContent = actionRepetitionsResponse.Content.ReadAsAsync<JToken>().Result;
+            JToken actionRepetitionsContent;
+            using (var actionRepetitionsResponse = _client.GetAsync(url).Result)
+            {
+                actionRepetitionsResponse.EnsureSuccessStatusCode();
+                actionRepetitionsContent = actionRepetitionsResponse.Content.ReadAsAsync<JToken>().Result;
+            }
 
             if (!actionRepetitionsContent["value"].Any())
                 throw new TestException($"There are no action repetition responses for action '{actionName}' in the workflow run. {StatelessWarningMessage}");
