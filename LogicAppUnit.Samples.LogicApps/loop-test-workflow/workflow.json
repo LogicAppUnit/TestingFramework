@@ -2,7 +2,7 @@
     "definition": {
         "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
         "actions": {
-            "Loop_for_each_iteration": {
+            "Until_Loop": {
                 "type": "Until",
                 "expression": "@equals(variables('loopCounter'), triggerBody()?['numberOfIterations'])",
                 "limit": {
@@ -10,11 +10,11 @@
                     "timeout": "PT1H"
                 },
                 "actions": {
-                    "Call_Service": {
+                    "Call_Service_One": {
                         "type": "Http",
                         "inputs": {
                             "method": "POST",
-                            "uri": "@{parameters('ServiceOne-Url')}/doSomethingInsideLoop",
+                            "uri": "@{parameters('ServiceOne-Url')}/doSomethingInsideUntilLoop",
                             "headers": {
                                 "Content-Type": "application/json"
                             },
@@ -22,17 +22,101 @@
                                 "iterationNumber": "@variables('loopCounter')"
                             }
                         },
-                        "runAfter": {},
+                        "runAfter": {
+                            "Increment_variable": [
+                                "Succeeded"
+                            ]
+                        },
                         "operationOptions": "DisableAsyncPattern, SuppressWorkflowHeaders"
                     },
-                    "Increment_Loop_Counter": {
+                    "Append_response_to_systemOneResponses": {
+                        "type": "AppendToArrayVariable",
+                        "inputs": {
+                            "name": "systemOneResponses",
+                            "value": "@body('Call_Service_One')"
+                        },
+                        "runAfter": {
+                            "Call_Service_One": [
+                                "Succeeded",
+                                "FAILED"
+                            ]
+                        }
+                    },
+                    "Increment_variable": {
                         "type": "IncrementVariable",
                         "inputs": {
                             "name": "loopCounter",
                             "value": 1
                         },
+                        "runAfter": {}
+                    }
+                },
+                "runAfter": {
+                    "Initialize_systemTwoResponses": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Initialize_systemOneResponses": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "systemOneResponses",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "Initialize_loopCounter": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Response": {
+                "type": "Response",
+                "kind": "http",
+                "inputs": {
+                    "statusCode": 200,
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "body": {
+                        "loopCounter": "@variables('loopCounter')",
+                        "serviceOneResponses": "@variables('systemOneResponses')",
+                        "serviceTwoResponses": "@variables('systemTwoResponses')"
+                    }
+                },
+                "runAfter": {
+                    "For_Each_Loop": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "For_Each_Loop": {
+                "type": "Foreach",
+                "foreach": "@variables('systemOneResponses')",
+                "actions": {
+                    "Call_Service_Two": {
+                        "type": "Http",
+                        "inputs": {
+                            "method": "POST",
+                            "uri": "@{parameters('ServiceTwo-Url')}/doSomethingInsideForEachLoop",
+                            "headers": {
+                                "Content-Type": "application/json"
+                            },
+                            "body": "@items('For_Each_Loop')"
+                        },
+                        "runAfter": {}
+                    },
+                    "Append_response_to_systemTwoResponses": {
+                        "type": "AppendToArrayVariable",
+                        "inputs": {
+                            "name": "systemTwoResponses",
+                            "value": "@body('Call_Service_Two')"
+                        },
                         "runAfter": {
-                            "Call_Service": [
+                            "Call_Service_Two": [
                                 "Succeeded",
                                 "FAILED"
                             ]
@@ -40,12 +124,33 @@
                     }
                 },
                 "runAfter": {
-                    "Initialize_variable": [
+                    "Until_Loop": [
+                        "Succeeded"
+                    ]
+                },
+                "runtimeConfiguration": {
+                    "concurrency": {
+                        "repetitions": 1
+                    }
+                }
+            },
+            "Initialize_systemTwoResponses": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "systemTwoResponses",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "Initialize_systemOneResponses": [
                         "Succeeded"
                     ]
                 }
             },
-            "Initialize_variable": {
+            "Initialize_loopCounter": {
                 "type": "InitializeVariable",
                 "inputs": {
                     "variables": [
@@ -57,24 +162,6 @@
                     ]
                 },
                 "runAfter": {}
-            },
-            "Response": {
-                "type": "Response",
-                "kind": "http",
-                "inputs": {
-                    "statusCode": 200,
-                    "headers": {
-                        "Content-Type": "application/json"
-                    },
-                    "body": {
-                        "numberOfIterations": "@variables('loopCounter')"
-                    }
-                },
-                "runAfter": {
-                    "Loop_for_each_iteration": [
-                        "Succeeded"
-                    ]
-                }
             }
         },
         "triggers": {

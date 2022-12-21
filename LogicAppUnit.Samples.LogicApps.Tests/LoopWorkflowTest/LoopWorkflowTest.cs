@@ -44,17 +44,31 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
                 {
                     HttpResponseMessage mockedResponse = new HttpResponseMessage();
                     iterationCounter += 1;
-                    if (request.RequestUri.AbsolutePath == "/api/v1/doSomethingInsideLoop" && request.Method == HttpMethod.Post && iterationCounter == 4)
+                    if (request.RequestUri.AbsolutePath == "/api/v1/doSomethingInsideUntilLoop" && request.Method == HttpMethod.Post && iterationCounter == 4)
                     {
                         mockedResponse.RequestMessage = request;
                         mockedResponse.StatusCode = HttpStatusCode.InternalServerError;
-                        mockedResponse.Content = ContentHelper.CreatePlainStringContent("Internal server error detected in System One");
+                        mockedResponse.Content = GetMockResponse(iterationCounter, "Internal server error detected in System One");
                     }
-                    else
+                    else if (request.RequestUri.AbsolutePath == "/api/v1/doSomethingInsideUntilLoop" && request.Method == HttpMethod.Post && iterationCounter != 4)
                     {
                         mockedResponse.RequestMessage = request;
                         mockedResponse.StatusCode = HttpStatusCode.OK;
+                        mockedResponse.Content = GetMockResponse(iterationCounter, "All working in System One");
                     }
+                    else if (request.RequestUri.AbsolutePath == "/api/v1.1/doSomethingInsideForEachLoop" && request.Method == HttpMethod.Post && iterationCounter == 7)
+                    {
+                        mockedResponse.RequestMessage = request;
+                        mockedResponse.StatusCode = HttpStatusCode.BadRequest;
+                        mockedResponse.Content = GetMockResponse(iterationCounter, "Bad request received by System Two");
+                    }
+                    else if (request.RequestUri.AbsolutePath == "/api/v1.1/doSomethingInsideForEachLoop" && request.Method == HttpMethod.Post && iterationCounter != 7)
+                    {
+                        mockedResponse.RequestMessage = request;
+                        mockedResponse.StatusCode = HttpStatusCode.OK;
+                        mockedResponse.Content = GetMockResponse(iterationCounter, "All working in System Two");
+                    }
+
                     return mockedResponse;
                 };
 
@@ -68,29 +82,44 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
 
                 // Check workflow response
                 testRunner.ExceptionWrapper(() => Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode));
+                Assert.AreEqual(
+                    ContentHelper.FormatJson(ResourceHelper.GetAssemblyResourceAsString($"{GetType().Namespace}.MockData.Response.json")),
+                    ContentHelper.FormatJson(workflowResponse.Content.ReadAsStringAsync().Result));
 
                 // Check repetitions
                 // We can check the number of iterations for the looping action (for example Until or ForEach) and the actions inside the loop
-                Assert.AreEqual(1, testRunner.GetWorkflowActionRepetitionCount("Initialize_variable"));
-                Assert.AreEqual(numberOfIterations, testRunner.GetWorkflowActionRepetitionCount("Loop_for_each_iteration"));
-                Assert.AreEqual(numberOfIterations, testRunner.GetWorkflowActionRepetitionCount("Call_Service"));
+                Assert.AreEqual(1, testRunner.GetWorkflowActionRepetitionCount("Initialize_systemOneResponses"));
+                Assert.AreEqual(1, testRunner.GetWorkflowActionRepetitionCount("Initialize_systemTwoResponses"));
+                Assert.AreEqual(numberOfIterations, testRunner.GetWorkflowActionRepetitionCount("Until_Loop"));
+                Assert.AreEqual(numberOfIterations, testRunner.GetWorkflowActionRepetitionCount("Call_Service_One"));
+                Assert.AreEqual(numberOfIterations, testRunner.GetWorkflowActionRepetitionCount("For_Each_Loop"));
+                Assert.AreEqual(numberOfIterations, testRunner.GetWorkflowActionRepetitionCount("Call_Service_Two"));
                 Assert.AreEqual(1, testRunner.GetWorkflowActionRepetitionCount("Response"));
 
                 // Check action result for the actions that were not repeated
-                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Initialize_variable"));
+                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Initialize_systemOneResponses"));
+                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Initialize_systemTwoResponses"));
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Response"));
 
-                // Check action result for the actions that were repeated
-                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service", 1));
-                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service", 2));
-                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service", 3));
-                Assert.AreEqual(ActionStatus.Failed, testRunner.GetWorkflowActionStatus("Call_Service", 4));
-                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service", 5));
+                // Check action results for the 'Call_Service_One' action that was repeated
+                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service_One", 1));
+                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service_One", 2));
+                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service_One", 3));
+                Assert.AreEqual(ActionStatus.Failed, testRunner.GetWorkflowActionStatus("Call_Service_One", 4));
+                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service_One", 5));
+
+                // Check action results for the 'Call_Service_Two' action that was repeated
+                // If your FoEach loop is set up to use parallel iterations, assertions like this might not be possible
+                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service_Two", 1));
+                Assert.AreEqual(ActionStatus.Failed, testRunner.GetWorkflowActionStatus("Call_Service_Two", 2));
+                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service_Two", 3));
+                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service_Two", 4));
+                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service_Two", 5));
 
                 // Get the action properties, we can then assert any of the content as needed
                 JToken actionResponse = testRunner.GetWorkflowAction("Response");
-                JToken actionCallService2 = testRunner.GetWorkflowActionRepetition("Call_Service", 2);
-                JToken actionCallService4 = testRunner.GetWorkflowActionRepetition("Call_Service", 4);
+                JToken actionCallService2 = testRunner.GetWorkflowActionRepetition("Call_Service_One", 2);
+                JToken actionCallService4 = testRunner.GetWorkflowActionRepetition("Call_Service_One", 4);
             }
         }
 
@@ -99,6 +128,15 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
             return ContentHelper.CreateJsonStringContent(new
             {
                 numberOfIterations
+            });
+        }
+
+        private static StringContent GetMockResponse(int iterationNumber, string message)
+        {
+            return ContentHelper.CreateJsonStringContent(new
+            {
+                iterationNumber,
+                message
             });
         }
     }

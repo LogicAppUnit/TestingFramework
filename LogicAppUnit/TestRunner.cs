@@ -212,9 +212,13 @@ namespace LogicAppUnit
             if (actionRunProperties["repetitionCount"] != null)
                 return actionRunProperties["repetitionCount"].Value<int>();
 
-            // A looping action (for example Until or ForEach) will have an 'iterationCount' property
+            // An Until loop will have an 'iterationCount' property
             if (actionRunProperties["iterationCount"] != null)
                 return actionRunProperties["iterationCount"].Value<int>();
+
+            // A ForEach loop will have an 'inputsLink.metadata.foreachItemsCount' property
+            if (actionRunProperties["inputsLink"]?["metadata"]?["foreachItemsCount"] != null)
+                return actionRunProperties["inputsLink"]["metadata"]["foreachItemsCount"].Value<int>();
 
             // Else the action has not been repeated
             return 1;

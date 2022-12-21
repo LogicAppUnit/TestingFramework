@@ -1,0 +1,47 @@
+﻿{
+  "loopCounter": 5,
+  "serviceOneResponses": [
+    {
+      "iterationNumber": 1,
+      "message": "All working in System One"
+    },
+    {
+      "iterationNumber": 2,
+      "message": "All working in System One"
+    },
+    {
+      "iterationNumber": 3,
+      "message": "All working in System One"
+    },
+    {
+      "iterationNumber": 4,
+      "message": "Internal server error detected in System One"
+    },
+    {
+      "iterationNumber": 5,
+      "message": "All working in System One"
+    }
+  ],
+  "serviceTwoResponses": [
+    {
+      "iterationNumber": 6,
+      "message": "All working in System Two"
+    },
+    {
+      "iterationNumber": 7,
+      "message": "Bad request received by System Two"
+    },
+    {
+      "iterationNumber": 8,
+      "message": "All working in System Two"
+    },
+    {
+      "iterationNumber": 9,
+      "message": "All working in System Two"
+    },
+    {
+      "iterationNumber": 10,
+      "message": "All working in System Two"
+    }
+  ]
+}
