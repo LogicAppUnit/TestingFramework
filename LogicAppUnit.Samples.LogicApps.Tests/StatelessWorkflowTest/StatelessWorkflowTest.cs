@@ -1,6 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using LogicAppUnit;
-using LogicAppUnit.Helper;
+﻿using LogicAppUnit.Helper;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -9,7 +8,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.StatelessWorkflowTest
 {
     /// <summary>
     /// Test cases for the <i>stateless-workflow</i> workflow.
-    /// This workflow includes a relative path in the trigger URL which includes the blob name.
+    /// This workflow is stateless and includes a relative path in the trigger URL which includes the container name and the blob name.
     /// </summary>
     [TestClass]
     public class StatelessWorkflowTest : WorkflowTestBase

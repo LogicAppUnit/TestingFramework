@@ -1,17 +1,15 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using LogicAppUnit;
-using LogicAppUnit.Helper;
-using System.Collections.Generic;
-using System.Linq;
+﻿using LogicAppUnit.Helper;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Net.Http;
-using Newtonsoft.Json.Linq;
 
 namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
 {
     /// <summary>
     /// Test cases for the <i>loop-test-workflow</i> workflow.
-    /// This workflow includes an <i>Until</i> loop action to demonstrate how the testing framework can be used to test actions that are run multiple times in a workflow run.
+    /// This workflow includes actions in an <i>Until</i> loop and a <i>ForEach</i>/> loop to demonstrate how the testing framework can be used to test actions that are run multiple times in a workflow run.
+    /// These types of actions are known as action repetitions.
     /// </summary>
     [TestClass]
     public class LoopWorkflowTest : WorkflowTestBase
@@ -120,6 +118,12 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
                 JToken actionResponse = testRunner.GetWorkflowAction("Response");
                 JToken actionCallService2 = testRunner.GetWorkflowActionRepetition("Call_Service_One", 2);
                 JToken actionCallService4 = testRunner.GetWorkflowActionRepetition("Call_Service_One", 4);
+
+                // Get action outputs
+                JToken serviceOneInput2 = testRunner.GetWorkflowActionInput("Call_Service_One", 2);
+                JToken serviceOneOutput2 = testRunner.GetWorkflowActionOutput("Call_Service_One", 2);
+                Assert.IsNotNull(serviceOneInput2.ToString());
+                Assert.IsNotNull(serviceOneOutput2.ToString());
             }
         }
 

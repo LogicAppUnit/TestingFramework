@@ -182,7 +182,7 @@ namespace LogicAppUnit
             if (string.IsNullOrEmpty(actionName))
                 throw new ArgumentNullException(nameof(actionName));
 
-            var getActionFromRunHistory = _apiHelper.ActionsContent(WorkflowRunId).Where(actionResult => actionResult["name"].ToString().Equals(actionName)).FirstOrDefault();
+            JToken getActionFromRunHistory = _apiHelper.ActionsContent(WorkflowRunId).Where(actionResult => actionResult["name"].ToString().Equals(actionName)).FirstOrDefault();
 
             if (getActionFromRunHistory == null)
                 throw new TestException($"Action '{actionName}' was not found in the workflow run history.");
@@ -288,6 +288,28 @@ namespace LogicAppUnit
         {
             JToken actionRunRepetitionProperties = GetWorkflowActionRepetition(actionName, repetitionNumber);
             return (ActionStatus)Enum.Parse(typeof(ActionStatus), actionRunRepetitionProperties["status"].ToString());
+        }
+
+        /// <summary>
+        /// Gets the input for a workflow action for a repetition.
+        /// </summary>
+        /// <param name="actionName">The name of the action.</param>
+        /// <param name="repetitionNumber">The repetition number.</param>
+        /// <returns>The input.</returns>
+        public JToken GetWorkflowActionInput(string actionName, int repetitionNumber)
+        {
+            return GetWorkflowActionRepetitionMessage(actionName, repetitionNumber, "input");
+        }
+
+        /// <summary>
+        /// Gets the output for a workflow action for a repetition.
+        /// </summary>
+        /// <param name="actionName">The name of the action.</param>
+        /// <param name="repetitionNumber">The repetition number.</param>
+        /// <returns>The output.</returns>
+        public JToken GetWorkflowActionOutput(string actionName, int repetitionNumber)
+        {
+            return GetWorkflowActionRepetitionMessage(actionName, repetitionNumber, "output");
         }
 
         #endregion // Public Action Repetition methods
@@ -429,6 +451,30 @@ namespace LogicAppUnit
                     throw new TestException($"Action '{actionName}' does not have any {messageType} because the action was skipped.");
                 else
                     throw new TestException($"Action '{actionName}' does not have any {messageType}.");
+            }
+
+            return _apiHelper.GetActionMessage(uri, messageType);
+        }
+
+        /// <summary>
+        /// Gets the input or output for an action for a repetition.
+        /// </summary>
+        /// <param name="actionName">The name of the action.</param>
+        /// <param name="repetitionNumber">The repetition number.</param>
+        /// <param name="messageType">Either 'input' or 'output'.</param>
+        /// <returns>The input or output.</returns>
+        private JToken GetWorkflowActionRepetitionMessage(string actionName, int repetitionNumber, string messageType)
+        {
+            JToken actionRunRepetitionProperties = GetWorkflowActionRepetition(actionName, repetitionNumber);
+            string uri = actionRunRepetitionProperties[$"{messageType}sLink"]?["uri"]?.Value<string>();
+
+            if (string.IsNullOrEmpty(uri))
+            {
+                // Give a better error message to the test author if this action was skipped
+                if (actionRunRepetitionProperties["status"].ToString() == ActionStatus.Skipped.ToString())
+                    throw new TestException($"Action '{actionName}' and repetiton {repetitionNumber} does not have any {messageType} because the action was skipped.");
+                else
+                    throw new TestException($"Action '{actionName}' and repetiton {repetitionNumber} does not have any {messageType}.");
             }
 
             return _apiHelper.GetActionMessage(uri, messageType);

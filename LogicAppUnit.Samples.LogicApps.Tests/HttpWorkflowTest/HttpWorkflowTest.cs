@@ -1,6 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using LogicAppUnit;
-using LogicAppUnit.Helper;
+﻿using LogicAppUnit.Helper;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -157,6 +157,11 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
                 Assert.AreEqual(
                     ContentHelper.FormatJson(ResourceHelper.GetAssemblyResourceAsString($"{GetType().Namespace}.MockData.SystemTwo_Request.json")),
                     ContentHelper.FormatJson(systemTwoRequest.Content));
+
+                JToken parseCustomerInput = testRunner.GetWorkflowActionInput("Parse_Customer");
+                JToken parseCustomerOutput = testRunner.GetWorkflowActionOutput("Parse_Customer");
+                Assert.IsNotNull(parseCustomerInput.ToString());
+                Assert.IsNotNull(parseCustomerOutput.ToString());
             }
         }
 
