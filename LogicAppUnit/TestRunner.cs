@@ -453,7 +453,7 @@ namespace LogicAppUnit
                     throw new TestException($"Action '{actionName}' does not have any {messageType}.");
             }
 
-            return _apiHelper.GetActionMessage(uri, messageType);
+            return _apiHelper.GetActionMessage(uri);
         }
 
         /// <summary>
@@ -477,7 +477,7 @@ namespace LogicAppUnit
                     throw new TestException($"Action '{actionName}' and repetiton {repetitionNumber} does not have any {messageType}.");
             }
 
-            return _apiHelper.GetActionMessage(uri, messageType);
+            return _apiHelper.GetActionMessage(uri);
         }
 
         /// <summary>

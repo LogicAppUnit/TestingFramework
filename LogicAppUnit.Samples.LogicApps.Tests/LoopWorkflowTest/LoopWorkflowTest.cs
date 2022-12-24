@@ -17,7 +17,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
         [TestInitialize]
         public void TestInitialize()
         {
-            Initialize(Constants.LOGIC_APP_TEST_EXAMPLE_BASE_PATH, Constants.LOOP_TEST_WORKFLOW);
+            Initialize(Constants.LOGIC_APP_TEST_EXAMPLE_BASE_PATH, Constants.LOOP_WORKFLOW);
         }
 
         [ClassCleanup]
@@ -119,7 +119,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
                 JToken actionCallService2 = testRunner.GetWorkflowActionRepetition("Call_Service_One", 2);
                 JToken actionCallService4 = testRunner.GetWorkflowActionRepetition("Call_Service_One", 4);
 
-                // Get action outputs
+                // Get action input and output
                 JToken serviceOneInput2 = testRunner.GetWorkflowActionInput("Call_Service_One", 2);
                 JToken serviceOneOutput2 = testRunner.GetWorkflowActionOutput("Call_Service_One", 2);
                 Assert.IsNotNull(serviceOneInput2.ToString());

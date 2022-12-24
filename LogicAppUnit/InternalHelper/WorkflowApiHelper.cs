@@ -101,14 +101,11 @@ namespace LogicAppUnit.InternalHelper
         /// Gets the input message or output message for an action.
         /// </summary>
         /// <param name="url">URL to get the action message.</param>
-        /// <param name="messageType">Either 'input' or 'output'.</param>
         /// <returns>The action message.</returns>
-        public JToken GetActionMessage(string url, string messageType)
+        public JToken GetActionMessage(string url)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
-            if (string.IsNullOrEmpty(messageType))
-                throw new ArgumentNullException(nameof(messageType));
 
             JToken actionMessageContent;
             using (var actionContentResponse = _client.GetAsync(url).Result)
