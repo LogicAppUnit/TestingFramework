@@ -34,7 +34,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
         {
             const int numberOfIterations = 5;
 
-            using (var testRunner = CreateTestRunner())
+            using (ITestRunner testRunner = CreateTestRunner())
             {
                 // Mock the HTTP calls and customize responses
                 int iterationCounter = 0;

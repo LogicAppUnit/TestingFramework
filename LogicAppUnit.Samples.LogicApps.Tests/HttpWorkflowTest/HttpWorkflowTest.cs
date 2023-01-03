@@ -29,12 +29,12 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
         }
 
         /// <summary>
-        /// Tests that the correct response is returned when an incorrect value for the X-API-Key header is used with the webhook request.
+        /// Tests that the correct response is returned when an incorrect value for the 'X-API-Key header' is used with the webhook request.
         /// </summary>
         [TestMethod]
         public void HttpWorkflowTest_When_Wrong_API_Key_In_Request()
         {
-            using (var testRunner = CreateTestRunner())
+            using (ITestRunner testRunner = CreateTestRunner())
             {
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
@@ -62,7 +62,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
         [TestMethod]
         public void HttpWorkflowTest_When_Get_Customer_Details_Fails()
         {
-            using (var testRunner = CreateTestRunner())
+            using (ITestRunner testRunner = CreateTestRunner())
             {
                 // Mock the HTTP calls and customize responses
                 testRunner.AddApiMocks = (request) =>
@@ -108,7 +108,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
             // Override one of the settings in the local settings file
             var settingsToOverride = new Dictionary<string, string>() { { "ServiceTwo-DefaultAddressType", "physical" } };
 
-            using (var testRunner = CreateTestRunner(settingsToOverride))
+            using (ITestRunner testRunner = CreateTestRunner(settingsToOverride))
             {
                 // Mock the HTTP calls and customize responses
                 testRunner.AddApiMocks = (request) =>
@@ -174,7 +174,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
             // Override one of the settings in the local settings file
             var settingsToOverride = new Dictionary<string, string>() { { "ServiceTwo-DefaultAddressType", "physical" } };
 
-            using (var testRunner = CreateTestRunner(settingsToOverride))
+            using (ITestRunner testRunner = CreateTestRunner(settingsToOverride))
             {
                 // Mock the HTTP calls and customize responses
                 testRunner.AddApiMocks = (request) =>

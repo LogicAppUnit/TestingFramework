@@ -34,7 +34,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.StatelessWorkflowTest
             const string containerName = "thisIsMyContainer";
             const string blobName = "thisIsMyBlob";
 
-            using (var testRunner = CreateTestRunner())
+            using (ITestRunner testRunner = CreateTestRunner())
             {
                 // Run the workflow
                 // The relative path must be URL-encoded by the test case, if needed
@@ -78,7 +78,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.StatelessWorkflowTest
             const string containerName = "thisIsMyContainer";
             const string blobName = "thisIsMyBlob";
 
-            using (var testRunner = CreateTestRunner())
+            using (ITestRunner testRunner = CreateTestRunner())
             {
                 // Mock the HTTP calls and customize responses
                 testRunner.AddApiMocks = (request) =>

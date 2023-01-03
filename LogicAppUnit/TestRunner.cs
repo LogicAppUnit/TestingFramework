@@ -20,7 +20,7 @@ namespace LogicAppUnit
     /// <summary>
     /// Runs a workflow in an isolated test environment and makes available the run execution history.
     /// </summary>
-    public class TestRunner : IDisposable
+    public class TestRunner : ITestRunner, IDisposable
     {
         private readonly HttpClient _client;
 
@@ -37,12 +37,31 @@ namespace LogicAppUnit
         private ConcurrentBag<MockRequest> _mockRequests;
         private List<MockRequest> _mockRequestsAsList;
 
-        #region Properties
+        #region Mock server properties
 
-        /// <summary>
-        /// Gets the workflow run id.
-        /// </summary>
-        /// <returns>The workflow run id.</returns>
+        /// <inheritdoc cref="ITestRunner.AddApiMocks" />
+        public Func<HttpRequestMessage, HttpResponseMessage> AddApiMocks
+        {
+            set
+            {
+                _mockHttpHost.RequestHandler = (request) => WrapApiMockDefinedInTestCase(request, value);
+            }
+        }
+
+        /// <inheritdoc cref="ITestRunner.MockRequests" />
+        public List<MockRequest> MockRequests
+        {
+            get
+            {
+                return _mockRequestsAsList;
+            }
+        }
+
+        #endregion // Mock server properties
+
+        #region Workflow properties
+
+        /// <inheritdoc cref="ITestRunner.WorkflowRunId" />
         public string WorkflowRunId
         {
             get
@@ -55,10 +74,7 @@ namespace LogicAppUnit
             }
         }
 
-        /// <summary>
-        /// Gets the workflow client tracking id.
-        /// </summary>
-        /// <returns>The workflow client tracking id.</returns>
+        /// <inheritdoc cref="ITestRunner.WorkflowClientTrackingId" />
         public string WorkflowClientTrackingId
         {
             get
@@ -71,10 +87,7 @@ namespace LogicAppUnit
             }
         }
 
-        /// <summary>
-        /// Gets the workflow run status indicating whether the workflow ran successfully or not.
-        /// </summary>
-        /// <returns>The workflow run status.</returns>
+        /// <inheritdoc cref="ITestRunner.WorkflowRunStatus" />
         public WorkflowRunStatus WorkflowRunStatus
         {
             get
@@ -83,32 +96,7 @@ namespace LogicAppUnit
             }
         }
 
-        /// <summary>
-        /// Sets the mocked responses for the outgoing HTTP calls from the workflow to the mock HTTP server.
-        /// </summary>
-        public Func<HttpRequestMessage, HttpResponseMessage> AddApiMocks
-        {
-            set
-            {
-                _mockHttpHost.RequestHandler = (request) => WrapApiMockDefinedInTestCase(request, value);
-            }
-        }
-
-        /// <summary>
-        /// Gets the mock requests that were created by the workflow during the test execution.
-        /// </summary>
-        /// <remarks>
-        /// The requests are ordered in chronological order, with the most recent request at the start of the list.
-        /// </remarks>
-        public List<MockRequest> MockRequests
-        {
-            get
-            {
-                return _mockRequestsAsList;
-            }
-        }
-
-        #endregion // Properties
+        #endregion // Workflow properties
 
         #region Lifetime management
 
@@ -172,11 +160,7 @@ namespace LogicAppUnit
 
         #region Public Action methods
 
-        /// <summary>
-        /// Gets the workflow action so that it can be asserted in a test.
-        /// </summary>
-        /// <param name="actionName">The name of the action.</param>
-        /// <returns>The action as a JSON object.</returns>
+        /// <inheritdoc cref="ITestRunner.GetWorkflowAction(string)" />
         public JToken GetWorkflowAction(string actionName)
         {
             if (string.IsNullOrEmpty(actionName))
@@ -190,40 +174,26 @@ namespace LogicAppUnit
             return getActionFromRunHistory["properties"];
         }
 
-        /// <summary>
-        /// Gets the workflow action status indicating whether the action completed successfully or not.
-        /// </summary>
-        /// <param name="actionName">The name of the action.</param>
+        /// <inheritdoc cref="ITestRunner.GetWorkflowActionStatus(string)" />
         public ActionStatus GetWorkflowActionStatus(string actionName)
         {
             JToken actionRunProperties = GetWorkflowAction(actionName);
             return (ActionStatus)Enum.Parse(typeof(ActionStatus), actionRunProperties["status"].ToString());
         }
 
-        /// <summary>
-        /// Gets the input for a workflow action.
-        /// </summary>
-        /// <param name="actionName">The name of the action.</param>
-        /// <returns>The input.</returns>
+        /// <inheritdoc cref="ITestRunner.GetWorkflowActionInput(string)" />
         public JToken GetWorkflowActionInput(string actionName)
         {
             return GetWorkflowActionMessage(actionName, "input");
         }
 
-        /// <summary>
-        /// Gets the output for a workflow action.
-        /// </summary>
-        /// <param name="actionName">The name of the action.</param>
-        /// <returns>The output.</returns>
+        /// <inheritdoc cref="ITestRunner.GetWorkflowActionOutput(string)" />
         public JToken GetWorkflowActionOutput(string actionName)
         {
             return GetWorkflowActionMessage(actionName, "output");
         }
 
-        /// <summary>
-        /// Gets the number of repetitions for a workflow action. An action in an Until or a ForEach loop can be run multiple times.
-        /// </summary>
-        /// <param name="actionName">The name of the action.</param>
+        /// <inheritdoc cref="ITestRunner.GetWorkflowActionRepetitionCount(string)" />
         public int GetWorkflowActionRepetitionCount(string actionName)
         {
             JToken actionRunProperties = GetWorkflowAction(actionName);
@@ -248,12 +218,7 @@ namespace LogicAppUnit
 
         #region Public Action Repetition methods
 
-        /// <summary>
-        /// Gets the workflow action for a specific repetition so that it can be asserted in a test.
-        /// </summary>
-        /// <param name="actionName">The name of the action.</param>
-        /// <param name="repetitionNumber">The repetition number.</param>
-        /// <returns>The action repetition as a JSON object.</returns>
+        /// <inheritdoc cref="ITestRunner.GetWorkflowActionRepetition(string, int)" />
         public JToken GetWorkflowActionRepetition(string actionName, int repetitionNumber)
         {
             if (repetitionNumber <= 0)
@@ -279,34 +244,20 @@ namespace LogicAppUnit
             return repetition["properties"];
         }
 
-        /// <summary>
-        /// Gets the workflow action status for a repetition, indicating whether the action completed successfully or not.
-        /// </summary>
-        /// <param name="actionName">The name of the action.</param>
-        /// <param name="repetitionNumber">The repetition number.</param>
+        /// <inheritdoc cref="ITestRunner.GetWorkflowActionStatus(string, int)" />
         public ActionStatus GetWorkflowActionStatus(string actionName, int repetitionNumber)
         {
             JToken actionRunRepetitionProperties = GetWorkflowActionRepetition(actionName, repetitionNumber);
             return (ActionStatus)Enum.Parse(typeof(ActionStatus), actionRunRepetitionProperties["status"].ToString());
         }
 
-        /// <summary>
-        /// Gets the input for a workflow action for a repetition.
-        /// </summary>
-        /// <param name="actionName">The name of the action.</param>
-        /// <param name="repetitionNumber">The repetition number.</param>
-        /// <returns>The input.</returns>
+        /// <inheritdoc cref="ITestRunner.GetWorkflowActionInput(string, int)" />
         public JToken GetWorkflowActionInput(string actionName, int repetitionNumber)
         {
             return GetWorkflowActionRepetitionMessage(actionName, repetitionNumber, "input");
         }
 
-        /// <summary>
-        /// Gets the output for a workflow action for a repetition.
-        /// </summary>
-        /// <param name="actionName">The name of the action.</param>
-        /// <param name="repetitionNumber">The repetition number.</param>
-        /// <returns>The output.</returns>
+        /// <inheritdoc cref="ITestRunner.GetWorkflowActionOutput(string, int)" />
         public JToken GetWorkflowActionOutput(string actionName, int repetitionNumber)
         {
             return GetWorkflowActionRepetitionMessage(actionName, repetitionNumber, "output");
@@ -316,40 +267,19 @@ namespace LogicAppUnit
 
         #region TriggerWorkflow
 
-        /// <summary>
-        /// Trigger a workflow using an empty request content and optional request headers.
-        /// </summary>
-        /// <param name="method">The HTTP method, this needs to match the method defined in the HTTP trigger in the workflow.</param>
-        /// <param name="requestHeaders">The request headers.</param>
-        /// <returns>The response from the workflow.</returns>
-        /// <remarks>
-        /// An empty request body may be used for workflows that contain triggers that do not use a request body, for example a Recurrence trigger.
-        /// </remarks>
+        /// <inheritdoc cref="ITestRunner.TriggerWorkflow(HttpMethod, Dictionary{string, string})" />
         public HttpResponseMessage TriggerWorkflow(HttpMethod method, Dictionary<string, string> requestHeaders = null)
         {
             return TriggerWorkflow(null, method, requestHeaders);
         }
 
-        /// <summary>
-        /// Trigger a workflow using a request body and optional request headers.
-        /// </summary>
-        /// <param name="content">The content (including any content headers) for running the workflow, or <c>null</c> if there is no content.</param>
-        /// <param name="method">The HTTP method, this needs to match the method defined in the HTTP trigger in the workflow.</param>
-        /// <param name="requestHeaders">The request headers.</param>
-        /// <returns>The response from the workflow.</returns>
+        /// <inheritdoc cref="ITestRunner.TriggerWorkflow(HttpContent, HttpMethod, Dictionary{string, string})" />
         public HttpResponseMessage TriggerWorkflow(HttpContent content, HttpMethod method, Dictionary<string, string> requestHeaders = null)
         {
             return TriggerWorkflow(content, method, string.Empty, requestHeaders);
         }
 
-        /// <summary>
-        /// Trigger a workflow using a request body, a relative path and optional request headers.
-        /// </summary>
-        /// <param name="content">The content (including any content headers) for running the workflow, or <c>null</c> if there is no content.</param>
-        /// <param name="method">The HTTP method, this needs to match the method defined in the HTTP trigger in the workflow.</param>
-        /// <param name="relativePath">The relative path to be used in the trigger. The path must already be URL-encoded.</param>
-        /// <param name="requestHeaders">The request headers.</param>
-        /// <returns>The response from the workflow.</returns>
+        /// <inheritdoc cref="ITestRunner.TriggerWorkflow(HttpContent, HttpMethod, string, Dictionary{string, string})" />
         public HttpResponseMessage TriggerWorkflow(HttpContent content, HttpMethod method, string relativePath, Dictionary<string, string> requestHeaders = null)
         {
             // Get the callback information for the workflow, including the trigger URL
@@ -406,11 +336,7 @@ namespace LogicAppUnit
 
         #endregion // TriggerWorkflow
 
-        /// <summary>
-        /// Wraps a test assertion in a <c>catch</c> block which logs additional workflow execution information when the assertion fails.
-        /// </summary>
-        /// <param name="assertion">The test assertion to be run.</param>
-        /// <exception cref="AssertFailedException">Thrown when the test assertion fails.</exception>
+        /// <inheritdoc cref="ITestRunner.ExceptionWrapper(Action)" />
         public void ExceptionWrapper(Action assertion)
         {
             try
