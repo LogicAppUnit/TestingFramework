@@ -72,7 +72,7 @@ namespace LogicAppUnit.Hosting
         public static readonly string ManagementWorkflowBaseUrlWithManagementHost = TestEnvironment.FlowV2TestManagementHostUri + FlowExtensionWorkflowManagementBasePath;
 
         /// <summary>
-        /// Gets the trigger callback URI.
+        /// Gets the workflow trigger callback URI.
         /// </summary>
         /// <param name="flowName">The flow name.</param>
         /// <param name="triggerName">The trigger name.</param>
@@ -88,10 +88,10 @@ namespace LogicAppUnit.Hosting
         }
 
         /// <summary>
-        /// Gets the runs request URI with management host.
+        /// Gets the workflow runs request URI using the management host.
         /// </summary>
         /// <param name="flowName">The flow name.</param>
-        /// <param name="top">The top.</param>
+        /// <param name="top">The maximum number of records to return.</param>
         public static string GetRunsRequestUriWithManagementHost(string flowName, int? top = null)
         {
             return top != null
@@ -111,7 +111,7 @@ namespace LogicAppUnit.Hosting
         }
 
         /// <summary>
-        /// Gets the run actions URI.
+        /// Gets the workflow run actions URI.
         /// </summary>
         /// <param name="flowName">The flow name.</param>
         /// <param name="runName">The run name.</param>
@@ -127,12 +127,12 @@ namespace LogicAppUnit.Hosting
         }
 
         /// <summary>
-        /// Gets the run actions URI.
+        /// Gets the workflow run action repetitions URI.
         /// </summary>
         /// <param name="flowName">The flow name.</param>
         /// <param name="runName">The run name.</param>
         /// <param name="actionName">The action name.</param>
-        public static string GetRunActionsRepetationRequestUri(string flowName, string runName, string actionName)
+        public static string GetRunActionRepetitionsRequestUri(string flowName, string runName, string actionName)
         {
             return string.Format(
                 CultureInfo.InvariantCulture,

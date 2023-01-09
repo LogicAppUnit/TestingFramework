@@ -1,6 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using LogicAppUnit;
-using LogicAppUnit.Helper;
+﻿using LogicAppUnit.Helper;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -35,7 +34,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.ManagedApiConnectorWorkflowTest
             // Override one of the settings in the local settings file
             var settingsToOverride = new Dictionary<string, string>() { { "Outlook-SubjectPrefix", "TEST ENVIRONMENT" } };
 
-            using (var testRunner = CreateTestRunner(settingsToOverride))
+            using (ITestRunner testRunner = CreateTestRunner(settingsToOverride))
             {
                 // Mock the Salesforce and Outlook actions (that use a Managed API connector) and customize responses
                 // For both types of actions, the URI in the request matches the 'connectionRuntimeUrl' in 'connections.json' and the 'path' configuration of the action
@@ -96,7 +95,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.ManagedApiConnectorWorkflowTest
             // Override one of the settings in the local settings file
             var settingsToOverride = new Dictionary<string, string>() { { "Outlook-SubjectPrefix", "TEST ENVIRONMENT" } };
 
-            using (var testRunner = CreateTestRunner(settingsToOverride))
+            using (ITestRunner testRunner = CreateTestRunner(settingsToOverride))
             {
                 // Mock the Salesforce and Outlook actions (that use a Managed API connector) and customize responses
                 // For both types of actions, the URI in the request matches the 'connectionRuntimeUrl' in 'connections.json' and the 'path' configuration of the action

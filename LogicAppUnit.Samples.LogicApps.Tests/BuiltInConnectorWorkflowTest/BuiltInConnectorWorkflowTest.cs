@@ -1,6 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using LogicAppUnit;
-using LogicAppUnit.Helper;
+﻿using LogicAppUnit.Helper;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -31,7 +30,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflowTest
         [TestMethod]
         public void BuiltInConnectorWorkflowTest_When_No_Language_Code()
         {
-            using (var testRunner = CreateTestRunner())
+            using (ITestRunner testRunner = CreateTestRunner())
             {
                 // Mock the SQL and Service Bus actions and customize responses
                 // For both types of actions, the URI in the request matches the action name
@@ -78,7 +77,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflowTest
         [TestMethod]
         public void BuiltInConnectorWorkflowTest_When_Valid_Language_Code()
         {
-            using (var testRunner = CreateTestRunner())
+            using (ITestRunner testRunner = CreateTestRunner())
             {
                 // Mock the SQL and Service Bus actions and customize responses
                 // For both types of actions, the URI in the request matches the action name
@@ -137,7 +136,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflowTest
         [TestMethod]
         public void BuiltInConnectorWorkflowTest_When_Invalid_Language_Code()
         {
-            using (var testRunner = CreateTestRunner())
+            using (ITestRunner testRunner = CreateTestRunner())
             {
                 // Mock the SQL and Service Bus actions and customize responses
                 // For both types of actions, the URI in the request matches the action name

@@ -1,3 +1,17 @@
+# 1.2.0 (9th January 2023)
+
+LogicAppUnit Testing Framework:
+
+- Added methods to `LogicAppUnit.TestRunner` to allow tests to assert actions that run in an `Until` loop or a `ForEach` loop. These actions are known as action repetitions.
+- Added methods to `LogicAppUnit.TestRunner` to allow tests to access the input and output messages for an action. This includes action repetitions.
+- Added an interface `LogicAppUnit.ITestRunner` and updated `LogicAppUnit.TestRunner` to implement this interface. This interface has been added to allow for the implementation of other test runners in the future.
+- Method `LogicAppUnit.WorkflowTestBase.CreateTestRunner()` returns an instance of `LogicAppUnit.ITestRunner` and not `LogicAppUnit.TestRunner`.
+
+LogicAppUnit.Samples.LogicApps.Tests:
+
+- Added a `LoopWorkflowTest` workflow and unit tests to demonstrate the use of the testing framework with a workflow containing actions in an `Until` loop and a `ForEach` loop.
+
+
 # 1.1.0 (16th December 2022)
 
 LogicAppUnit Testing Framework:

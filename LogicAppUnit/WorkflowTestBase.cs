@@ -148,11 +148,11 @@ namespace LogicAppUnit
         /// <summary>
         /// Create a new instance of the test runner. This is used to run a test for a workflow.
         /// </summary>
-        /// <returns>An instance of the rest runner.</returns>
+        /// <returns>An instance of the test runner.</returns>
         /// <remarks>
         /// Do not use an instance of a test runner to run multiple workflows.
         /// </remarks>
-        protected TestRunner CreateTestRunner()
+        protected ITestRunner CreateTestRunner()
         {
             return CreateTestRunner(null);
         }
@@ -161,11 +161,11 @@ namespace LogicAppUnit
         /// Create a new instance of the test runner with overrides for specific local settings. This is used to run a test for a workflow.
         /// </summary>
         /// <param name="localSettingsOverrides">Dictionary containing the local settings to be overridden.</param>
-        /// <returns>An instance of the rest runner.</returns>
+        /// <returns>An instance of the test runner.</returns>
         /// <remarks>
         /// Do not use an instance of a test runner to run multiple workflows.
         /// </remarks>
-        protected TestRunner CreateTestRunner(Dictionary<string, string> localSettingsOverrides)
+        protected ITestRunner CreateTestRunner(Dictionary<string, string> localSettingsOverrides)
         {
             // Make sure that the workflow has been initialised
             if (!_workflowIsInitialised)
