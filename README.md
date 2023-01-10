@@ -9,7 +9,7 @@ The framework does not support the testing of:
 - Consumption Logic App workflows.
 - Standard Logic App workflows that have been deployed to Azure.
 
-The testing framework has been designed to make it easier to perform isolated unit testing of a workflow. The framework does this by modifying a copy of the workflow definition to remove the dependencies on external services and APIs, without affecting the functionality or behaviour of the workflow. This means that workflows can be easily testing in a developer's local environment, and by a DevOps pipeline running on a build server, where there is no access to Azure services or any other workflow dependencies.
+The testing framework has been designed to make it easier to perform isolated unit testing of a workflow. The framework does this by modifying a copy of the workflow definition to remove the dependencies on external services and APIs, without affecting the functionality or behaviour of the workflow. This means that workflows can be easily tested in a developer's local environment, and by a DevOps pipeline running on a build server, where there is no access to Azure services or any other workflow dependencies.
 
 The framework includes these high-level capabilities:
 
