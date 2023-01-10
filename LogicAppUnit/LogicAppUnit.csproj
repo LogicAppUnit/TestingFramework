@@ -8,7 +8,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Title>Logic App Unit Testing Framework</Title>
     <Description>Unit testing framework for Standard Logic Apps.</Description>
@@ -16,7 +16,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageId>$(AssemblyName)</PackageId>
     <PackageProjectUrl>https://github.com/LogicAppUnit/TestingFramework</PackageProjectUrl>
-    <PackageTags>azure logic-apps unit-testing</PackageTags>
+    <PackageTags>azure logic-apps unit-testing integration-testing</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
