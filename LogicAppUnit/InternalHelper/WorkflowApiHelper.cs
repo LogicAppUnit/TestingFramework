@@ -1,9 +1,12 @@
-﻿using LogicAppUnit.Hosting;
+﻿using LogicAppUnit.Helper;
+using LogicAppUnit.Hosting;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Net.Sockets;
 
 namespace LogicAppUnit.InternalHelper
 {
@@ -96,6 +99,40 @@ namespace LogicAppUnit.InternalHelper
         #endregion // Response caching
 
         #region REST API calls
+
+        /// <summary>
+        /// Get the callback definition for the workflow trigger. 
+        /// </summary>
+        /// <returns>The callback definition for the workflow trigger.</returns>
+        public CallbackUrlDefinition GetWorkflowCallbackDefinition()
+        {
+            // Documentation: https://learn.microsoft.com/en-us/rest/api/logic/workflow-triggers/list-callback-url
+            try
+            {
+                using (var workflowTriggerCallbackResponse = _client.PostAsync(
+                    TestEnvironment.GetTriggerCallbackRequestUri(flowName: _workflowName, triggerName: "manual"),
+                    ContentHelper.CreatePlainStringContent("")).Result)
+                {
+                    workflowTriggerCallbackResponse.EnsureSuccessStatusCode();
+                    return workflowTriggerCallbackResponse.Content.ReadAsAsync<CallbackUrlDefinition>().Result;
+                }
+            }
+            catch (HttpRequestException hrex) when (hrex.StatusCode == HttpStatusCode.NotFound)
+            {
+                throw new TestException($"The callback endpoint for workflow '{_workflowName}' was not found. This indicates that the Function runtime could not start the workflow. Enable the Function runtime start-up logging using the 'logging.writeFunctionRuntineStartupLogs' option in 'testConfiguration.json'. Then check the logs for any errors.", hrex);
+            }
+            catch (AggregateException ae)
+            {
+                foreach (var e in ae.InnerExceptions)
+                {
+                    if (e is SocketException)
+                    {
+                        Console.WriteLine($"Socket Exception: Error Code = {(e as SocketException).ErrorCode}, Message = {e.Message}");
+                    }
+                }
+                throw;
+            }
+        }
 
         /// <summary>
         /// Gets the input message or output message for an action.
