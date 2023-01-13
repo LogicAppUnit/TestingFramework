@@ -83,7 +83,15 @@ namespace LogicAppUnit
         /// Gets the number of repetitions for a workflow action. An action in an Until or a ForEach loop can be run multiple times.
         /// </summary>
         /// <param name="actionName">The name of the action.</param>
+        /// <returns>The number of repetitions.</returns>
         int GetWorkflowActionRepetitionCount(string actionName);
+
+        /// <summary>
+        /// Gets the properties that have been tracked by a workflow action.
+        /// </summary>
+        /// <param name="actionName">The name of the action.</param>
+        /// <returns>The tracked properties, including their names and values.</returns>
+        Dictionary<string, string> GetWorkflowActionTrackedProperties(string actionName);
 
         #endregion // Action methods
 
@@ -119,6 +127,14 @@ namespace LogicAppUnit
         /// <param name="repetitionNumber">The repetition number.</param>
         /// <returns>The output.</returns>
         JToken GetWorkflowActionOutput(string actionName, int repetitionNumber);
+
+        /// <summary>
+        /// Gets the properties that have been tracked by a workflow action for a repetition.
+        /// </summary>
+        /// <param name="actionName">The name of the action.</param>
+        /// <param name="repetitionNumber">The repetition number.</param>
+        /// <returns>The tracked properties, including their names and values.</returns>
+        Dictionary<string, string> GetWorkflowActionTrackedProperties(string actionName, int repetitionNumber);
 
         #endregion // Public Action Repetition methods
 

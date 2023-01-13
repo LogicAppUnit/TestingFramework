@@ -224,6 +224,12 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
                 Assert.AreEqual(
                     ContentHelper.FormatJson(ResourceHelper.GetAssemblyResourceAsString($"{GetType().Namespace}.MockData.SystemTwo_Request.json")),
                     ContentHelper.FormatJson(systemTwoRequest.Content));
+
+                // Check tracked properties
+                var trackedProps = testRunner.GetWorkflowActionTrackedProperties("Get_Customer_Details_from_Service_One");
+                Assert.AreEqual("customer", trackedProps["recordType"]);
+                Assert.AreEqual("54617", trackedProps["recordId"]);
+                Assert.AreEqual("c2ddb2f2-7bff-4cce-b724-ac2400b12760", trackedProps["correlationId"]);
             }
         }
 
@@ -233,14 +239,12 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
             {
                 id = "71fbcb8e-f974-449a-bb14-ac2400b150aa",
                 correlationId = "c2ddb2f2-7bff-4cce-b724-ac2400b12760",
-                webhookId = "4cf42534-0795-4191-880c-ac2400a46ccf",
                 sourceSystem = "SystemOne",
                 timestamp = "2022-08-27T08:45:00.1493711Z",
                 type = "CustomerUpdated",
                 customerId = 54617,
                 resourceId = "54617",
-                resourceURI = "https://external-service-one.testing.net/api/v1/customer/54617",
-                expiryTime = "2022-08-28T08:45:00.1493711Z"
+                resourceURI = "https://external-service-one.testing.net/api/v1/customer/54617"
             });
         }
 

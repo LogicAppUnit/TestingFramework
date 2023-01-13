@@ -25,7 +25,13 @@
                             }
                         },
                         "runAfter": {},
-                        "operationOptions": "DisableAsyncPattern, SuppressWorkflowHeaders"
+                        "operationOptions": "DisableAsyncPattern, SuppressWorkflowHeaders",
+                        "description": "Track some properties in this action",
+                        "trackedProperties": {
+                            "recordType": "customer",
+                            "recordId": "@{triggerBody()?['customerId']}",
+                            "correlationId": "@{triggerBody()?['correlationId']}"
+                        }
                     },
                     "Get_Customer_Details_Success": {
                         "type": "If",
@@ -246,9 +252,6 @@
                             "customerId": {
                                 "type": "integer"
                             },
-                            "expiryTime": {
-                                "type": "string"
-                            },
                             "id": {
                                 "type": "string"
                             },
@@ -265,9 +268,6 @@
                                 "type": "string"
                             },
                             "type": {
-                                "type": "string"
-                            },
-                            "webhookId": {
                                 "type": "string"
                             }
                         },

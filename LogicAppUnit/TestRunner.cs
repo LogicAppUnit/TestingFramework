@@ -213,6 +213,13 @@ namespace LogicAppUnit
             return 1;
         }
 
+        /// <inheritdoc cref="ITestRunner.GetWorkflowActionTrackedProperties(string)" />
+        public Dictionary<string, string> GetWorkflowActionTrackedProperties(string actionName)
+        {
+            JToken actionRunProperties = GetWorkflowAction(actionName);
+            return actionRunProperties["trackedProperties"]?.ToDictionary(a => ((JProperty)a).Name, b => ((JProperty)b).Value.Value<string>());
+        }
+
         #endregion // Public Action methods
 
         #region Public Action Repetition methods
@@ -260,6 +267,13 @@ namespace LogicAppUnit
         public JToken GetWorkflowActionOutput(string actionName, int repetitionNumber)
         {
             return GetWorkflowActionRepetitionMessage(actionName, repetitionNumber, "output");
+        }
+
+        /// <inheritdoc cref="ITestRunner.GetWorkflowActionTrackedProperties(string, int)" />
+        public Dictionary<string, string> GetWorkflowActionTrackedProperties(string actionName, int repetitionNumber)
+        {
+            JToken actionRunRepetitionProperties = GetWorkflowActionRepetition(actionName, repetitionNumber);
+            return actionRunRepetitionProperties["trackedProperties"]?.ToDictionary(a => ((JProperty)a).Name, b => ((JProperty)b).Value.Value<string>());
         }
 
         #endregion // Public Action Repetition methods
