@@ -30,15 +30,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="TestConfigs\workflow.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="TestConfigs\workflow.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\LogicAppUnit.png" Pack="true" PackagePath="\"/>
+    <None Include="..\LogicAppUnit.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>

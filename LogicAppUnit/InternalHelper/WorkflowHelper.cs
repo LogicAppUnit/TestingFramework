@@ -1,11 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
-using LogicAppUnit.Helper;
-using LogicAppUnit.Hosting;
+﻿using LogicAppUnit.Hosting;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Reflection;
 
 namespace LogicAppUnit.InternalHelper
 {
@@ -63,71 +60,6 @@ namespace LogicAppUnit.InternalHelper
                 return (WorkflowType)Enum.Parse(typeof(WorkflowType), _jObjectWorkflow["kind"].ToString());
             }
         }
-
-        #region Mock External workflow calls
-
-        /// <summary>
-        /// We are creating and replacing all the nested external workflow calls with the dummy onces.We are doing this because we want to mock the external workflow 
-        /// calls to test the current workflow independently. 
-        /// </summary>
-        /// <param name="workflowTestInput"></param>
-        /// <param name="dummyWorkflowInput"></param>
-        /// <exception cref="System.Exception"></exception>
-        internal static void MockExternalWorkflowCalls(ref WorkflowTestInput[] workflowTestInput, List<ExternalWorkflowMock> dummyWorkflowInput)
-        {
-            // We don't have any external workflow call from this workflow so throw an exception.
-            if (dummyWorkflowInput.Count <= 0)
-            {
-                throw new TestException("Need dummy workflow input to replace actual replace workflow calls.");
-            }
-
-            // Lets hold dummy workflow to real workflow name mapping in this dictionary.
-            var realDummyWorkflowMap = AddWorkflowTestInputForDummyWorkflows(ref workflowTestInput, dummyWorkflowInput);
-
-            // Now lets replace every real workflow hook from our main (parent) workflow with the dummy workflow names.
-            var jObject = JObject.Parse(workflowTestInput[0].WorkflowDefinition);
-            var realWorkflows = jObject.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "Workflow").Select(x => x["inputs"] as JObject).ToList();
-            if (realWorkflows.Count > 0)
-            {
-                realWorkflows.ForEach((workflow) => {
-                    var dummyWorkflowName = realDummyWorkflowMap[workflow["host"]["workflow"]["id"].Value<string>()];
-                    // Lets add link to dummy workflow
-                    workflow.Remove("host");
-                    workflow.Add("host", JObject.FromObject(new { workflow = new { id = dummyWorkflowName } }));
-                });
-            }
-            workflowTestInput[0].WorkflowDefinition = jObject.ToString();
-        }
-
-        /// <summary>
-        /// With this function we are creating multiple WorkflowTestInputs which will create multiple dummy workflow files for every real workflow in the directory.
-        /// And every time when a real workflow is called, under the hood our dummy workflow will be executed.
-        /// </summary>
-        /// <param name="workflowTestInput"></param>
-        /// <param name="dummyWorkflowInput"></param>
-        /// <returns></returns>
-        private static Dictionary<string, string> AddWorkflowTestInputForDummyWorkflows(ref WorkflowTestInput[] workflowTestInput, List<ExternalWorkflowMock> dummyWorkflowInput)
-        {
-            var realDummyWorkflowMap = new Dictionary<string, string>();
-            var commonDummyWorkflowDefinition = ResourceHelper.GetAssemblyResourceAsString($"{typeof(WorkflowTestBase).Namespace}.TestConfigs.workflow.json", Assembly.GetExecutingAssembly());
-            foreach (var input in dummyWorkflowInput.Select((value, i) => new { i, value }))
-            {
-                var jObjectDummyWorkflow = JObject.Parse(commonDummyWorkflowDefinition);
-                var customizedDummyWorkflow = jObjectDummyWorkflow.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "Response").Select(x => x["inputs"] as JObject).ToList();
-                // Lets modify statuscode for dummy workflow as per the user's mock input
-                customizedDummyWorkflow[0].Remove("statusCode");
-                customizedDummyWorkflow[0].Add("statusCode", JToken.Parse(Convert.ToInt32(input.value.StatusCodeOfMockResponse, CultureInfo.InvariantCulture).ToString()));
-                // Lets modify body for dummy workflow as per the user's mock input
-                customizedDummyWorkflow[0].Remove("body");
-                customizedDummyWorkflow[0].Add("body", JToken.Parse(input.value.BodyOfMockResponse.SerializeObject()));
-                // Add newly created dummy mock in workflow list
-                workflowTestInput = workflowTestInput.Concat(new WorkflowTestInput[] { new WorkflowTestInput($"dummy-workflow-{input.i}", jObjectDummyWorkflow.ToString()) }).ToArray();
-                realDummyWorkflowMap.Add(input.value.WorkflowNameToMock, $"dummy-workflow-{input.i}");
-            }
-            return realDummyWorkflowMap;
-        }
-
-        #endregion // Mock External workflow calls
 
         /// <summary>
         /// Update all HTTP actions to include a retry policy of 'none' so that when making HTTP calls from the workflow, any configured retries for a failed HTTP call won't happen.
