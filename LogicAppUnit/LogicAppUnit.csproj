@@ -18,6 +18,7 @@
     <PackageProjectUrl>https://github.com/LogicAppUnit/TestingFramework</PackageProjectUrl>
     <PackageTags>azure logic-apps unit-testing integration-testing</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>LogicAppUnit.png</PackageIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -37,10 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\License.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
+    <None Include="..\LogicAppUnit.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <ItemGroup>
