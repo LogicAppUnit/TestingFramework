@@ -742,5 +742,4 @@ This is a list of possible future improvements and changes for the framework. Pl
 
 - Ability to mock an `Invoke workflow` action to remove dependencies on a called workflow.
 - Improve the creation of the mocked responses using the mock HTTP server, perhaps using Fluent notation to create the responses.
-- Expose an action's tracked properties so they can be aserted in a test case.
 - Reduce the number of dependent packages.
