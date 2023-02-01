@@ -1,3 +1,16 @@
+# 1.3.0 (1st February 2023)
+
+LogicAppUnit Testing Framework:
+
+- Added methods to `LogicAppUnit.TestRunner` to allow tests to access the tracked properties that are created by an action. This includes action repetitions.
+  - This is only available for stateful workflows because tracked properties are never recorded in the run history for stateless workflows.
+- Updated `LogicAppUnit.Helper.ContentHelper.FormatJson(string)` so that any references to the local server name are replaced with `localhost`.
+
+LogicAppUnit.Samples.LogicApps.Tests:
+
+- Updated the `HttpWorkflowTest` workflow and unit tests to include tracked properties.
+
+
 # 1.2.0 (9th January 2023)
 
 LogicAppUnit Testing Framework:

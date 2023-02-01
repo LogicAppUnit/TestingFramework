@@ -66,6 +66,11 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.StatelessWorkflowTest
                 Assert.AreEqual(
                     ContentHelper.FormatJson(ResourceHelper.GetAssemblyResourceAsString($"{GetType().Namespace}.MockData.UploadBlobRequest.json")),
                     ContentHelper.FormatJson(storageRequest.Content));
+
+                // Check tracked properties
+                // Tracked properties are not logged in the workflow run history for stateless workflows
+                var trackedProps = testRunner.GetWorkflowActionTrackedProperties("Upload_Blob");
+                Assert.IsNull(trackedProps);
             }
         }
 

@@ -178,6 +178,9 @@ namespace LogicAppUnit.Helper
         /// </remarks>
         public static string FormatJson(string json)
         {
+            // Replace any local server names with 'localhost'
+            json = json.Replace(Environment.MachineName, "localhost").Replace(Environment.MachineName.ToLowerInvariant(), "localhost");
+
             var settings = new JsonLoadSettings()
             {
                 CommentHandling = CommentHandling.Ignore

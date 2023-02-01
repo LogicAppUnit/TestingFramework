@@ -1,8 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
-using LogicAppUnit.Helper;
+﻿using LogicAppUnit.Helper;
 using LogicAppUnit.Hosting;
 using LogicAppUnit.InternalHelper;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -12,7 +12,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Sockets;
 using System.Threading;
 
 namespace LogicAppUnit
@@ -214,6 +213,13 @@ namespace LogicAppUnit
             return 1;
         }
 
+        /// <inheritdoc cref="ITestRunner.GetWorkflowActionTrackedProperties(string)" />
+        public Dictionary<string, string> GetWorkflowActionTrackedProperties(string actionName)
+        {
+            JToken actionRunProperties = GetWorkflowAction(actionName);
+            return actionRunProperties["trackedProperties"]?.ToDictionary(a => ((JProperty)a).Name, b => ((JProperty)b).Value.Value<string>());
+        }
+
         #endregion // Public Action methods
 
         #region Public Action Repetition methods
@@ -263,6 +269,13 @@ namespace LogicAppUnit
             return GetWorkflowActionRepetitionMessage(actionName, repetitionNumber, "output");
         }
 
+        /// <inheritdoc cref="ITestRunner.GetWorkflowActionTrackedProperties(string, int)" />
+        public Dictionary<string, string> GetWorkflowActionTrackedProperties(string actionName, int repetitionNumber)
+        {
+            JToken actionRunRepetitionProperties = GetWorkflowActionRepetition(actionName, repetitionNumber);
+            return actionRunRepetitionProperties["trackedProperties"]?.ToDictionary(a => ((JProperty)a).Name, b => ((JProperty)b).Value.Value<string>());
+        }
+
         #endregion // Public Action Repetition methods
 
         #region TriggerWorkflow
@@ -283,7 +296,7 @@ namespace LogicAppUnit
         public HttpResponseMessage TriggerWorkflow(HttpContent content, HttpMethod method, string relativePath, Dictionary<string, string> requestHeaders = null)
         {
             // Get the callback information for the workflow, including the trigger URL
-            CallbackUrlDefinition callbackDef = GetWorkflowCallbackDefinition();
+            CallbackUrlDefinition callbackDef = _apiHelper.GetWorkflowCallbackDefinition();
 
             // Configure the HttpRequestMessage to trigger the workflow
             var httpRequestMessage = new HttpRequestMessage
@@ -404,37 +417,6 @@ namespace LogicAppUnit
             }
 
             return _apiHelper.GetActionMessage(uri);
-        }
-
-        /// <summary>
-        /// Get the callback definition for the workflow trigger. 
-        /// </summary>
-        /// <returns>The callback definition for the workflow trigger.</returns>
-        private CallbackUrlDefinition GetWorkflowCallbackDefinition()
-        {
-            HttpResponseMessage workflowTriggerCallbackResponse;
-            try
-            {
-                workflowTriggerCallbackResponse = _client.PostAsync(TestEnvironment.GetTriggerCallbackRequestUri(flowName: _workflowName, triggerName: "manual"), ContentHelper.CreatePlainStringContent("")).Result;
-                workflowTriggerCallbackResponse.EnsureSuccessStatusCode();
-
-                return workflowTriggerCallbackResponse.Content.ReadAsAsync<CallbackUrlDefinition>().Result;
-            }
-            catch (HttpRequestException hrex) when (hrex.StatusCode == HttpStatusCode.NotFound)
-            {
-                throw new TestException($"The callback endpoint for workflow '{_workflowName}' was not found. This indicates that the Function runtime could not start the workflow. Enable the Function runtime start-up logging using the 'logging.writeFunctionRuntineStartupLogs' option in 'testConfiguration.json'. Then check the logs for any errors.", hrex);
-            }
-            catch (AggregateException ae)
-            {
-                foreach (var e in ae.InnerExceptions)
-                {
-                    if (e is SocketException)
-                    {
-                        Console.WriteLine($"Socket Exception: Error Code = {(e as SocketException).ErrorCode}, Message = {e.Message}");
-                    }
-                }
-                throw;
-            }
         }
 
         /// <summary>

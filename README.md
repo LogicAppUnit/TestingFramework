@@ -9,7 +9,7 @@ The framework does not support the testing of:
 - Consumption Logic App workflows.
 - Standard Logic App workflows that have been deployed to Azure.
 
-The testing framework has been designed to make it easier to perform isolated unit testing of a workflow. The framework does this by modifying a copy of the workflow definition to remove the dependencies on external services and APIs, without affecting the functionality or behaviour of the workflow. This means that workflows can be easily testing in a developer's local environment, and by a DevOps pipeline running on a build server, where there is no access to Azure services or any other workflow dependencies.
+The testing framework has been designed to make it easier to perform isolated unit testing of a workflow. The framework does this by modifying a copy of the workflow definition to remove the dependencies on external services and APIs, without affecting the functionality or behaviour of the workflow. This means that workflows can be easily tested in a developer's local environment, and by a DevOps pipeline running on a build server, where there is no access to Azure services or any other workflow dependencies.
 
 The framework includes these high-level capabilities:
 
@@ -44,7 +44,8 @@ The best way to understand how the framework works and how to write tests using 
   - [Running a Test](#running-a-test)
   - [Checking (Asserting) the Workflow Run](#checking-asserting-the-workflow-run)
     - [Repeating Actions](#repeating-actions)
-    - [Checking action messages and HTTP requests](#checking-action-messages-and-http-requests)
+    - [Checking Action Messages and HTTP requests](#checking-action-messages-and-http-requests)
+    - [Checking Tracked Properties](#checking-tracked-properties)
 - [Test Configuration](#test-configuration)
 - [Azurite](#azurite)
 - [Local Settings file](#local-settings-file)
@@ -223,7 +224,7 @@ Assert.AreEqual(5, testRunner.GetWorkflowActionRepetitionCount("Call_Service"));
 ```
 
 
-### Checking action messages and HTTP requests
+### Checking Action Messages and HTTP requests
 
 You can check the input and output messages for an action using the `TestRunner.GetWorkflowActionInput(string actionName)` and `TestRunner.GetWorkflowActionOutput(string actionName)` methods, passing the action name as the parameter:
 
@@ -259,6 +260,28 @@ The instances of `MockRequest` in the list are sorted in chronological ascending
 The `ContentHelper.FormatJson()` method is part of the testing framework and formats JSON into a consistent format to enable reliable string comparison between the actual request and the expected request. `ContentHelper.FormatXml()` can be used for the comparison of XML.
 
 The input message for a HTTP action should match the request message that is recorded by the mock HTTP server and the same applies to the action's output message and the response that is created by the mock HTTP server. The testing framework lets you use either or both of these approaches for your test cases.
+
+
+### Checking Tracked Properties
+
+You can check the tracked properties for an action using the `TestRunner.GetWorkflowActionTrackedProperties(string actionName)` method, passing the action name as the parameter:
+
+```c#
+// Check tracked properties
+Dictionary<string, string> trackedProps = testRunner.GetWorkflowActionTrackedProperties("Get_Customer");
+Assert.AreEqual("customer", trackedProps["recordType"]);
+Assert.AreEqual("123456", trackedProps["recordId"]);
+Assert.AreEqual("c2ddb2f2-7bff-4cce-b724-ac2400b12760", trackedProps["correlationId"]);
+```
+
+Use the method overload for action repetitions that run in a loop:
+
+```c#
+// Check tracked properties for the fourth repetition
+Dictionary<string, string> trackedProps = testRunner.GetWorkflowActionTrackedProperties("Get_Customer", 4);
+```
+
+> Stateless workflows do not record the tracked properties in the workflow run history, even when the run history is enabled using the `OperationOptions` setting. Therefore the `GetWorkflowActionTrackedProperties()` method will always return `null` for actions in a stateless workflow.
 
 
 # Test Configuration
@@ -719,5 +742,4 @@ This is a list of possible future improvements and changes for the framework. Pl
 
 - Ability to mock an `Invoke workflow` action to remove dependencies on a called workflow.
 - Improve the creation of the mocked responses using the mock HTTP server, perhaps using Fluent notation to create the responses.
-- Expose an action's tracked properties so they can be aserted in a test case.
 - Reduce the number of dependent packages.
