@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
-using LogicAppUnit.Hosting;
+﻿using LogicAppUnit.Hosting;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
 
@@ -11,17 +11,24 @@ namespace LogicAppUnit.InternalHelper
     internal class ConnectionHelper
     {
         private readonly JObject _jObjectConnection;
+        private readonly SettingsHelper _localSettings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionHelper"/> class.
         /// </summary>
         /// <param name="connectionsContent">The contents of the connections file, or <c>null</c> if the file does not exist.</param>
-        public ConnectionHelper(string connectionsContent)
+        /// <param name="localSettings">The settings helper that is used to manage the local application settings.</param>
+        public ConnectionHelper(string connectionsContent, SettingsHelper localSettings)
         {
+            if (localSettings == null)
+                throw new ArgumentNullException(nameof(localSettings));
+
             if (!string.IsNullOrEmpty(connectionsContent))
             {
                 _jObjectConnection = JObject.Parse(connectionsContent);
             }
+
+            _localSettings = localSettings;
         }
 
         /// <summary>
@@ -51,10 +58,27 @@ namespace LogicAppUnit.InternalHelper
 
                 managedApiConnections.ForEach((connection) => {
                     // Get the original connection URL that points to the Microsoft-hosted API connection
-                    Uri connectionUrl = new Uri(connection.Value["connectionRuntimeUrl"].Value<string>());
+                    string connectionUrl = connection.Value["connectionRuntimeUrl"].Value<string>();
+
+                    Uri validatedConnectionUri;
+                    if (!connectionUrl.Contains("@appsetting"))
+                    {
+                        // This connection runtime URL must be a valid URL since it is not using any appsetting substitution
+                        var isValidUrl = Uri.TryCreate(connectionUrl, UriKind.Absolute, out validatedConnectionUri);
+                        if (!isValidUrl)
+                            throw new TestException($"The connection runtime URL for managed connection '{connection.Name}' is not a valid URL. The URL is '{connectionUrl}'");
+                    }
+                    else
+                    {
+                        // Check that the expanded connection runtime URL is a valid URL
+                        string expandedConnectionUrl = _localSettings.ExpandAppSettingsValues(connectionUrl);
+                        var isValidUrl = Uri.TryCreate(expandedConnectionUrl, UriKind.Absolute, out validatedConnectionUri);
+                        if (!isValidUrl)
+                            throw new TestException($"The connection runtime URL for managed connection '{connection.Name}' is not a valid URL, even when the app settings have been expanded. The expanded URL is '{expandedConnectionUrl}'");
+                    }
 
                     // Replace the host with the mock URL
-                    Uri newConnectionUrl = new Uri(new Uri(TestEnvironment.FlowV2MockTestHostUri), connectionUrl.AbsolutePath);
+                    Uri newConnectionUrl = new Uri(new Uri(TestEnvironment.FlowV2MockTestHostUri), validatedConnectionUri.AbsolutePath);
                     connection.Value["connectionRuntimeUrl"] = newConnectionUrl;
 
                     Console.WriteLine($"    {connection.Name}:");

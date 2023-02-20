@@ -112,14 +112,14 @@ namespace LogicAppUnit
             _workflowDefinition.ReplaceTriggersWithHttp();
             _workflowDefinition.ReplaceBuiltInConnectorActionsWithHttp(_testConfig.Workflow.BuiltInConnectorsToMock);
 
-            // Set up the connections
-            _connections = new ConnectionHelper(ReadFromPath(Path.Combine(logicAppBasePath, Constants.CONNECTIONS), optional: true));
-            _connections.ReplaceManagedApiConnectionUrlsWithMockServer();
-
             // Set up the local settings
             // The name of the local setting file can be set in the test configuration
             _localSettings = new SettingsHelper(ReadFromPath(Path.Combine(logicAppBasePath, SetLocalSettingsFile(localSettingsFilename))));
             _localSettings.ReplaceExternalUrlsWithMockServer(_testConfig.Workflow.ExternalApiUrlsToMock);
+
+            // Set up the connections
+            _connections = new ConnectionHelper(ReadFromPath(Path.Combine(logicAppBasePath, Constants.CONNECTIONS), optional: true), _localSettings);
+            _connections.ReplaceManagedApiConnectionUrlsWithMockServer();
 
             // Set up the artifacts (schemas, maps)
             SetArtifactDirectory(logicAppBasePath);

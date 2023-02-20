@@ -3,6 +3,7 @@ using LogicAppUnit.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace LogicAppUnit.InternalHelper
 {
@@ -141,6 +142,26 @@ namespace LogicAppUnit.InternalHelper
             _jObjectSettings["Values"][settingName] = value;
 
             return $"{settingName} = {value}";
+        }
+
+        /// <summary>
+        /// Expand the app settings values in <paramref name="value"/>.
+        /// </summary>
+        /// <param name="value">The string value containing the app settings to be expanded.</param>
+        /// <returns>Expanded string.</returns>
+        public string ExpandAppSettingsValues(string value)
+        {
+            const string appSettingsPattern = @"@appsetting\('[\w.:-]*'\)";
+            string expandedValue = value;
+
+            MatchCollection matches = Regex.Matches(value, appSettingsPattern, RegexOptions.IgnoreCase);
+            foreach (Match match in matches)
+            {
+                string appSettingName = match.Value[13..^2];
+                expandedValue = expandedValue.Replace(match.Value, GetSettingValue(appSettingName));
+            }
+
+            return expandedValue;
         }
     }
 }
