@@ -1,3 +1,10 @@
+# 1.4.0 (21st February 2023)
+
+LogicAppUnit Testing Framework:
+
+- Changed the logic that updates the `connectionRuntimeUrl` for Managed API connectors so that it works with URL values that include `@appsetting()` references. [Issue #9]
+
+
 # 1.3.0 (1st February 2023)
 
 LogicAppUnit Testing Framework:
