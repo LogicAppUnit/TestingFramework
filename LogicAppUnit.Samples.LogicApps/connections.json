@@ -50,7 +50,7 @@
       "connection": {
         "id": "/subscriptions/c1661296-a732-44b9-8458-d1a0dd19815e/resourceGroups/rg-uks-01/providers/Microsoft.Web/connections/outlook01"
       },
-      "connectionRuntimeUrl": "https://7606763fdc09952f.10.common.logic-uksouth.azure-apihub.net/apim/outlook/79a0bc680716416e90e17323b581695d/",
+      "connectionRuntimeUrl": "@appsetting('Outlook-ManagedConnectionRuntimeUrl')",
       "authentication": {
         "type": "Raw",
         "scheme": "Key",

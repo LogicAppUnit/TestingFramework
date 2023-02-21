@@ -44,7 +44,8 @@ The best way to understand how the framework works and how to write tests using 
   - [Running a Test](#running-a-test)
   - [Checking (Asserting) the Workflow Run](#checking-asserting-the-workflow-run)
     - [Repeating Actions](#repeating-actions)
-    - [Checking Action Messages and HTTP requests](#checking-action-messages-and-http-requests)
+    - [Checking Action Input and Output Messages](#checking-action-input-and-output-messages)
+    - [Checking HTTP requests in the Mock Server](#checking-http-requests-in-the-mock-server)
     - [Checking Tracked Properties](#checking-tracked-properties)
 - [Test Configuration](#test-configuration)
 - [Azurite](#azurite)
@@ -224,7 +225,7 @@ Assert.AreEqual(5, testRunner.GetWorkflowActionRepetitionCount("Call_Service"));
 ```
 
 
-### Checking Action Messages and HTTP requests
+### Checking Action Input and Output Messages
 
 You can check the input and output messages for an action using the `TestRunner.GetWorkflowActionInput(string actionName)` and `TestRunner.GetWorkflowActionOutput(string actionName)` methods, passing the action name as the parameter:
 
@@ -241,6 +242,19 @@ Use the method overloads for action repetitions that run in a loop:
 JToken serviceOneInput2 = testRunner.GetWorkflowActionInput("Call_Service_One", 2);
 JToken serviceOneOutput2 = testRunner.GetWorkflowActionOutput("Call_Service_One", 2);
 ```
+
+The response is a `JToken` that includes the details of the input and output for the action, including the input and output message bodies. The structure of the JSON and the attributes in the `JToken` depends on the type of action. This example validates fields in the JSON output of a Compose action:
+
+```c#
+// Validate Customer request
+JToken composeCustomerRequestOutput = testRunner.GetWorkflowActionOutput("Compose_Customer_Request");
+Assert.IsNotNull(composeCustomerRequestOutput);
+Assert.AreEqual(composeCustomerRequestOutput["data"]["name"].Value<string>(), "Peter Smith");
+Assert.AreEqual(composeCustomerRequestOutput["data"]["address"]["line1"].Value<string>(), "23 High Street");
+```
+
+
+### Checking HTTP requests in the Mock Server
 
 You can also check the requests sent to the mock HTTP server, using the `TestRunner.MockRequests` property which returns a `List<MockRequest>`:
 
@@ -597,11 +611,13 @@ Replacing workflow actions using a built-in connector with a HTTP action for the
 
 ## Workflow Actions and Managed API Connectors 
 
-A workflow action can also communicate with an external service using a [managed API connector](https://learn.microsoft.com/en-us/azure/connectors/managed#standard-connectors). These connectors run outside of the Logic App in a Microsoft-hosted Azure environment. A `connections.json` file contains  configuration to map a named connection in the workflow definition to an instance of a Microsoft-hosted API connection. The managed API connection is invoked by the workflow using a HTTP call and the URL for the API connection is stored in the `connectionRuntimeUrl` attribute in the `connections.json` file.
+A workflow action can also communicate with an external service using a [managed API connector](https://learn.microsoft.com/en-us/azure/connectors/managed#standard-connectors). These connectors run outside of the Logic App in a Microsoft-hosted Azure environment. A `connections.json` file contains  configuration to map a named connection in the workflow definition to an instance of a Microsoft-hosted API connector. The managed API connector is invoked by the workflow using a HTTP call and the URL for the API connector is stored in the `connectionRuntimeUrl` attribute in the `connections.json` file.
 
-When unit testing a workflow that uses a managed API connector, the dependency on the Microsoft-hosted API connector needs to be removed. The testing framework does this by updating the `connections.json` file and replacing the URLs for the API connectors with a URL for a mock HTTP server that is managed by the testing framework. This allows workflow actions that use the connection to run independently of the Microsoft-hosted API connector.
+When unit testing a workflow that uses a managed API connector, the dependency on the Microsoft-hosted API connector needs to be removed. The testing framework does this by updating the `connections.json` file and replacing the host name in each `connectionRuntimeUrl` attribute with the host name for a mock HTTP server that is managed by the testing framework. This allows workflow actions that use the connection to run independently of the Microsoft-hosted API connector.
 
-Replacing the connector like this does not affect the functionality of the workflow action or change the behaviour. Every action generates an *input* JSON message which is then sent to the external service via the connector. The action then generates an *output* JSON message which is then processed by the rest of the workflow. The structure of the *input* and *output* JSON messages differs for each type of action and API connector, but as long as the same message structures are used in the request and responses for the mock HTTP server, the rest of the workflow will execute in exactly the same way.
+If the value of `connectionRuntimeUrl` attribute includes `@appsetting()` references, these references are replaced with the values defined in the `local.settings.json` file, before the host name is replaced.
+
+Updating the connection URL like this does not affect the functionality of the workflow action or change the behaviour. Every action generates an *input* JSON message which is then sent to the external service via the connector. The action then generates an *output* JSON message which is then processed by the rest of the workflow. The structure of the *input* and *output* JSON messages differs for each type of action and API connector, but as long as the same message structures are used in the request and responses for the mock HTTP server, the rest of the workflow will execute in exactly the same way.
 
 As an example, this is a managed API connection in the `connections.json` file for Salesforce:
 
