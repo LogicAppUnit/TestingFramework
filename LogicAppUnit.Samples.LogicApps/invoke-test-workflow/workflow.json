@@ -1,0 +1,108 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Delete_blob": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "containerName": "customers",
+                        "blobName": "@triggerOutputs()?['body']?['name']"
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "azureBlob",
+                        "operationId": "deleteBlob",
+                        "serviceProviderId": "/serviceProviders/AzureBlob"
+                    }
+                },
+                "runAfter": {
+                    "Switch_on_Content_Type": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Add_blob_to_failed_queue": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "queueName": "failed-customers-queue",
+                        "message": "{\n  \"blobName\": \"@{triggerOutputs()?['body']?['name']}\",\n  \"blobContent\":  @{triggerOutputs()?['body']?['content']}\n}"
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "azureQueue",
+                        "operationId": "putMessage",
+                        "serviceProviderId": "/serviceProviders/azurequeues"
+                    }
+                },
+                "runAfter": {
+                    "Switch_on_Content_Type": [
+                        "FAILED",
+                        "TIMEDOUT"
+                    ]
+                }
+            },
+            "Switch_on_Content_Type": {
+                "type": "Switch",
+                "expression": "@triggerOutputs()?['body']?['properties']?['contentType']",
+                "cases": {
+                    "Case_JSON": {
+                        "case": "application/json",
+                        "actions": {
+                            "Invoke_a_workflow_(JSON)": {
+                                "type": "Workflow",
+                                "inputs": {
+                                    "host": {
+                                        "workflow": {
+                                            "id": "managed-api-connector-test-workflow"
+                                        }
+                                    },
+                                    "headers": {
+                                        "Content-Type": "@triggerBody()?['body']?['properties']?['contentType']",
+                                        "DataSource": "@triggerBody()?['body']?['containerInfo']?['name']"
+                                    },
+                                    "body": "@triggerOutputs()?['body']?['content']"
+                                },
+                                "runAfter": {}
+                            }
+                        }
+                    }
+                },
+                "default": {
+                    "actions": {
+                        "Invoke_a_workflow_(not_JSON)": {
+                            "type": "Workflow",
+                            "inputs": {
+                                "host": {
+                                    "workflow": {
+                                        "id": "managed-api-connector-test-workflow"
+                                    }
+                                }
+                            },
+                            "runAfter": {}
+                        }
+                    }
+                },
+                "runAfter": {},
+                "description": "This switch is a bit pointless, just trying to demonstrate a workflow that includes two \"Invoke Workflow\" actions."
+            }
+        },
+        "triggers": {
+            "When_a_blob_is_added_or_updated": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "path": "customers"
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "azureBlob",
+                        "operationId": "whenABlobIsAddedOrModified",
+                        "serviceProviderId": "/serviceProviders/AzureBlob"
+                    }
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {}
+    },
+    "kind": "Stateful"
+}

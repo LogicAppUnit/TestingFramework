@@ -26,6 +26,15 @@
         "id": "/serviceProviders/AzureBlob"
       },
       "displayName": "storageBlobConnection"
+    },
+    "azureQueue": {
+      "parameterValues": {
+        "connectionString": "@appsetting('AzureQueue-ConnectionString')"
+      },
+      "serviceProvider": {
+        "id": "/serviceProviders/azurequeues"
+      },
+      "displayName": "storageQueueConnection"
     }
   },
   "managedApiConnections": {

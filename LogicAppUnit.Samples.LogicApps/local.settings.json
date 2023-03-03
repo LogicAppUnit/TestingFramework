@@ -5,6 +5,7 @@
     "FUNCTIONS_WORKER_RUNTIME": "node",
     "WORKFLOWS_SUBSCRIPTION_ID": "",
     "AzureBlob-ConnectionString": "any-blob-connection-string",
+    "AzureQueue-ConnectionString": "any-queue-connection-string",
     "Outlook-ConnectionKey": "any-outlook-connection-key",
     "Outlook-SubjectPrefix": "INFORMATION",
     "Outlook-ManagedConnectionRuntimeUrl": "https://7606763fdc09952f.10.common.logic-uksouth.azure-apihub.net/apim/outlook/79a0bc680716416e90e17323b581695d/",
