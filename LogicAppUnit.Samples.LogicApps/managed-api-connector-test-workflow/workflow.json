@@ -73,7 +73,67 @@
                 },
                 "runAfter": {}
             },
-            "Response": {
+            "Scope": {
+                "type": "Scope",
+                "actions": {
+                    "Upsert_Customer": {
+                        "type": "ApiConnection",
+                        "inputs": {
+                            "host": {
+                                "connection": {
+                                    "referenceName": "salesforce"
+                                }
+                            },
+                            "method": "patch",
+                            "body": {
+                                "Title__c": "@body('Parse_JSON')?['title']",
+                                "FirstName__c": "@body('Parse_JSON')?['firstName']",
+                                "LastName__c": "@body('Parse_JSON')?['lastName']",
+                                "Address_Line_1__c": "@body('Parse_JSON')?['address']?['addressLine1']",
+                                "Address_Line_2__c": "@{concat(body('Parse_JSON')?['address']?['addressLine2'], ', ', body('Parse_JSON')?['address']?['addressLine3'])}",
+                                "Town__c": "@body('Parse_JSON')?['address']?['town']",
+                                "County__c": "@body('Parse_JSON')?['address']?['county']",
+                                "Country__c": "@body('Parse_JSON')?['address']?['countryName']",
+                                "Post_Code__c": "@body('Parse_JSON')?['address']?['postcode']",
+                                "Status__c": "Active"
+                            },
+                            "path": "/v2/datasets/default/tables/@{encodeURIComponent(encodeURIComponent('Account_Staging__c'))}/externalIdFields/@{encodeURIComponent(encodeURIComponent('External_Id__c'))}/@{encodeURIComponent(encodeURIComponent(body('Parse_JSON')?['id']))}"
+                        },
+                        "operationOptions": "DisableAsyncPattern",
+                        "runAfter": {}
+                    },
+                    "Send_a_confirmation_email": {
+                        "type": "ApiConnection",
+                        "inputs": {
+                            "host": {
+                                "connection": {
+                                    "referenceName": "outlook"
+                                }
+                            },
+                            "method": "post",
+                            "body": {
+                                "To": "update-notification@test-example.net",
+                                "Subject": "@{appsetting('Outlook-SubjectPrefix')}: Customer @{body('Parse_JSON')?['id']} (@{body('Parse_JSON')?['firstName']} @{body('Parse_JSON')?['lastName']}) has been updated",
+                                "Body": "<p><u><strong>Notification</strong></u><br>\n<br>\nCustomer @{body('Parse_JSON')?['id']} has been updated.</p>",
+                                "From": "integration@test-example.net",
+                                "Importance": "Normal"
+                            },
+                            "path": "/v2/Mail"
+                        },
+                        "runAfter": {
+                            "Upsert_Customer": [
+                                "Succeeded"
+                            ]
+                        }
+                    }
+                        },
+                "runAfter": {
+                    "Parse_JSON": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Success_Response": {
                 "type": "Response",
                 "kind": "http",
                 "inputs": {
@@ -81,62 +141,22 @@
                     "body": "Upsert is successful"
                 },
                 "runAfter": {
-                    "Send_a_confirmation_email": [
+                    "Scope": [
                         "Succeeded"
                     ]
                 }
             },
-            "Upsert_Customer": {
-                "type": "ApiConnection",
+            "Failure_Response": {
+                "type": "Response",
+                "kind": "http",
                 "inputs": {
-                    "host": {
-                        "connection": {
-                            "referenceName": "salesforce"
-                        }
-                    },
-                    "method": "patch",
-                    "body": {
-                        "Title__c": "@body('Parse_JSON')?['title']",
-                        "FirstName__c": "@body('Parse_JSON')?['firstName']",
-                        "LastName__c": "@body('Parse_JSON')?['lastName']",
-                        "Address_Line_1__c": "@body('Parse_JSON')?['address']?['addressLine1']",
-                        "Address_Line_2__c": "@{concat(body('Parse_JSON')?['address']?['addressLine2'], ', ', body('Parse_JSON')?['address']?['addressLine3'])}",
-                        "Town__c": "@body('Parse_JSON')?['address']?['town']",
-                        "County__c": "@body('Parse_JSON')?['address']?['county']",
-                        "Country__c": "@body('Parse_JSON')?['address']?['countryName']",
-                        "Post_Code__c": "@body('Parse_JSON')?['address']?['postcode']",
-                        "Status__c": "Active"
-                    },
-                    "path": "/v2/datasets/default/tables/@{encodeURIComponent(encodeURIComponent('Account_Staging__c'))}/externalIdFields/@{encodeURIComponent(encodeURIComponent('External_Id__c'))}/@{encodeURIComponent(encodeURIComponent(body('Parse_JSON')?['id']))}"
-                },
-                "operationOptions": "DisableAsyncPattern",
-                "runAfter": {
-                    "Parse_JSON": [
-                        "Succeeded"
-                    ]
-                }
-            },
-            "Send_a_confirmation_email": {
-                "type": "ApiConnection",
-                "inputs": {
-                    "host": {
-                        "connection": {
-                            "referenceName": "outlook"
-                        }
-                    },
-                    "method": "post",
-                    "body": {
-                        "To": "update-notification@test-example.net",
-                        "Subject": "@{appsetting('Outlook-SubjectPrefix')}: Customer @{body('Parse_JSON')?['id']} (@{body('Parse_JSON')?['firstName']} @{body('Parse_JSON')?['lastName']}) has been updated",
-                        "Body": "<p><u><strong>Notification</strong></u><br>\n<br>\nCustomer @{body('Parse_JSON')?['id']} has been updated.</p>",
-                        "From": "integration@test-example.net",
-                        "Importance": "Normal"
-                    },
-                    "path": "/v2/Mail"
+                    "statusCode": 500,
+                    "body": "Upsert failed"
                 },
                 "runAfter": {
-                    "Upsert_Customer": [
-                        "Succeeded"
+                    "Scope": [
+                        "TIMEDOUT",
+                        "FAILED"
                     ]
                 }
             }
