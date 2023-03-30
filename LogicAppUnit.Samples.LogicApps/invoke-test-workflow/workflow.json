@@ -16,8 +16,8 @@
                     }
                 },
                 "runAfter": {
-                    "Switch_on_Content_Type": [
-                        "Succeeded"
+                    "Is_this_a_Priority_blob": [
+                        "FAILED"
                     ]
                 }
             },
@@ -35,39 +35,44 @@
                     }
                 },
                 "runAfter": {
-                    "Switch_on_Content_Type": [
-                        "FAILED",
-                        "TIMEDOUT"
+                    "Is_this_a_Priority_blob": [
+                        "TIMEDOUT",
+                        "FAILED"
                     ]
                 }
             },
-            "Switch_on_Content_Type": {
-                "type": "Switch",
-                "expression": "@triggerOutputs()?['body']?['properties']?['contentType']",
-                "cases": {
-                    "Case_JSON": {
-                        "case": "application/json",
-                        "actions": {
-                            "Invoke_a_workflow_(JSON)": {
-                                "type": "Workflow",
-                                "inputs": {
-                                    "host": {
-                                        "workflow": {
-                                            "id": "managed-api-connector-test-workflow"
-                                        }
-                                    },
-                                    "headers": {
-                                        "Content-Type": "@triggerBody()?['body']?['properties']?['contentType']",
-                                        "DataSource": "@triggerBody()?['body']?['containerInfo']?['name']"
-                                    },
-                                    "body": "@triggerOutputs()?['body']?['content']"
-                                },
-                                "runAfter": {}
-                            }
+            "Is_this_a_Priority_blob": {
+                "type": "If",
+                "expression": {
+                    "and": [
+                        {
+                            "contains": [
+                                "@triggerOutputs()?['body']?['name']",
+                                "Priority"
+                            ]
                         }
+                    ]
+                },
+                "actions": {
+                    "Invoke_a_workflow_(JSON)": {
+                        "type": "Workflow",
+                        "inputs": {
+                            "host": {
+                                "workflow": {
+                                    "id": "managed-api-connector-test-workflow"
+                                }
+                            },
+                            "headers": {
+                                "Content-Type": "@triggerBody()?['body']?['properties']?['contentType']",
+                                "DataSource": "@triggerBody()?['body']?['containerInfo']?['name']"
+                            },
+                            "body": "@triggerOutputs()?['body']?['content']"
+                        },
+                        "runAfter": {}
                     }
                 },
-                "default": {
+                "runAfter": {},
+                "else": {
                     "actions": {
                         "Invoke_a_workflow_(not_JSON)": {
                             "type": "Workflow",
@@ -76,14 +81,18 @@
                                     "workflow": {
                                         "id": "managed-api-connector-test-workflow"
                                     }
-                                }
+                                },
+                                "headers": {
+                                    "Content-Type": "@triggerBody()?['body']?['properties']?['contentType']",
+                                    "DataSource": "@triggerBody()?['body']?['containerInfo']?['name']"
+                                },
+                                "body": "@triggerOutputs()?['body']?['content']"
                             },
                             "runAfter": {}
                         }
                     }
                 },
-                "runAfter": {},
-                "description": "This switch is a bit pointless, just trying to demonstrate a workflow that includes two \"Invoke Workflow\" actions."
+                "description": "This Decision is a bit pointless, just trying to demonstrate a workflow that includes two \"Invoke Workflow\" actions. "
             }
         },
         "triggers": {
