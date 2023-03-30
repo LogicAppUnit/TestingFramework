@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace LogicAppUnit.InternalHelper
 {
@@ -113,6 +114,42 @@ namespace LogicAppUnit.InternalHelper
                         schema = new { }
                     }
                 }));
+            }
+        }
+
+        /// <summary>
+        /// Replace <i>Invoke Workflow</i> actions with HTTP actions so that the invoked workflow can be easily mocked.
+        /// </summary>
+        public void ReplaceInvokeWorkflowWithHttp()
+        {
+            var invokeActions = _jObjectWorkflow.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "Workflow").Select(x => x as JObject).ToList();
+
+            if (invokeActions.Count > 0)
+            {
+                Console.WriteLine("Updating Workflow Invoke actions to replace call to child workflow with a HTTP action for the mock test server:");
+
+                invokeActions.ForEach(currentAction => {
+
+                    // Copy the 'inputs' object into the HTTP request, this includes the name of the invoked workflow and the JSON body and headers that are passed to the HTTP trigger of the called workflow
+                    var newAction = JObject.FromObject(new
+                    {
+                        type = "Http",
+                        inputs = new
+                        {
+                            method = "POST",
+                            uri = TestEnvironment.FlowV2MockTestHostUri + "/" + WebUtility.UrlEncode(((JProperty)currentAction.Parent).Name),
+                            body = currentAction["inputs"].Value<object>(),
+                            retryPolicy = new { type = "none" }
+                        },
+                        runAfter = currentAction["runAfter"],
+                        operationOptions = "DisableAsyncPattern, SuppressWorkflowHeaders"
+                    });
+
+                    Console.WriteLine($"    {((JProperty)currentAction.Parent).Name}:");
+                    Console.WriteLine($"      Mocked URL: {newAction["inputs"]["uri"]}");
+
+                    ((JProperty)currentAction.Parent).Value = newAction;
+                });
             }
         }
 
@@ -229,7 +266,7 @@ namespace LogicAppUnit.InternalHelper
                 inputs = new
                 {
                     method = "POST",
-                    uri = TestEnvironment.FlowV2MockTestHostUri + "/" + currentAction.Key,
+                    uri = TestEnvironment.FlowV2MockTestHostUri + "/" + WebUtility.UrlEncode(currentAction.Key),
                     body = currentAction.Value["inputs"]["parameters"].Value<object>(),
                     retryPolicy = new { type = "none" }
                 },

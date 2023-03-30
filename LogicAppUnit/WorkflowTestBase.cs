@@ -110,6 +110,7 @@ namespace LogicAppUnit
             Console.WriteLine($"Workflow '{_workflowDefinition.WorkflowName}' is {_workflowDefinition.WorkflowType}");
             _workflowDefinition.ReplaceRetryPoliciesWithNone();
             _workflowDefinition.ReplaceTriggersWithHttp();
+            _workflowDefinition.ReplaceInvokeWorkflowWithHttp();
             _workflowDefinition.ReplaceBuiltInConnectorActionsWithHttp(_testConfig.Workflow.BuiltInConnectorsToMock);
 
             // Set up the local settings
