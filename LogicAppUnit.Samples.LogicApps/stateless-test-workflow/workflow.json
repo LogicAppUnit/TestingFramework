@@ -50,6 +50,8 @@
                 }
             }
         },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
         "triggers": {
             "manual": {
                 "type": "Request",
@@ -59,14 +61,12 @@
                     "method": "POST",
                     "relativePath": "{containerName}/{blobName}"
                 },
-                "operationOptions": "SuppressWorkflowHeadersOnResponse",
                 "correlation": {
                     "clientTrackingId": "@concat(triggerOutputs()['relativePathParameters']['containerName'], '-', triggerOutputs()['relativePathParameters']['blobName'])"
-                }
+                },
+                "operationOptions": "SuppressWorkflowHeadersOnResponse"
             }
-        },
-        "contentVersion": "1.0.0.0",
-        "outputs": {}
+        }
     },
     "kind": "Stateless"
 }

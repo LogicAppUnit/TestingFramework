@@ -13,8 +13,8 @@
                     "Call_Service_One": {
                         "type": "Http",
                         "inputs": {
-                            "method": "POST",
                             "uri": "@{parameters('ServiceOne-Url')}/doSomethingInsideUntilLoop",
+                            "method": "POST",
                             "headers": {
                                 "Content-Type": "application/json"
                             },
@@ -47,8 +47,7 @@
                         "inputs": {
                             "name": "loopCounter",
                             "value": 1
-                        },
-                        "runAfter": {}
+                        }
                     }
                 },
                 "runAfter": {
@@ -100,14 +99,13 @@
                     "Call_Service_Two": {
                         "type": "Http",
                         "inputs": {
-                            "method": "POST",
                             "uri": "@{parameters('ServiceTwo-Url')}/doSomethingInsideForEachLoop",
+                            "method": "POST",
                             "headers": {
                                 "Content-Type": "application/json"
                             },
                             "body": "@items('For_Each_Loop')"
-                        },
-                        "runAfter": {}
+                        }
                     },
                     "Append_response_to_systemTwoResponses": {
                         "type": "AppendToArrayVariable",
@@ -164,6 +162,8 @@
                 "runAfter": {}
             }
         },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
         "triggers": {
             "manual": {
                 "type": "Request",
@@ -180,9 +180,7 @@
                     "method": "POST"
                 }
             }
-        },
-        "contentVersion": "1.0.0.0",
-        "outputs": {}
+        }
     },
     "kind": "Stateful"
 }

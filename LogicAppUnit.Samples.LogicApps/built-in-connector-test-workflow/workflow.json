@@ -139,8 +139,7 @@
                                 "count": 2,
                                 "interval": "PT5S"
                             }
-                        },
-                        "runAfter": {}
+                        }
                     },
                     "Did_we_get_a_Language_Name": {
                         "type": "If",
@@ -160,14 +159,8 @@
                                 "inputs": {
                                     "name": "languageName",
                                     "value": "@body('Execute_Query_to_get_Language_Name')[0][0]?['LanguageName']"
-                                },
-                                "runAfter": {}
+                                }
                             }
-                        },
-                        "runAfter": {
-                            "Execute_Query_to_get_Language_Name": [
-                                "Succeeded"
-                            ]
                         },
                         "else": {
                             "actions": {
@@ -179,12 +172,19 @@
                                             "code": "500",
                                             "message": "Language Code '@{body('Parse_Customer')?['languageCode']}' is not valid"
                                         }
-                                    },
-                                    "runAfter": {}
+                                    }
                                 }
                             }
+                        },
+                        "runAfter": {
+                            "Execute_Query_to_get_Language_Name": [
+                                "Succeeded"
+                            ]
                         }
                     }
+                },
+                "else": {
+                    "actions": {}
                 },
                 "runAfter": {
                     "Parse_Customer": [
@@ -224,6 +224,8 @@
                 "runAfter": {}
             }
         },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
         "triggers": {
             "When_messages_are_available_in_a_queue": {
                 "type": "ServiceProvider",
@@ -240,9 +242,7 @@
                 },
                 "splitOn": "@triggerOutputs()?['body']"
             }
-        },
-        "contentVersion": "1.0.0.0",
-        "outputs": {}
+        }
     },
     "kind": "Stateful"
 }

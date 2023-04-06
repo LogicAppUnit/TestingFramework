@@ -17,16 +17,15 @@
                 "actions": {
                     "Get_Customer_Details_from_Service_One": {
                         "type": "Http",
+                        "description": "Track some properties in this action",
                         "inputs": {
-                            "method": "GET",
                             "uri": "@{parameters('ServiceOne-Url')}/customers/@{triggerBody()?['customerId']}",
+                            "method": "GET",
                             "headers": {
                                 "x-api-key": "ApiKey @{parameters('ServiceOne-Authentication-APIKey')}"
                             }
                         },
-                        "runAfter": {},
                         "operationOptions": "DisableAsyncPattern, SuppressWorkflowHeaders",
-                        "description": "Track some properties in this action",
                         "trackedProperties": {
                             "recordType": "customer",
                             "recordId": "@{triggerBody()?['customerId']}",
@@ -114,14 +113,13 @@
                                             }
                                         }
                                     }
-                                },
-                                "runAfter": {}
+                                }
                             },
                             "Update_Customer_Details_in_Service_Two": {
                                 "type": "Http",
                                 "inputs": {
-                                    "method": "PUT",
                                     "uri": "@{parameters('ServiceTwo-Url')}/membership/customers/@{triggerBody()?['customerId']}",
+                                    "method": "PUT",
                                     "headers": {
                                         "x-api-key": "ApiKey @{parameters('ServiceTwo-Authentication-APIKey')}",
                                         "Content-Type": "application/json"
@@ -173,17 +171,8 @@
                                         "inputs": {
                                             "statusCode": 200,
                                             "body": "Webhook processed successfully"
-                                        },
-                                        "runAfter": {}
+                                        }
                                     }
-                                },
-                                "runAfter": {
-                                    "Update_Customer_Details_in_Service_Two": [
-                                        "Succeeded",
-                                        "FAILED",
-                                        "SKIPPED",
-                                        "TIMEDOUT"
-                                    ]
                                 },
                                 "else": {
                                     "actions": {
@@ -193,9 +182,28 @@
                                             "inputs": {
                                                 "statusCode": 500,
                                                 "body": "Unable to update customer details: @{body('Update_Customer_Details_in_Service_Two')}"
-                                            },
-                                            "runAfter": {}
+                                            }
                                         }
+                                    }
+                                },
+                                "runAfter": {
+                                    "Update_Customer_Details_in_Service_Two": [
+                                        "Succeeded",
+                                        "FAILED",
+                                        "SKIPPED",
+                                        "TIMEDOUT"
+                                    ]
+                                }
+                            }
+                        },
+                        "else": {
+                            "actions": {
+                                "Failed_Get_Response": {
+                                    "type": "Response",
+                                    "kind": "http",
+                                    "inputs": {
+                                        "statusCode": "@outputs('Get_Customer_Details_from_Service_One')['statusCode']",
+                                        "body": "Unable to get customer details: @{body('Get_Customer_Details_from_Service_One')}"
                                     }
                                 }
                             }
@@ -207,23 +215,9 @@
                                 "SKIPPED",
                                 "FAILED"
                             ]
-                        },
-                        "else": {
-                            "actions": {
-                                "Failed_Get_Response": {
-                                    "type": "Response",
-                                    "kind": "http",
-                                    "inputs": {
-                                        "statusCode": "@outputs('Get_Customer_Details_from_Service_One')['statusCode']",
-                                        "body": "Unable to get customer details: @{body('Get_Customer_Details_from_Service_One')}"
-                                    },
-                                    "runAfter": {}
-                                }
-                            }
                         }
                     }
                 },
-                "runAfter": {},
                 "else": {
                     "actions": {
                         "Unauthorized_Response": {
@@ -232,13 +226,15 @@
                             "inputs": {
                                 "statusCode": 401,
                                 "body": "Invalid/No authorization header passed"
-                            },
-                            "runAfter": {}
+                            }
                         }
                     }
-                }
+                },
+                "runAfter": {}
             }
         },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
         "triggers": {
             "manual": {
                 "type": "Request",
@@ -276,9 +272,7 @@
                     "method": "POST"
                 }
             }
-        },
-        "contentVersion": "1.0.0.0",
-        "outputs": {}
+        }
     },
     "kind": "Stateful"
 }
