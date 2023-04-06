@@ -8,7 +8,7 @@
                     "and": [
                         {
                             "contains": [
-                                "@triggerOutputs()?['body']?['name']",
+                                "@triggerBody()?['name']",
                                 "Priority"
                             ]
                         }
@@ -24,8 +24,8 @@
                                 }
                             },
                             "headers": {
-                                "Content-Type": "@triggerBody()?['body']?['properties']?['contentType']",
-                                "DataSource": "@triggerBody()?['body']?['containerInfo']?['name']",
+                                "Content-Type": "@triggerOutputs()?['body']?['properties']?['contentType']",
+                                "DataSource": "@triggerOutputs()?['body']?['containerInfo']?['name']",
                                 "Priority": true
                             },
                             "body": "@triggerOutputs()?['body']?['content']"
@@ -47,7 +47,9 @@
                         },
                         "runAfter": {
                             "Invoke_a_workflow_(Priority)": [
-                                "SUCCEEDED"
+                                "SUCCEEDED",
+                                "TIMEDOUT",
+                                "FAILED"
                             ]
                         }
                     }
@@ -64,8 +66,8 @@
                                     }
                                 },
                                 "headers": {
-                                    "Content-Type": "@triggerBody()?['body']?['properties']?['contentType']",
-                                    "DataSource": "@triggerBody()?['body']?['containerInfo']?['name']",
+                                    "Content-Type": "@triggerOutputs()?['body']?['properties']?['contentType']",
+                                    "DataSource": "@triggerOutputs()?['body']?['containerInfo']?['name']",
                                     "Priority": false
                                 },
                                 "body": "@triggerOutputs()?['body']?['content']"
