@@ -1,0 +1,4 @@
+﻿{
+  "queueName": "customers-priority-queue",
+  "message": "{\n  \"blobName\": \"Priority customer.json\",\n  \"blobContent\":  {\"id\":54624,\"title\":\"Mr\",\"firstName\":\"Peter\",\"lastName\":\"Smith\",\"dateOfBirth\":\"1970-04-25\",\"address\":{\"addressLine1\":\"Blossoms Pasture\",\"addressLine2\":\"High Street\",\"addressLine3\":\"Tinyville\",\"town\":\"Luton\",\"county\":\"Bedfordshire\",\"postcode\":\"LT12 6TY\",\"countryCode\":\"UK\",\"countryName\":\"United Kingdom\"}}\n}"
+}

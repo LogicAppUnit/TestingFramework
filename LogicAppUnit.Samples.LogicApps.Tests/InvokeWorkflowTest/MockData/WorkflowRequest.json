@@ -1,0 +1,58 @@
+﻿{
+  "content": {
+    "id": 54624,
+    "title": "Mr",
+    "firstName": "Peter",
+    "lastName": "Smith",
+    "dateOfBirth": "1970-04-25",
+    "address": {
+      "addressLine1": "Blossoms Pasture",
+      "addressLine2": "High Street",
+      "addressLine3": "Tinyville",
+      "town": "Luton",
+      "county": "Bedfordshire",
+      "postcode": "LT12 6TY",
+      "countryCode": "UK",
+      "countryName": "United Kingdom"
+    }
+  },
+  "containerInfo": {
+    "name": "customers",
+    "properties": {
+      "lastModified": "2023-01-27T12:01:06+00:00",
+      "leaseStatus": "Unlocked",
+      "leaseState": "Available",
+      "leaseDuration": "Infinite",
+      "hasImmutabilityPolicy": false,
+      "hasLegalHold": false,
+      "defaultEncryptionScope": "$account-encryption-key",
+      "preventEncryptionScopeOverride": false,
+      "eTag": {},
+      "metadata": {},
+      "hasImmutableStorageWithVersioning": false
+    }
+  },
+  "name": "Priority Customer.json",
+  "properties": {
+    "appendBlobCommittedBlockCount": 0,
+    "blobTierInferred": true,
+    "blobTierLastModifiedTime": "2023-01-27T12:08:02+00:00",
+    "blobType": "Block",
+    "contentMD5": "(?SP}\u001a?????1??V",
+    "contentType": "application/json",
+    "created": "2023-01-27T12:08:02+00:00",
+    "creationTime": "2023-01-27T12:08:02+00:00",
+    "eTag": "\"0x8DB005F23D6CBDD\"",
+    "isIncrementalCopy": false,
+    "isServerEncrypted": true,
+    "lastModified": "2023-01-27T12:08:02+00:00",
+    "leaseDuration": "Infinite",
+    "leaseState": "Available",
+    "leaseStatus": "Unlocked",
+    "length": 442,
+    "pageBlobSequenceNumber": 0,
+    "premiumPageBlobTier": "Hot",
+    "standardBlobTier": "Hot"
+  },
+  "metadata": {}
+}
