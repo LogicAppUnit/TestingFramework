@@ -4,6 +4,7 @@
         "actions": {
             "Is_this_a_Priority_blob": {
                 "type": "If",
+                "description": "This Decision is a bit pointless, just trying to demonstrate a workflow that includes two \"Invoke Workflow\" actions. ",
                 "expression": {
                     "and": [
                         {
@@ -29,8 +30,7 @@
                                 "Priority": true
                             },
                             "body": "@triggerOutputs()?['body']?['content']"
-                        },
-                        "runAfter": {}
+                        }
                     },
                     "Add_customer_to_Priority_queue": {
                         "type": "ServiceProvider",
@@ -54,7 +54,6 @@
                         }
                     }
                 },
-                "runAfter": {},
                 "else": {
                     "actions": {
                         "Invoke_a_workflow_(not_Priority)": {
@@ -71,12 +70,11 @@
                                     "Priority": false
                                 },
                                 "body": "@triggerOutputs()?['body']?['content']"
-                            },
-                            "runAfter": {}
+                            }
                         }
                     }
                 },
-                "description": "This Decision is a bit pointless, just trying to demonstrate a workflow that includes two \"Invoke Workflow\" actions. "
+                "runAfter": {}
             },
             "Delete_blob": {
                 "type": "ServiceProvider",
@@ -100,6 +98,8 @@
                 }
             }
         },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
         "triggers": {
             "When_a_blob_is_added_or_updated": {
                 "type": "ServiceProvider",
@@ -114,9 +114,7 @@
                     }
                 }
             }
-        },
-        "contentVersion": "1.0.0.0",
-        "outputs": {}
+        }
     },
     "kind": "Stateful"
 }
