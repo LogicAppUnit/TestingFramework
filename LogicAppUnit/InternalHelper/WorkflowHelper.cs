@@ -162,117 +162,40 @@ namespace LogicAppUnit.InternalHelper
         /// </remarks>
         public void ReplaceBuiltInConnectorActionsWithHttp(List<string> builtInConnectorsToMock)
         {
-            Console.WriteLine("Replacing workflow actions using a built-in connector with a HTTP action for the mock test server:");
-
-            // Start with the 'top-level' actions, then move recursively down through the workflow definition to replace all of the built-in connectors
-            var actionsBlock = _jObjectWorkflow.SelectToken("$.definition.actions") as JObject;
-            ReplaceBuiltInActionsWithHttpActions(actionsBlock, builtInConnectorsToMock);
-        }
-
-        /// <summary>
-        /// Replace actions using Built-In connectors with HTTP actions.
-        /// </summary>
-        /// <param name="block">The set of actions to be processed.</param>
-        /// <param name="builtInConnectorsToMock">List of the built-in connector types to be mocked.</param>
-        private static void ReplaceBuiltInActionsWithHttpActions(JObject block, List<string> builtInConnectorsToMock)
-        {
-            Dictionary<string, JObject> newReplacedHttpActions = new Dictionary<string, JObject>();
-
-            foreach (var item in block)
-            {
-                var newReplacedAction = LoopThroughAllNestedPathsOfAction(item, builtInConnectorsToMock);
-                if (newReplacedAction != null)
-                {
-                    newReplacedHttpActions.Add(item.Key, newReplacedAction);
-                }
-            }
-
-            // Now replace each action with the mocked HTTP action
-            foreach (var newAction in newReplacedHttpActions)
-            {
-                JToken serviceProviderConfig = block[newAction.Key]["inputs"]["serviceProviderConfiguration"];
-                Console.WriteLine($"    {newAction.Key}:");
-                Console.WriteLine($"      Connector Type: {serviceProviderConfig["serviceProviderId"].Value<string>()}/{serviceProviderConfig["operationId"].Value<string>()}");
-                Console.WriteLine($"      Mocked URL: {newAction.Value["inputs"]["uri"]}");
-
-                block.Remove(newAction.Key);
-                block.Add(newAction.Key, newAction.Value);
-            }
-        }
-
-        /// <summary>
-        /// Traverse through all the paths of current action block such as control blocks (if, else and switch cases) and recursively try to replace them. 
-        /// </summary>
-        /// <param name="currentAction">The current action to be processed.</param>
-        /// <param name="builtInConnectorsToMock">List of the built-in connector types to be mocked.</param>
-        /// <returns></returns>
-        private static JObject LoopThroughAllNestedPathsOfAction(KeyValuePair<string, JToken> currentAction, List<string> builtInConnectorsToMock)
-        {
-            var currentActionJObject = currentAction.Value as JObject;
-
-            if (currentActionJObject.ContainsKey("actions"))
-            {
-                var currentActionsNestedActions = currentAction.Value["actions"] as JObject;
-                ReplaceBuiltInActionsWithHttpActions(currentActionsNestedActions, builtInConnectorsToMock);
-            }
-
-            if (currentActionJObject.ContainsKey("else"))
-            {
-                var currentActionsNestedActions = currentAction.Value["else"]["actions"] as JObject;
-                ReplaceBuiltInActionsWithHttpActions(currentActionsNestedActions, builtInConnectorsToMock);
-            }
-
-            if (currentActionJObject.ContainsKey("cases"))
-            {
-                var casesWithNestedActions = currentAction.Value["cases"] as JObject;
-                foreach (var eachCase in casesWithNestedActions)
-                {
-                    if ((eachCase.Value as JObject).ContainsKey("actions"))
-                    {
-                        ReplaceBuiltInActionsWithHttpActions(eachCase.Value["actions"] as JObject, builtInConnectorsToMock);
-                    }
-                }
-            }
-
-            if (currentActionJObject.ContainsKey("default"))
-            {
-                var currentActionsNestedActions = currentAction.Value["default"]["actions"] as JObject;
-                ReplaceBuiltInActionsWithHttpActions(currentActionsNestedActions, builtInConnectorsToMock);
-            }
-
-            return CreateMockHttpActionIfUsingBuiltInConnector(currentAction, builtInConnectorsToMock);
-        }
-
-        /// <summary>
-        /// Create Mock HTTP action for in-built action by keeping all the other parameters inside http action body.  
-        /// </summary>
-        /// <param name="currentAction"></param>
-        /// <param name="builtInConnectorsToMock">List of the built-in connector types to be mocked.</param>
-        /// <returns>The JObject representing the replacement mocked action, or <c>null</c> if the action does not use a built-in connector.</returns>
-        private static JObject CreateMockHttpActionIfUsingBuiltInConnector(KeyValuePair<string, JToken> currentAction, List<string> builtInConnectorsToMock)
-        {
             // All actions using built-in connectors have a 'type' of 'ServiceProvider'
-            if (currentAction.Value["type"].ToString() != "ServiceProvider")
-                return null;
+            var invokeActions = _jObjectWorkflow.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "ServiceProvider").Select(x => x as JObject).ToList();
 
-            if (builtInConnectorsToMock == null)
-                return null;
-            if (!builtInConnectorsToMock.Contains(currentAction.Value["inputs"]["serviceProviderConfiguration"]["operationId"].Value<string>()))
-                return null;
+            // Remove any actions that use connector types that are not included in the configuration
+            invokeActions.RemoveAll(x => !builtInConnectorsToMock.Contains(x["inputs"]["serviceProviderConfiguration"]["operationId"].Value<string>()));
 
-            return JObject.FromObject(new
+            if (invokeActions.Count > 0)
             {
-                type = "Http",
-                inputs = new
-                {
-                    method = "POST",
-                    uri = TestEnvironment.FlowV2MockTestHostUri + "/" + WebUtility.UrlEncode(currentAction.Key),
-                    body = currentAction.Value["inputs"]["parameters"].Value<object>(),
-                    retryPolicy = new { type = "none" }
-                },
-                runAfter = currentAction.Value["runAfter"],
-                operationOptions = "DisableAsyncPattern, SuppressWorkflowHeaders"
-            });
+                Console.WriteLine("Replacing workflow actions using a built-in connector with a HTTP action for the mock test server:");
+
+                invokeActions.ForEach(currentAction => {
+
+                    var newAction = JObject.FromObject(new
+                    {
+                        type = "Http",
+                        inputs = new
+                        {
+                            method = "POST",
+                            uri = TestEnvironment.FlowV2MockTestHostUri + "/" + WebUtility.UrlEncode(((JProperty)currentAction.Parent).Name),
+                            body = currentAction["inputs"]["parameters"].Value<object>(),
+                            retryPolicy = new { type = "none" }
+                        },
+                        runAfter = currentAction["runAfter"],
+                        operationOptions = "DisableAsyncPattern, SuppressWorkflowHeaders"
+                    });
+
+                    JToken serviceProviderConfig = currentAction["inputs"]["serviceProviderConfiguration"];
+                    Console.WriteLine($"    {((JProperty)currentAction.Parent).Name}:");
+                    Console.WriteLine($"      Connector Type: {serviceProviderConfig["serviceProviderId"].Value<string>()}/{serviceProviderConfig["operationId"].Value<string>()}");
+                    Console.WriteLine($"      Mocked URL: {newAction["inputs"]["uri"]}");
+
+                    ((JProperty)currentAction.Parent).Value = newAction;
+                });
+            }
         }
     }
 }
