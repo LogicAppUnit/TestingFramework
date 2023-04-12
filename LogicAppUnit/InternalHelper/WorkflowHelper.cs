@@ -12,6 +12,9 @@ namespace LogicAppUnit.InternalHelper
     /// </summary>
     internal class WorkflowHelper
     {
+        // The HTTP trigger has a trigger type of 'Request'
+        private const string HttpTriggerType = "Request";
+
         private readonly string _workflowName;
         private readonly JObject _jObjectWorkflow;
 
@@ -63,6 +66,21 @@ namespace LogicAppUnit.InternalHelper
         }
 
         /// <summary>
+        /// Gets the name of the first HTTP trigger.
+        /// </summary>
+        public string HttpTriggerName
+        {
+            get
+            {
+                var trigger = _jObjectWorkflow.SelectTokens("$.definition.triggers.*").Where(x => x["type"].ToString() == HttpTriggerType).FirstOrDefault();
+                if (trigger == null)
+                    return null;
+                else
+                    return ((JProperty)trigger.Parent).Name;
+            }
+        }
+
+        /// <summary>
         /// Update all HTTP actions to include a retry policy of 'none' so that when making HTTP calls from the workflow, any configured retries for a failed HTTP call won't happen.
         /// </summary>
         /// <remarks>
@@ -93,24 +111,22 @@ namespace LogicAppUnit.InternalHelper
         /// </summary>
         public void ReplaceTriggersWithHttp()
         {
-            // The HTTP trigger is called a 'Request' action
-            const string HttpTriggerName = "Request";
-
-            var trigger = _jObjectWorkflow.SelectTokens("$.definition.triggers.*").Where(x => x["type"].ToString() != HttpTriggerName).FirstOrDefault();
+            var trigger = _jObjectWorkflow.SelectTokens("$.definition.triggers.*").Where(x => x["type"].ToString() != HttpTriggerType).FirstOrDefault();
 
             if (trigger != null)
             {
-                Console.WriteLine($"Replacing workflow trigger '{((JProperty)trigger.Parent).Name}' with a HTTP Request trigger.");
+                string triggerName = ((JProperty)trigger.Parent).Name;
+                Console.WriteLine($"Replacing workflow trigger '{triggerName}' with a HTTP Request trigger.");
 
                 var triggerBlock = _jObjectWorkflow.SelectToken("$.definition.triggers") as JObject;
+
                 triggerBlock.RemoveAll();
-                triggerBlock.Add("manual", JObject.FromObject(new
+                triggerBlock.Add(triggerName, JObject.FromObject(new
                 {
-                    type = HttpTriggerName,
+                    type = HttpTriggerType,
                     kind = "Http",
                     inputs = new
                     {
-                        //This empty schema type is required because we want to allow generic schema type
                         schema = new { }
                     }
                 }));

@@ -103,14 +103,15 @@ namespace LogicAppUnit.InternalHelper
         /// <summary>
         /// Get the callback definition for the workflow trigger. 
         /// </summary>
+        /// <param name="triggerName">The name of the HTTP trigger that is used to start the workflow.</param>
         /// <returns>The callback definition for the workflow trigger.</returns>
-        public CallbackUrlDefinition GetWorkflowCallbackDefinition()
+        public CallbackUrlDefinition GetWorkflowCallbackDefinition(string triggerName)
         {
             // Documentation: https://learn.microsoft.com/en-us/rest/api/logic/workflow-triggers/list-callback-url
             try
             {
                 using (var workflowTriggerCallbackResponse = _client.PostAsync(
-                    TestEnvironment.GetTriggerCallbackRequestUri(flowName: _workflowName, triggerName: "manual"),
+                    TestEnvironment.GetTriggerCallbackRequestUri(flowName: _workflowName, triggerName: triggerName),
                     ContentHelper.CreatePlainStringContent("")).Result)
                 {
                     workflowTriggerCallbackResponse.EnsureSuccessStatusCode();

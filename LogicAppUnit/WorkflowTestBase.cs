@@ -181,8 +181,7 @@ namespace LogicAppUnit
             return new TestRunner(
                 _testConfig.Logging,
                 _client,
-                _workflowDefinition.WorkflowName, _workflowDefinition.ToString(),
-                _localSettings.ToString(), _host, _parameters, _connections.ToString(), _artifactDirectory);
+                _workflowDefinition, _localSettings, _host, _parameters, _connections, _artifactDirectory);
         }
 
         /// <summary>
