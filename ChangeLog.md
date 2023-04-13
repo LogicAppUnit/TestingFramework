@@ -5,7 +5,7 @@ LogicAppUnit Testing Framework:
 - Invoked child workflows are now mocked using HTTP actions. This means that the dependencies between a parent workflow and child workflows can be broken to enable better unit testing of the parent workflow.
 - `LogicAppUnit.TestRunner` does not assume that the name of the HTTP trigger is `manual`, it now retrieves the name from the workflow definition.
   - This change is needed because the new Standard Logic App designer allows a developer to edit the name of the HTTP trigger. In all previous versions of the designer the trigger name was set to `manual` and could not be changed.
-- Built-in triggers that are replaced with HTTP triggers now have the same name as the original built-in trigger. Previously, the name of the HTTP trigger was set to `manual`.
+- Non-HTTP triggers that are replaced with HTTP triggers now have the same name as the original trigger. Previously, the name of the HTTP trigger was set to `manual`.
 
 LogicAppUnit.Samples.LogicApps.Tests:
 
