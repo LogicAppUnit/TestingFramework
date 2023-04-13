@@ -34,6 +34,8 @@ This code repository includes three projects:
 
 You can download the *LogicAppUnit* testing framework package from nuget: https://www.nuget.org/packages/LogicAppUnit/
 
+[![NuGet Badge WireMock.Net](https://buildstats.info/nuget/LogicAppUnit)](https://www.nuget.org/packages/LogicAppUnit)
+
 The best way to understand how the framework works and how to write tests using it is to read this information and look at the sample tests in the *LogicAppUnit.Samples.LogicApps.Tests* project.
 
 
@@ -592,7 +594,7 @@ The testing framework will replace the action with a HTTP action that calls the 
             "body": "@triggerOutputs()?['body']?['content']"
         },
         "retryPolicy": {
-        "type": "none"
+            "type": "none"
         }
     },
     "operationOptions": "DisableAsyncPattern, SuppressWorkflowHeaders"
