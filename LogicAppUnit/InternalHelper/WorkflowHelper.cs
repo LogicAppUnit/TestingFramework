@@ -136,7 +136,7 @@ namespace LogicAppUnit.InternalHelper
         /// <summary>
         /// Replace <i>Invoke Workflow</i> actions with HTTP actions so that the invoked workflow can be easily mocked.
         /// </summary>
-        public void ReplaceInvokeWorkflowWithHttp()
+        public void ReplaceInvokeWorkflowActionsWithHttp()
         {
             var invokeActions = _jObjectWorkflow.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "Workflow").Select(x => x as JObject).ToList();
 
