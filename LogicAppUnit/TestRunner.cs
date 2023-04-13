@@ -23,7 +23,6 @@ namespace LogicAppUnit
     {
         private readonly HttpClient _client;
 
-        private readonly string _workflowName;
         private readonly WorkflowHelper _workflowDefinition;
         private readonly MockHttpHost _mockHttpHost;
         private readonly WorkflowTestHost _workflowTestHost;
@@ -132,13 +131,12 @@ namespace LogicAppUnit
                 Console.WriteLine("Logging of the Function runtime startup logs is disabled. This can be enabled using the 'logging.writeFunctionRuntineStartupLogs' option in 'testConfiguration.json'.");
 
             _client = client;
-            _workflowName = workflowDefinition.WorkflowName;
             _workflowDefinition = workflowDefinition;
 
-            var workflowTestInput = new WorkflowTestInput[] { new WorkflowTestInput(_workflowName, workflowDefinition.ToString()) };
+            var workflowTestInput = new WorkflowTestInput[] { new WorkflowTestInput(workflowDefinition.WorkflowName, workflowDefinition.ToString()) };
             _workflowTestHost = new WorkflowTestHost(workflowTestInput, localSettings.ToString(), parameters, connections.ToString(), host, artifactsDirectory, loggingConfig.WriteFunctionRuntineStartupLogs);
             _mockHttpHost = new MockHttpHost();
-            _apiHelper = new WorkflowApiHelper(client, _workflowName);
+            _apiHelper = new WorkflowApiHelper(client, workflowDefinition.WorkflowName);
 
             // Initialise the cached mocked requests
             _mockRequests = new ConcurrentBag<MockRequest>();
@@ -451,7 +449,7 @@ namespace LogicAppUnit
 
             while (stopwatch.Elapsed < TimeSpan.FromMinutes(Constants.MAX_TIME_MINUTES_WHILE_POLLING_WORKFLOW_RESULT))
             {
-                using (var latestWorkflowHttpResponse = _client.GetAsync(TestEnvironment.GetRunsRequestUriWithManagementHost(flowName: _workflowName)).Result)
+                using (var latestWorkflowHttpResponse = _client.GetAsync(TestEnvironment.GetRunsRequestUriWithManagementHost(flowName: _workflowDefinition.WorkflowName)).Result)
                 {
                     var latestWorkflowHttpResponseContent = latestWorkflowHttpResponse.Content.ReadAsAsync<JToken>().Result;
                     var runStatusOfWorkflow = latestWorkflowHttpResponseContent["value"][0]["properties"]["status"].ToString();
