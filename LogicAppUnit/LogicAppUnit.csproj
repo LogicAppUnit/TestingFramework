@@ -9,7 +9,6 @@
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <Version>1.5.0</Version>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Title>Logic App Unit Testing Framework</Title>
     <Description>Unit testing framework for Standard Logic Apps.</Description>
     <RepositoryUrl>https://github.com/LogicAppUnit/TestingFramework</RepositoryUrl>
@@ -19,6 +18,10 @@
     <PackageTags>azure logic-apps unit-testing integration-testing</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>LogicAppUnit.png</PackageIcon>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
