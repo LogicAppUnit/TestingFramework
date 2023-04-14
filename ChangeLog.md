@@ -9,7 +9,7 @@ LogicAppUnit Testing Framework:
 
 LogicAppUnit.Samples.LogicApps.Tests:
 
-- Added a `InvokeWorkflowTest` workflow and unit tests to demonstrate the use of the testing framework which child workflows that are invoked from a parent workflow.
+- Added an `InvokeWorkflowTest` workflow and unit tests to demonstrate the use of the testing framework with child workflows that are invoked from a parent workflow.
 
 
 # 1.4.0 (21st February 2023)
