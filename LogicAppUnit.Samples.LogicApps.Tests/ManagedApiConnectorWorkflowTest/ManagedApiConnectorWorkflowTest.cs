@@ -70,7 +70,8 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.ManagedApiConnectorWorkflowTest
                 // Check action result
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Upsert_Customer"));
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Send_a_confirmation_email"));
-                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Response"));
+                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Success_Response"));
+                Assert.AreEqual(ActionStatus.Skipped, testRunner.GetWorkflowActionStatus("Failure_Response"));
 
                 // Check message sent to Salesforce
                 var salesforceRequest = testRunner.MockRequests.First(r => r.RequestUri.AbsolutePath.EndsWith("/default/tables/Account_Staging__c/externalIdFields/External_Id__c/54624"));
@@ -125,13 +126,13 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.ManagedApiConnectorWorkflowTest
                 Assert.AreEqual(WorkflowRunStatus.Failed, testRunner.WorkflowRunStatus);
 
                 // Check workflow response
-                // This workflow does not have a Catch block, or handle the failed 'Send Email' action, so the workflow will fail with a Bad Gateway error
-                testRunner.ExceptionWrapper(() => Assert.AreEqual(HttpStatusCode.BadGateway, workflowResponse.StatusCode));
+                testRunner.ExceptionWrapper(() => Assert.AreEqual(HttpStatusCode.InternalServerError, workflowResponse.StatusCode));
 
                 // Check action result
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Upsert_Customer"));
                 Assert.AreEqual(ActionStatus.Failed, testRunner.GetWorkflowActionStatus("Send_a_confirmation_email"));
-                Assert.AreEqual(ActionStatus.Skipped, testRunner.GetWorkflowActionStatus("Response"));
+                Assert.AreEqual(ActionStatus.Skipped, testRunner.GetWorkflowActionStatus("Success_Response"));
+                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Failure_Response"));
 
                 // Check message sent to Salesforce
                 var salesforceRequest = testRunner.MockRequests.First(r => r.RequestUri.AbsolutePath.EndsWith("/default/tables/Account_Staging__c/externalIdFields/External_Id__c/54624"));

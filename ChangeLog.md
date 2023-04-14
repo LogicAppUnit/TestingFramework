@@ -1,8 +1,22 @@
+# 1.5.0 (14th April 2023)
+
+LogicAppUnit Testing Framework:
+
+- Invoked child workflows are now mocked using HTTP actions. This means that the dependencies between a parent workflow and child workflows can be broken to enable better unit testing of the parent workflow.
+- `LogicAppUnit.TestRunner` does not assume that the name of the HTTP trigger is `manual`, it now retrieves the name from the workflow definition.
+  - This change is needed because the new Standard Logic App designer allows a developer to edit the name of the HTTP trigger. In all previous versions of the designer the trigger name was set to `manual` and could not be changed.
+- Non-HTTP triggers that are replaced with HTTP triggers now have the same name as the original trigger. Previously, the name of the HTTP trigger was set to `manual`.
+
+LogicAppUnit.Samples.LogicApps.Tests:
+
+- Added an `InvokeWorkflowTest` workflow and unit tests to demonstrate the use of the testing framework with child workflows that are invoked from a parent workflow.
+
+
 # 1.4.0 (21st February 2023)
 
 LogicAppUnit Testing Framework:
 
-- Changed the logic that updates the `connectionRuntimeUrl` for Managed API connectors so that it works with URL values that include `@appsetting()` references. [Issue #9]
+- Changed the logic that updates the `connectionRuntimeUrl` for Managed API connectors so that it works with URL values that include `@appsetting()` references. [[Issue #9](https://github.com/LogicAppUnit/TestingFramework/issues/9)]
 
 
 # 1.3.0 (1st February 2023)

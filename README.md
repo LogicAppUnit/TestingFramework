@@ -2,7 +2,7 @@
 
 <img align="right" src="https://raw.github.com/LogicAppUnit/TestingFramework/main/LogicAppUnit.png" width="120" />
 
-LogicAppUnit is a testing framework that simplifies the creation of automated unit tests for Standard Logic Apps running in a *local development environment*, or on a *build server as part of a DevOps pipeline*. Standard Logic Apps do not include an out-of-the-box testing capability and this framework has been designed to fill this gap. The framework is based on the [Logic Apps Sample Test Framework](https://techcommunity.microsoft.com/t5/integrations-on-azure-blog/automated-testing-with-logic-apps-standard/ba-p/2960623) that was developed by Henry Liu, and includes additional functionality to make it easier to author and run tests and validate (assert) the results.
+LogicAppUnit is a testing framework that simplifies the creation of automated unit tests for Standard Logic Apps running in a *local development environment*, or in a *build server as part of a DevOps pipeline*. Standard Logic Apps do not include an out-of-the-box testing capability and this framework has been designed to fill this gap. The framework is based on the [Logic Apps Sample Test Framework](https://techcommunity.microsoft.com/t5/integrations-on-azure-blog/automated-testing-with-logic-apps-standard/ba-p/2960623) that was developed by Henry Liu, and includes additional functionality to make it easier to author and run tests and validate (assert) the results.
 
 The framework does not support the testing of:
 
@@ -15,6 +15,7 @@ The framework includes these high-level capabilities:
 
 - Replace non-HTTP triggers with HTTP triggers to enable automated testing of every workflow, irrespective of the trigger type.
 - Remove external service dependencies for built-in service provider connectors by replacing these actions with HTTP actions and a mock HTTP server that is managed by the framework.
+- Remove dependencies on invoked workflows by replacing the Invoke Workflow actions with HTTP actions and a mock HTTP server that is managed by the framework.
 - Remove external service dependencies for managed API connectors by automatically re-configuring managed API connections to use a mock HTTP server that is managed by the framework.
 - Remove all retry policies to ensure that tests exercising failure scenarios do not take a long time to execute.
 - Detailed logging to help with workflow test authoring and debugging.
@@ -28,12 +29,14 @@ This code repository includes three projects:
 | Name | Description |
 |:-----|:------------|
 | LogicAppUnit | The testing framework. |
-| LogicAppUnit.Samples.LogicApps.Tests | Example test project that demonstrates the features of the testing framework. 
-| LogicAppUnit.Samples.LogicApps | Workflows that are tested by the example test project. |
+| LogicAppUnit.Samples.LogicApps.Tests | Sample test project that demonstrates the features of the testing framework. 
+| LogicAppUnit.Samples.LogicApps | Workflows that are tested by the sample test project. |
 
 You can download the *LogicAppUnit* testing framework package from nuget: https://www.nuget.org/packages/LogicAppUnit/
 
-The best way to understand how the framework works and how to write tests using it is to read this information and look at the example tests in the *LogicAppUnit.Samples.LogicApps.Tests* project.
+[![NuGet Badge WireMock.Net](https://buildstats.info/nuget/LogicAppUnit)](https://www.nuget.org/packages/LogicAppUnit)
+
+The best way to understand how the framework works and how to write tests using it is to read this information and look at the sample tests in the *LogicAppUnit.Samples.LogicApps.Tests* project.
 
 
 # Contents
@@ -56,6 +59,7 @@ The best way to understand how the framework works and how to write tests using 
 - [Stateless Workflows](#stateless-workflows)
 - [Handling Workflow Dependencies](#handling-workflow-dependencies)
   - [Workflow Triggers](#workflow-triggers)
+  - [Invoke Workflow Actions](#invoke-workflow-actions)
   - [Workflow Actions and Built-In Connectors](#workflow-actions-and-built-in-connectors)
   - [Workflow Actions and Managed API Connectors](#workflow-actions-and-managed-api-connectors)
   - [External URLs configured in the `local.settings.json` file](#external-urls-configured-in-the-local.settings.json-file)
@@ -150,8 +154,12 @@ There are a few overloads of the `TriggerWorkflow()` method that allow you to se
 The trigger URL for the workflow is logged to the test execution log. This example is for a workflow that uses a relative path of `/thisIsMyContainer/thisIsMyBlob`:
 
 ```txt
-Workflow trigger: POST http://localhost:7071/api/stateless-test-workflow/triggers/manual/invoke/thisIsMyContainer/thisIsMyBlob?api-version=2022-05-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=123ao4DL03l1c1C-KRqfsl9hr0G_ipOjg_h77STbAWQ
+Workflow trigger:
+    Name: manual
+    URL: POST http://localhost:7071/api/stateless-test-workflow/triggers/manual/invoke/thisIsMyContainer/thisIsMyBlob?api-version=2022-05-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=123ao4DL03l1c1C-KRqfsl9hr0G_ipOjg_h77STbAWQ
 ```
+
+The example shows a trigger with the name of `manual`, but the testing framework makes no assumptions about the name of the trigger, it can be set to any valid value.
 
 
 ## Checking (Asserting) the Workflow Run
@@ -189,7 +197,7 @@ Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Fail
 Assert.AreEqual(ActionStatus.Skipped, testRunner.GetWorkflowActionStatus("Update_Customer_Details_in_Service_Two"));
 ```
 
-Make sure the action name matches the action name in the `workflow.json` file, i.e. spaces replaced with underscores.
+Make sure the action name in the test matches the action name in the `workflow.json` file, i.e. spaces replaced with underscores. The testing framework will not automatically replace spaces with underscores.
 
 You can also check the workflow's Client Tracking Id using the `TestRunner.WorkflowClientTrackingId` property:
 
@@ -203,7 +211,7 @@ Assert.AreEqual("expected-tracking-id", testRunner.WorkflowClientTrackingId);
 
 The testing framework supports the checking of actions that run inside a loop, for example an `Until` loop or a `ForEach` loop. 
 
-You can check the status of individual action repetitions in the workflow run history using the `TestRunner.GetWorkflowActionStatus(string actionName, int repetitionNumber)` method, passing the action name and repetition number as the parameters:
+You can check the status of individual action repetitions in the workflow run history using the `TestRunner.GetWorkflowActionStatus(string actionName, int repetitionNumber)` method, passing the action name and repetition number as parameters:
 
 ```c#
 // Check action result
@@ -260,7 +268,7 @@ You can also check the requests sent to the mock HTTP server, using the `TestRun
 
 ```c#
 // Check request to Membership API
-var request = testRunner.MockRequests.First(r => r.RequestUri.AbsolutePath == "/api/v1.1/membership/customers/1234");
+MockRequest request = testRunner.MockRequests.First(r => r.RequestUri.AbsolutePath == "/api/v1.1/membership/customers/1234");
 Assert.AreEqual(HttpMethod.Put, request.Method);
 Assert.AreEqual("application/json", request.ContentHeaders["Content-Type"].First());
 Assert.AreEqual("expected-api-key", request.Headers["x-api-key"].First());
@@ -441,6 +449,7 @@ A workflow usually has dependencies on one or more external services. For exampl
 The testing framework will automatically remove the following dependencies when a workflow is tested:
 
 - Triggers that use a non-HTTP connector
+- `Invoke Workflow` actions that call a child workflow
 - Actions that use a non-HTTP built-in service provider connector
 - Actions that use a Managed API connector
 - External URLs configured in the `local.settings.json` file
@@ -484,7 +493,7 @@ The testing framework will replace the Service bus trigger with a HTTP trigger t
 
 ```json
 "triggers": {
-    "manual": {
+    "When_messages_are_available_in_a_topic_subscription_(peek-lock)": {
         "type": "Request",
         "kind": "Http",
         "inputs": {
@@ -533,13 +542,85 @@ The test execution log will include logging to show when a non-HTTP trigger has 
 Replacing workflow trigger 'When_messages_are_available_in_a_topic_subscription_(peek-lock)' with a HTTP Request trigger.
 ```
 
+## Invoke Workflow Actions
+
+
+A workflow can [call another workflow](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-workflow-actions-triggers#workflow-action) using the `Invoke Workflow` action. The action configuration includes the name of the workflow to be called, which must exist in the same Logic App.
+
+When unit testing a workflow that calls another workflow, the dependency needs to be removed. The testing framework does this by replacing the `Invoke Workflow` action with a HTTP connector that is configured to call a mock HTTP server that is managed by the testing framework. This allows the action to run independently of other workflows.
+
+Replacing the action like this does not affect the functionality of the action or change the behaviour. Every `Invoke Workflow` action generates an *input* JSON message which is then passed to the called workflow. The called workflow then generates an *output* JSON message which is then processed by the rest of the workflow. As long as the same message structures are used in the request and response for the HTTP connector and mock HTTP server, the rest of the workflow will execute in exactly the same way.
+
+As an example, this is an `Invoke Workflow` action that calls a `my-child-workflow` workflow in the same Logic App, passing three headers and body content:
+
+```json
+"Invoke_a_workflow": {
+    "type": "Workflow",
+    "inputs": {
+        "host": {
+            "workflow": {
+                "id": "my-child-workflow"
+            }
+        },
+        "headers": {
+            "Content-Type": "@triggerOutputs()?['body']?['properties']?['contentType']",
+            "DataSource": "@triggerOutputs()?['body']?['containerInfo']?['name']",
+            "Priority": true
+        },
+        "body": "@triggerOutputs()?['body']?['content']"
+    }
+}
+```
+
+The testing framework will replace the action with a HTTP action that calls the mock HTTP server using a POST operation:
+
+```json
+"Invoke_a_workflow": {
+    "type": "Http",
+    "inputs": {
+        "method": "POST",
+        "uri": "http://local-server-name:7075/Invoke_a_workflow",
+        "body": {
+            "host": {
+                "workflow": {
+                "id": "my-child-workflow"
+                }
+            },
+            "headers": {
+                "Content-Type": "@triggerOutputs()?['body']?['properties']?['contentType']",
+                "DataSource": "@triggerOutputs()?['body']?['containerInfo']?['name']",
+                "Priority": true
+            },
+            "body": "@triggerOutputs()?['body']?['content']"
+        },
+        "retryPolicy": {
+            "type": "none"
+        }
+    },
+    "operationOptions": "DisableAsyncPattern, SuppressWorkflowHeaders"
+}
+```
+
+The contents of the `inputs` attribute in the original action configuration is included in the JSON request body that is sent to the mock HTTP server. This includes the called workflow name, any headers and the body content. The request is sent to the mock HTTP server using a URL that includes the action name. The test case can assert the contents of the request to ensure that the headers and body content match expectations. 
+
+The test execution log will include logging to show when an `Invoke Workflow` action has been replaced with a HTTP action:
+
+```txt
+Updating Workflow Invoke actions to replace call to child workflow with a HTTP action for the mock test server:
+    Invoke_a_workflow:
+      Mocked URL: http://local-server-name:7075/Invoke_a_workflow
+    Invoke_another_workflow:
+      Mocked URL: http://local-server-name:7075/Invoke_another_workflow
+```
+
+
 ## Workflow Actions and Built-In Connectors 
 
 A workflow action can communicate with an external service using a [built-in service provider connector](https://learn.microsoft.com/en-us/azure/connectors/built-in) which runs in-process with the workflow. The configuration of the built-in connector is part of the workflow definition. There are many different types of built-in service provider connector, for example Service Bus, Event Grid, SQL Server, SMTP and Salesforce.
 
 When unit testing a workflow with a built-in connector, any dependency on an external service needs to be removed. The testing framework does this by replacing a non-HTTP connector with a HTTP connector that is configured to call a mock HTTP server that is managed by the testing framework. This allows the action to run independently of any external dependency.
 
-Replacing the connector like this does not affect the functionality of the workflow action or change the behaviour. Every action generates an *input* JSON message which is then sent to the external service via the connector. The action then generates an *output* JSON message which is then processed by the rest of the workflow. The structure of the *input* and *output* JSON messages differs for each type of action and connector, but as long as the same message structures are used in the request and responses for the HTTP connector and mock HTTP server, the rest of the workflow will execute in exactly the same way.
+Replacing the connector like this does not affect the functionality of the workflow action or change the behaviour. Every action generates an *input* JSON message which is then sent to the external service via the connector. The action then generates an *output* JSON message which is then processed by the rest of the workflow. The structure of the *input* and *output* JSON messages differs for each type of action and connector, but as long as the same message structures are used in the request and response for the HTTP connector and mock HTTP server, the rest of the workflow will execute in exactly the same way.
 
 The testing framework will only replace actions using built-in connectors where the action's `operationId` is listed in the `workflow.builtInConnectorsToMock` section in the `testConfiguration.json` file. The example below will enable the update of all actions that use the `executeQuery` (SQL Server) and `sendMessage` (Service Bus) operations:
 
@@ -609,6 +690,7 @@ Replacing workflow actions using a built-in connector with a HTTP action for the
       Mocked URL: http://local-server-name:7075/Send_message_to_Topic
 ```
 
+
 ## Workflow Actions and Managed API Connectors 
 
 A workflow action can also communicate with an external service using a [managed API connector](https://learn.microsoft.com/en-us/azure/connectors/managed#standard-connectors). These connectors run outside of the Logic App in a Microsoft-hosted Azure environment. A `connections.json` file contains  configuration to map a named connection in the workflow definition to an instance of a Microsoft-hosted API connector. The managed API connector is invoked by the workflow using a HTTP call and the URL for the API connector is stored in the `connectionRuntimeUrl` attribute in the `connections.json` file.
@@ -617,7 +699,7 @@ When unit testing a workflow that uses a managed API connector, the dependency o
 
 If the value of `connectionRuntimeUrl` attribute includes `@appsetting()` references, these references are replaced with the values defined in the `local.settings.json` file, before the host name is replaced.
 
-Updating the connection URL like this does not affect the functionality of the workflow action or change the behaviour. Every action generates an *input* JSON message which is then sent to the external service via the connector. The action then generates an *output* JSON message which is then processed by the rest of the workflow. The structure of the *input* and *output* JSON messages differs for each type of action and API connector, but as long as the same message structures are used in the request and responses for the mock HTTP server, the rest of the workflow will execute in exactly the same way.
+Updating the connection URL like this does not affect the functionality of the workflow action or change the behaviour. Every action generates an *input* JSON message which is then sent to the external service via the connector. The action then generates an *output* JSON message which is then processed by the rest of the workflow. The structure of the *input* and *output* JSON messages differs for each type of action and API connector, but as long as the same message structures are used in the request and response for the mock HTTP server, the rest of the workflow will execute in exactly the same way.
 
 As an example, this is a managed API connection in the `connections.json` file for Salesforce:
 
@@ -754,8 +836,7 @@ The previous sections describe how the `testConfiguration.json` file can be used
 
 # Future Improvements and Changes
 
-This is a list of possible future improvements and changes for the framework. Please create a new issue in GitHub if there are other features that you would like to see.
+This is a list of possible future improvements and changes for the framework. Please create a [new issue in GitHub](https://github.com/LogicAppUnit/TestingFramework/issues) if there are other features that you would like to see.
 
-- Ability to mock an `Invoke workflow` action to remove dependencies on a called workflow.
-- Improve the creation of the mocked responses using the mock HTTP server, perhaps using Fluent notation to create the responses.
-- Reduce the number of dependent packages.
+- Improve the creation of the mocked responses using the mock HTTP server, perhaps using Fluent notation to match requests and create the responses.
+- Add a test configuration option to allow the port number for the mock HTTP server to be changed from the default of 7075.

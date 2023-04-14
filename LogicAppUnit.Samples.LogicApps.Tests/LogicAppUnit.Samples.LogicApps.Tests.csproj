@@ -24,6 +24,10 @@
     <None Remove="BuiltInConnectorWorkflowTest\MockData\SQL_Request_en_GB.json" />
     <None Remove="BuiltInConnectorWorkflowTest\MockData\SQL_Request_xx_GB.json" />
     <None Remove="HttpWorkflowTest\MockData\SystemTwo_Request.json" />
+    <None Remove="InvokeWorkflowTest\MockData\AddToPriorityQueueRequest.json" />
+    <None Remove="InvokeWorkflowTest\MockData\InvokeWorkflowNotPriorityRequest.json" />
+    <None Remove="InvokeWorkflowTest\MockData\InvokeWorkflowPriorityRequest.json" />
+    <None Remove="InvokeWorkflowTest\MockData\WorkflowRequest.json" />
     <None Remove="LoopWorkflowTest\MockData\Response.json" />
     <None Remove="ManagedApiConnectorWorkflowTest\MockData\Outlook_Request.json" />
     <None Remove="ManagedApiConnectorWorkflowTest\MockData\Salesforce_Request.json" />
@@ -38,6 +42,10 @@
     <EmbeddedResource Include="BuiltInConnectorWorkflowTest\MockData\SQL_Request_xx_GB.json" />
     <EmbeddedResource Include="BuiltInConnectorWorkflowTest\MockData\SQL_Request_en_GB.json" />
     <EmbeddedResource Include="HttpWorkflowTest\MockData\SystemTwo_Request.json" />
+    <EmbeddedResource Include="InvokeWorkflowTest\MockData\AddToPriorityQueueRequest.json" />
+    <EmbeddedResource Include="InvokeWorkflowTest\MockData\InvokeWorkflowNotPriorityRequest.json" />
+    <EmbeddedResource Include="InvokeWorkflowTest\MockData\InvokeWorkflowPriorityRequest.json" />
+    <EmbeddedResource Include="InvokeWorkflowTest\MockData\WorkflowRequest.json" />
     <EmbeddedResource Include="LoopWorkflowTest\MockData\Response.json" />
     <EmbeddedResource Include="ManagedApiConnectorWorkflowTest\MockData\Outlook_Request.json" />
     <EmbeddedResource Include="ManagedApiConnectorWorkflowTest\MockData\Salesforce_Request.json" />

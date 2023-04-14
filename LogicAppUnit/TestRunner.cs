@@ -23,7 +23,7 @@ namespace LogicAppUnit
     {
         private readonly HttpClient _client;
 
-        private readonly string _workflowName;
+        private readonly WorkflowHelper _workflowDefinition;
         private readonly MockHttpHost _mockHttpHost;
         private readonly WorkflowTestHost _workflowTestHost;
         private readonly WorkflowApiHelper _apiHelper;
@@ -104,27 +104,26 @@ namespace LogicAppUnit
         /// </summary>
         /// <param name="loggingConfig">The logging configuration for the test execution.</param>
         /// <param name="client">The HTTP client.</param>
-        /// <param name="workflowName">The name of the workflow being tested.</param>
-        /// <param name="workflowDefinition">The content of the workflow definition file.</param>
-        /// <param name="localSettings">The contents of the local settings file.</param>
+        /// <param name="workflowDefinition">The workflow definition file.</param>
+        /// <param name="localSettings">The local settings file.</param>
         /// <param name="host">The contents of the host file.</param>
         /// <param name="parameters">The contents of the parameters file, or <c>null</c> if the file does not exist.</param>
-        /// <param name="connections">The contents of the connections file, or <c>null</c> if the file does not exist.</param>
+        /// <param name="connections">The connections file, or <c>null</c> if the file does not exist.</param>
         /// <param name="artifactsDirectory">The (optional) artifacts directory containing maps and schemas that are used by the workflow being tested.</param>
-        public TestRunner(
+        internal TestRunner(
             TestConfigurationLogging loggingConfig,
             HttpClient client,
-            string workflowName, string workflowDefinition,
-            string localSettings, string host, string parameters = null, string connections = null, DirectoryInfo artifactsDirectory = null)
+            WorkflowHelper workflowDefinition,
+            SettingsHelper localSettings, string host, string parameters = null, ConnectionHelper connections = null, DirectoryInfo artifactsDirectory = null)
         {
             if (loggingConfig == null)
                 throw new ArgumentNullException(nameof(loggingConfig));
             if (client == null)
                 throw new ArgumentNullException(nameof(client));
-            if (string.IsNullOrEmpty(workflowName))
-                throw new ArgumentNullException(nameof(workflowName));
-            if (string.IsNullOrEmpty(workflowDefinition))
+            if (workflowDefinition == null)
                 throw new ArgumentNullException(nameof(workflowDefinition));
+            if (localSettings == null)
+                throw new ArgumentNullException(nameof(localSettings));
 
             LoggingHelper.LogBanner("Starting test runner");
 
@@ -132,12 +131,12 @@ namespace LogicAppUnit
                 Console.WriteLine("Logging of the Function runtime startup logs is disabled. This can be enabled using the 'logging.writeFunctionRuntineStartupLogs' option in 'testConfiguration.json'.");
 
             _client = client;
-            _workflowName = workflowName;
+            _workflowDefinition = workflowDefinition;
 
-            var workflowTestInput = new WorkflowTestInput[] { new WorkflowTestInput(workflowName, workflowDefinition) };
-            _workflowTestHost = new WorkflowTestHost(workflowTestInput, localSettings, parameters, connections, host, artifactsDirectory, loggingConfig.WriteFunctionRuntineStartupLogs);
+            var workflowTestInput = new WorkflowTestInput[] { new WorkflowTestInput(workflowDefinition.WorkflowName, workflowDefinition.ToString()) };
+            _workflowTestHost = new WorkflowTestHost(workflowTestInput, localSettings.ToString(), parameters, connections.ToString(), host, artifactsDirectory, loggingConfig.WriteFunctionRuntineStartupLogs);
             _mockHttpHost = new MockHttpHost();
-            _apiHelper = new WorkflowApiHelper(client, workflowName);
+            _apiHelper = new WorkflowApiHelper(client, workflowDefinition.WorkflowName);
 
             // Initialise the cached mocked requests
             _mockRequests = new ConcurrentBag<MockRequest>();
@@ -295,8 +294,12 @@ namespace LogicAppUnit
         /// <inheritdoc cref="ITestRunner.TriggerWorkflow(HttpContent, HttpMethod, string, Dictionary{string, string})" />
         public HttpResponseMessage TriggerWorkflow(HttpContent content, HttpMethod method, string relativePath, Dictionary<string, string> requestHeaders = null)
         {
+            string triggerName = _workflowDefinition.HttpTriggerName;
+            if (string.IsNullOrEmpty(triggerName))
+                throw new TestException($"Workflow does not have a HTTP Request trigger, so the workflow cannot be started.");
+
             // Get the callback information for the workflow, including the trigger URL
-            CallbackUrlDefinition callbackDef = _apiHelper.GetWorkflowCallbackDefinition();
+            CallbackUrlDefinition callbackDef = _apiHelper.GetWorkflowCallbackDefinition(triggerName);
 
             // Configure the HttpRequestMessage to trigger the workflow
             var httpRequestMessage = new HttpRequestMessage
@@ -315,9 +318,12 @@ namespace LogicAppUnit
             }
 
             LoggingHelper.LogBanner("Starting workflow execution");
+            Console.WriteLine("Workflow trigger:");
+            Console.WriteLine($"    Name: {triggerName}");
+            Console.WriteLine($"    URL: {httpRequestMessage.Method} {httpRequestMessage.RequestUri}");
+            Console.WriteLine();
 
             // Run the workflow and wait for completion
-            Console.WriteLine($"Workflow trigger: {httpRequestMessage.Method} {httpRequestMessage.RequestUri}");
             HttpResponseMessage response = PollAndReturnFinalWorkflowResponse(httpRequestMessage);
 
             // Copy the collection of mock requests from the thread-safe collection into a List that is accessible to the test case
@@ -443,7 +449,7 @@ namespace LogicAppUnit
 
             while (stopwatch.Elapsed < TimeSpan.FromMinutes(Constants.MAX_TIME_MINUTES_WHILE_POLLING_WORKFLOW_RESULT))
             {
-                using (var latestWorkflowHttpResponse = _client.GetAsync(TestEnvironment.GetRunsRequestUriWithManagementHost(flowName: _workflowName)).Result)
+                using (var latestWorkflowHttpResponse = _client.GetAsync(TestEnvironment.GetRunsRequestUriWithManagementHost(flowName: _workflowDefinition.WorkflowName)).Result)
                 {
                     var latestWorkflowHttpResponseContent = latestWorkflowHttpResponse.Content.ReadAsAsync<JToken>().Result;
                     var runStatusOfWorkflow = latestWorkflowHttpResponseContent["value"][0]["properties"]["status"].ToString();

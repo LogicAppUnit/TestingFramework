@@ -110,6 +110,7 @@ namespace LogicAppUnit
             Console.WriteLine($"Workflow '{_workflowDefinition.WorkflowName}' is {_workflowDefinition.WorkflowType}");
             _workflowDefinition.ReplaceRetryPoliciesWithNone();
             _workflowDefinition.ReplaceTriggersWithHttp();
+            _workflowDefinition.ReplaceInvokeWorkflowActionsWithHttp();
             _workflowDefinition.ReplaceBuiltInConnectorActionsWithHttp(_testConfig.Workflow.BuiltInConnectorsToMock);
 
             // Set up the local settings
@@ -180,8 +181,7 @@ namespace LogicAppUnit
             return new TestRunner(
                 _testConfig.Logging,
                 _client,
-                _workflowDefinition.WorkflowName, _workflowDefinition.ToString(),
-                _localSettings.ToString(), _host, _parameters, _connections.ToString(), _artifactDirectory);
+                _workflowDefinition, _localSettings, _host, _parameters, _connections, _artifactDirectory);
         }
 
         /// <summary>

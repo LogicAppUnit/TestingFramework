@@ -1,0 +1,120 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Is_this_a_Priority_blob": {
+                "type": "If",
+                "description": "This Decision is a bit pointless, just trying to demonstrate a workflow that includes two \"Invoke Workflow\" actions. ",
+                "expression": {
+                    "and": [
+                        {
+                            "contains": [
+                                "@triggerBody()?['name']",
+                                "Priority"
+                            ]
+                        }
+                    ]
+                },
+                "actions": {
+                    "Invoke_a_workflow_(Priority)": {
+                        "type": "Workflow",
+                        "inputs": {
+                            "host": {
+                                "workflow": {
+                                    "id": "managed-api-connector-test-workflow"
+                                }
+                            },
+                            "headers": {
+                                "Content-Type": "@triggerOutputs()?['body']?['properties']?['contentType']",
+                                "DataSource": "@triggerOutputs()?['body']?['containerInfo']?['name']",
+                                "Priority": true
+                            },
+                            "body": "@triggerOutputs()?['body']?['content']"
+                        }
+                    },
+                    "Add_customer_to_Priority_queue": {
+                        "type": "ServiceProvider",
+                        "inputs": {
+                            "parameters": {
+                                "queueName": "customers-priority-queue",
+                                "message": "{\n  \"blobName\": \"@{triggerOutputs()?['body']?['name']}\",\n  \"blobContent\":  @{triggerOutputs()?['body']?['content']}\n}"
+                            },
+                            "serviceProviderConfiguration": {
+                                "connectionName": "azureQueue",
+                                "operationId": "putMessage",
+                                "serviceProviderId": "/serviceProviders/azurequeues"
+                            }
+                        },
+                        "runAfter": {
+                            "Invoke_a_workflow_(Priority)": [
+                                "SUCCEEDED",
+                                "TIMEDOUT",
+                                "FAILED"
+                            ]
+                        }
+                    }
+                },
+                "else": {
+                    "actions": {
+                        "Invoke_a_workflow_(not_Priority)": {
+                            "type": "Workflow",
+                            "inputs": {
+                                "host": {
+                                    "workflow": {
+                                        "id": "managed-api-connector-test-workflow"
+                                    }
+                                },
+                                "headers": {
+                                    "Content-Type": "@triggerOutputs()?['body']?['properties']?['contentType']",
+                                    "DataSource": "@triggerOutputs()?['body']?['containerInfo']?['name']",
+                                    "Priority": false
+                                },
+                                "body": "@triggerOutputs()?['body']?['content']"
+                            }
+                        }
+                    }
+                },
+                "runAfter": {}
+            },
+            "Delete_blob": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "containerName": "customers",
+                        "blobName": "@triggerOutputs()?['body']?['name']"
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "azureBlob",
+                        "operationId": "deleteBlob",
+                        "serviceProviderId": "/serviceProviders/AzureBlob"
+                    }
+                },
+                "runAfter": {
+                    "Is_this_a_Priority_blob": [
+                        "SUCCEEDED",
+                        "FAILED",
+                        "TIMEDOUT"
+                    ]
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_a_blob_is_added_or_updated": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "path": "customers"
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "azureBlob",
+                        "operationId": "whenABlobIsAddedOrModified",
+                        "serviceProviderId": "/serviceProviders/AzureBlob"
+                    }
+                }
+            }
+        }
+    },
+    "kind": "Stateful"
+}
