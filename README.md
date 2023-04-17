@@ -1,6 +1,6 @@
 # LogicAppUnit Testing Framework
 
-<img align="right" src="https://raw.github.com/LogicAppUnit/TestingFramework/main/LogicAppUnit.png" width="120" />
+<img align="right" src="https://raw.github.com/LogicAppUnit/TestingFramework/main/LogicAppUnit.png" width="130" />
 
 LogicAppUnit is a testing framework that simplifies the creation of automated unit tests for Standard Logic Apps running in a *local development environment*, or in a *build server as part of a DevOps pipeline*. Standard Logic Apps do not include an out-of-the-box testing capability and this framework has been designed to fill this gap. The framework is based on the [Logic Apps Sample Test Framework](https://techcommunity.microsoft.com/t5/integrations-on-azure-blog/automated-testing-with-logic-apps-standard/ba-p/2960623) that was developed by Henry Liu, and includes additional functionality to make it easier to author and run tests and validate (assert) the results.
 
@@ -11,7 +11,7 @@ The framework does not support the testing of:
 
 The testing framework has been designed to make it easier to perform isolated unit testing of a workflow. The framework does this by modifying a copy of the workflow definition to remove the dependencies on external services and APIs, without affecting the functionality or behaviour of the workflow. This means that workflows can be easily tested in a developer's local environment, and by a DevOps pipeline running on a build server, where there is no access to Azure services or any other workflow dependencies.
 
-The framework includes these high-level capabilities:
+## Key Features
 
 - Replace non-HTTP triggers with HTTP triggers to enable automated testing of every workflow, irrespective of the trigger type.
 - Remove external service dependencies for built-in service provider connectors by replacing these actions with HTTP actions and a mock HTTP server that is managed by the framework.
