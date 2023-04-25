@@ -6,6 +6,7 @@ namespace LogicAppUnit.Hosting
     using System;
     using System.Linq;
     using System.Net.Http;
+    using LogicAppUnit.Mocking;
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -22,21 +23,22 @@ namespace LogicAppUnit.Hosting
     /// </summary>
     internal class MockHttpHost : IDisposable
     {
+        private readonly MockDefinition _mockDefinition;
+
         /// <summary>
         /// The web host.
         /// </summary>
         public IWebHost Host { get; set; }
 
         /// <summary>
-        /// The request handler.
-        /// </summary>
-        public Func<HttpRequestMessage, HttpResponseMessage> RequestHandler { get; set; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="MockHttpHost"/> class.
+        /// <param name="mockDefinition">The definition of the requests and responses to be mocked.</param>
+        /// <param name="url">URL for the mock host to listen on.</param>
         /// </summary>
-        public MockHttpHost(string url = null)
+        public MockHttpHost(MockDefinition mockDefinition, string url = null)
         {
+            _mockDefinition = mockDefinition;
+
             this.Host = WebHost
                 .CreateDefaultBuilder()
                 .UseSetting(key: WebHostDefaults.SuppressStatusMessagesKey, value: "true")
@@ -111,7 +113,8 @@ namespace LogicAppUnit.Hosting
                     }
 
                     using (var request = GetHttpRequestMessage(context))
-                    using (var responseMessage = this.Host.RequestHandler(request))
+                    // TODO: Why is '_mockDefinition' public?
+                    using (var responseMessage = await this.Host._mockDefinition.MatchRequestAndBuildResponseAsync(request))
                     {
                         var response = context.Response;
 

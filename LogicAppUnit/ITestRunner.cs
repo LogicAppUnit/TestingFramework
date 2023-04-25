@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using LogicAppUnit.Mocking;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -11,12 +12,19 @@ namespace LogicAppUnit
     /// </summary>
     public interface ITestRunner : IDisposable
     {
-        #region Mock server properties
+        #region Mock request handling
 
         /// <summary>
-        /// Sets the mocked responses for the outgoing HTTP calls from the workflow to the mock HTTP server.
+        /// Configures a delegate function that creates a mocked response based on a request.
         /// </summary>
         Func<HttpRequestMessage, HttpResponseMessage> AddApiMocks { set; }
+
+        /// <summary>
+        /// Configures a mocked response, consisting of a request matcher and a corresponding response builder.
+        /// </summary>
+        /// <param name="mockRequestMatcher">The request matcher.</param>
+        /// <returns>The mocked response.</returns>
+        IMockResponse AddMockResponse(IMockRequestMatcher mockRequestMatcher);
 
         /// <summary>
         /// Gets the mock requests that were created by the workflow during the test execution.
@@ -26,7 +34,7 @@ namespace LogicAppUnit
         /// </remarks>
         List<MockRequest> MockRequests { get; }
 
-        #endregion // Mock server properties
+        #endregion // Mock request handling
 
         #region Workflow properties
 
