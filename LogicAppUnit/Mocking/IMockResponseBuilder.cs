@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 
 namespace LogicAppUnit.Mocking
 {
@@ -69,6 +70,13 @@ namespace LogicAppUnit.Mocking
         IMockResponseBuilder WithDelay(TimeSpan delay);
 
         /// <summary>
+        /// Configures response content using an implementation of <see cref="HttpContent"/>.
+        /// </summary>
+        /// <param name="content">The HTTP content.</param>
+        /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
+        IMockResponseBuilder WithContent(HttpContent content);
+
+        /// <summary>
         /// Configures JSON response content using a <see cref="Stream"/>.
         /// </summary>
         /// <param name="jsonStream">The stream to be used for HTTP content.</param>
@@ -87,6 +95,6 @@ namespace LogicAppUnit.Mocking
         /// </summary>
         /// <param name="value">String to be used for HTTP content.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
-        IMockResponseBuilder WithContentAsPlainString(string value);
+        IMockResponseBuilder WithContentAsPlainTextString(string value);
     }
 }

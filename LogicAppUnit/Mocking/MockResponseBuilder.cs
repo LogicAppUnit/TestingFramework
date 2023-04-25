@@ -118,10 +118,18 @@ namespace LogicAppUnit.Mocking
             return this;
         }
 
+        /// <inheritdoc cref="IMockResponseBuilder.WithContent(HttpContent)" />
+        public IMockResponseBuilder WithContent(HttpContent content)
+        {
+            _content = content;
+            return this;
+        }
+
         /// <inheritdoc cref="IMockResponseBuilder.WithContentAsJsonString(string)" />
         public IMockResponseBuilder WithContentAsJsonString(string jsonString)
         {
             // TODO: WireMock allows you to enter dynamic JSON directly
+            // TODO: Should this be an overload of 'WithContentAsJson()'?
             _content = ContentHelper.CreateJsonStringContent(jsonString);
             return this;
         }
@@ -133,8 +141,8 @@ namespace LogicAppUnit.Mocking
             return this;
         }
 
-        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsPlainString(string)" />
-        public IMockResponseBuilder WithContentAsPlainString(string value)
+        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsPlainTextString(string)" />
+        public IMockResponseBuilder WithContentAsPlainTextString(string value)
         {
             _content = ContentHelper.CreatePlainStringContent(value);
             return this;
