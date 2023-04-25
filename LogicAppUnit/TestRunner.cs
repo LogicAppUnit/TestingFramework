@@ -140,7 +140,7 @@ namespace LogicAppUnit
             _apiHelper = new WorkflowApiHelper(client, workflowDefinition.WorkflowName);
 
             // Create the mock definition and mock HTTP host
-            _mockDefinition = new MockDefinition();
+            _mockDefinition = new MockDefinition(loggingConfig.WriteMockRequestMatchingLogs);
             _mockHttpHost = new MockHttpHost(_mockDefinition);
         }
 

@@ -15,6 +15,9 @@ namespace LogicAppUnit.Mocking
     /// </summary>
     internal class MockDefinition
     {
+        // <c>true</c> if the mock request matching logs are to be written to the test execution logs, otherwise <c>false</c>.
+        private readonly bool _writeMockRequestMatchingLogs;
+
         // Request matchers and response builders that are configured using the fluent API
         private readonly List<MockResponse> _mockResponses;
 
@@ -31,9 +34,12 @@ namespace LogicAppUnit.Mocking
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MockDefinition"/> class.
+        /// <param name="writeMockRequestMatchingLogs">Indicates if the mock request matching logs are to be written to the test execution logs.</param>
         /// </summary>
-        public MockDefinition()
+        public MockDefinition(bool writeMockRequestMatchingLogs)
         {
+            _writeMockRequestMatchingLogs = writeMockRequestMatchingLogs;
+
             _mockResponses = new List<MockResponse>();
             _mockRequestLog = new ConcurrentBag<MockRequest>();
             _requestMatchingLog = new List<string>();
@@ -103,12 +109,11 @@ namespace LogicAppUnit.Mocking
             {
                 Console.WriteLine("No mocked requests were logged");
             }
-            Console.WriteLine();
 
             // Write the request matching logs to the test output
-            // TODO: This logging needs to be controlled by a setting
-            if (_requestMatchingLog.Count > 0)
+            if (_writeMockRequestMatchingLogs && _requestMatchingLog.Count > 0)
             {
+                Console.WriteLine();
                 Console.WriteLine("Mocked request matching logs:");
                 _requestMatchingLog.ForEach(s => Console.WriteLine("    " + s));
             }
@@ -136,6 +141,7 @@ namespace LogicAppUnit.Mocking
             });
 
             // Use fluent mock reponses first, then the mock response delegate
+            // TODO: The logs don;t work when multiple requests are processed and matched
             HttpResponseMessage response = null;
             if (_mockResponses.Count > 0)
             {

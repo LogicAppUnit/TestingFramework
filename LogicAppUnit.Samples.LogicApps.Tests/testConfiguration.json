@@ -1,6 +1,7 @@
 ﻿{
   "logging": {
-    "writeFunctionRuntineStartupLogs": false
+    "writeFunctionRuntineStartupLogs": false,
+    "WriteMockRequestMatchingLogs":  true
   },
 
   "workflow": {
