@@ -169,10 +169,12 @@ namespace LogicAppUnit.Mocking
             if (_requestMethods.Count > 0 && !_requestMethods.Contains(request.Method))
                 return false;
 
-            // Paths
+            // Absolute Paths
             foreach (MockRequestPath path in _requestPaths)
             {
-                if ((path.MatchType == PathMatchType.AbsolutePath && request.RequestUri.AbsolutePath != path.Path) || (path.MatchType == PathMatchType.Contains && !request.RequestUri.AbsolutePath.Contains(path.Path)))
+                if ((path.MatchType == PathMatchType.Exact && request.RequestUri.AbsolutePath != path.Path) || 
+                    (path.MatchType == PathMatchType.Contains && !request.RequestUri.AbsolutePath.Contains(path.Path)) ||
+                    (path.MatchType == PathMatchType.EndsWith && !request.RequestUri.AbsolutePath.EndsWith(path.Path)))
                     return false;
             }
 
@@ -220,13 +222,18 @@ namespace LogicAppUnit.Mocking
         // TODO: Move to another file?
 
         /// <summary>
-        /// Match value is a complete match for the request URL absolute path, e.g. '\api\v1\this-service\this-operation'.
+        /// Value is an exact match for the path, e.g. '\api\v1\this-service\this-operation'.
         /// </summary>
-        AbsolutePath,
+        Exact,
 
         /// <summary>
-        /// Match value is contained within the request URL absolute path, e.g. 'this-service'.
+        /// Value is contained within the path, e.g. 'v1\this-service'.
         /// </summary>
-        Contains
+        Contains,
+
+        /// <summary>
+        /// Value matches the end of the path, e.g. 'this-operation'.
+        /// </summary>
+        EndsWith
     }
 }

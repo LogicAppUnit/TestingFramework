@@ -66,10 +66,10 @@ namespace LogicAppUnit.Mocking
         IMockRequestMatcher WithHeader(string name, string value);
 
         /// <summary>
-        /// Configure request matching using one or more HTTP URL paths.
+        /// Configure request matching using one or more URL absolute paths.
         /// </summary>
-        /// <param name="matchType">The type of match to be used when matching paths.</param>
-        /// <param name="paths">The paths to match.</param>
+        /// <param name="matchType">The type of match to be used when matching the absolute paths.</param>
+        /// <param name="paths">The absolute paths to match.</param>
         /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
         IMockRequestMatcher WithPath(PathMatchType matchType, params string[] paths);
 
