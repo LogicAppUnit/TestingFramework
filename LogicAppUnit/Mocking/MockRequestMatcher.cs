@@ -163,7 +163,7 @@ namespace LogicAppUnit.Mocking
         /// </summary>
         /// <param name="request">The HTTP request message to be compared.</param>
         /// <returns><c>true</c> if the request match conditions match the HTTP request message, otherwise <c>false</c>.</returns>
-        public bool MatchRequest(HttpRequestMessage request)
+        internal bool MatchRequest(HttpRequestMessage request)
         {
             // Method
             if (_requestMethods.Count > 0 && !_requestMethods.Contains(request.Method))

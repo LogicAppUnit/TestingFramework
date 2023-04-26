@@ -46,7 +46,7 @@ namespace LogicAppUnit.Mocking
         /// <param name="request">The HTTP request to be matched.</param>
         /// <param name="requestMatchingLog">Request matching log.</param>
         /// <returns>The response for the matching request, or <c>null</c> if there was no match.</returns>
-        public async Task<HttpResponseMessage> MatchRequestAndCreateResponseAsync(HttpRequestMessage request, List<string> requestMatchingLog)
+        internal async Task<HttpResponseMessage> MatchRequestAndCreateResponseAsync(HttpRequestMessage request, List<string> requestMatchingLog)
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
