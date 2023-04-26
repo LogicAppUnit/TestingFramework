@@ -70,6 +70,14 @@ namespace LogicAppUnit.Mocking
         IMockResponseBuilder WithDelay(TimeSpan delay);
 
         /// <summary>
+        /// Configures a random delay (between the <paramref name="from"/> and <paramref name="to"/>) before the response is returned to the workflow being tested.
+        /// </summary>
+        /// <param name="from">The from <see cref="TimeSpan"/>.</param>
+        /// <param name="to">The to <see cref="TimeSpan"/>.</param>
+        /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
+        IMockResponseBuilder WithDelay(TimeSpan from, TimeSpan to);
+
+        /// <summary>
         /// Configures response content using an implementation of <see cref="HttpContent"/>.
         /// </summary>
         /// <param name="content">The HTTP content.</param>

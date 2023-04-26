@@ -118,6 +118,16 @@ namespace LogicAppUnit.Mocking
             return this;
         }
 
+        /// <inheritdoc cref="IMockResponseBuilder.WithDelay(TimeSpan, TimeSpan)" />
+        public IMockResponseBuilder WithDelay(TimeSpan from, TimeSpan to)
+        {
+            if (to < from)
+                throw new ArgumentException("The 'from' timespan must be less than or equal to the 'to' timespan.", nameof(from));
+
+            _delay = TimeSpan.FromMilliseconds(new Random().Next((int)from.TotalMilliseconds, (int)to.TotalMilliseconds));
+            return this;
+        }
+
         /// <inheritdoc cref="IMockResponseBuilder.WithContent(HttpContent)" />
         public IMockResponseBuilder WithContent(HttpContent content)
         {
@@ -155,7 +165,7 @@ namespace LogicAppUnit.Mocking
         /// </summary>
         /// <param name="request">The HTTP request message.</param>
         /// <returns>The HTTP response message.</returns>
-        public HttpResponseMessage BuildResponse(HttpRequestMessage request)
+        internal HttpResponseMessage BuildResponse(HttpRequestMessage request)
         {
             HttpResponseMessage response = new HttpResponseMessage();
             response.RequestMessage = request;
