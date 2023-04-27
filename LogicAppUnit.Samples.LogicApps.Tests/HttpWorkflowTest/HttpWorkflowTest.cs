@@ -1,6 +1,8 @@
 ﻿using LogicAppUnit.Helper;
+using LogicAppUnit.Mocking;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -64,18 +66,16 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
-                // Mock the HTTP calls and customize responses
-                testRunner.AddApiMocks = (request) =>
-                {
-                    HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    if (request.RequestUri.AbsolutePath == "/api/v1/customers/54617" && request.Method == HttpMethod.Get)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.InternalServerError;
-                        mockedResponse.Content = ContentHelper.CreatePlainStringContent("Internal server error detected in System One");
-                    }
-                    return mockedResponse;
-                };
+                // Configure mock responses
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingGet()
+                        .WithPath(PathMatchType.Exact, "/api/v1/customers/54617"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError()
+                        .WithContentAsPlainTextString("Internal server error detected in System One"));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
@@ -110,24 +110,25 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
 
             using (ITestRunner testRunner = CreateTestRunner(settingsToOverride))
             {
-                // Mock the HTTP calls and customize responses
-                testRunner.AddApiMocks = (request) =>
-                {
-                    HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    if (request.RequestUri.AbsolutePath == "/api/v1/customers/54617" && request.Method == HttpMethod.Get)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                        mockedResponse.Content = GetCustomerResponse();
-                    }
-                    else if (request.RequestUri.AbsolutePath == "/api/v1.1/membership/customers/54617" && request.Method == HttpMethod.Put)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.InternalServerError;
-                        mockedResponse.Content = ContentHelper.CreatePlainStringContent("System Two has died");
-                    }
-                    return mockedResponse;
-                };
+                // Configure mock responses
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingGet()
+                        .WithPath(PathMatchType.Exact, "/api/v1/customers/54617"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess()
+                        .WithContent(GetCustomerResponse()));
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingPut()
+                        .WithPath(PathMatchType.Exact, "/api/v1.1/membership/customers/54617"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError()
+                        .WithContentAsPlainTextString("System Two has died"));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
@@ -176,24 +177,25 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
 
             using (ITestRunner testRunner = CreateTestRunner(settingsToOverride))
             {
-                // Mock the HTTP calls and customize responses
-                testRunner.AddApiMocks = (request) =>
-                {
-                    HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    if (request.RequestUri.AbsolutePath == "/api/v1/customers/54617" && request.Method == HttpMethod.Get)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                        mockedResponse.Content = GetCustomerResponse();
-                    }
-                    else if (request.RequestUri.AbsolutePath == "/api/v1.1/membership/customers/54617" && request.Method == HttpMethod.Put)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                        mockedResponse.Content = ContentHelper.CreatePlainStringContent("success");
-                    }
-                    return mockedResponse;
-                };
+                // Configure mock responses
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingGet()
+                        .WithPath(PathMatchType.Exact, "/api/v1/customers/54617"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess()
+                        .WithContent(GetCustomerResponse()));
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingPut()
+                        .WithPath(PathMatchType.Exact, "/api/v1.1/membership/customers/54617"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess()
+                        .WithContentAsPlainTextString("success"));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
