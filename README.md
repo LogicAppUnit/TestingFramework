@@ -42,6 +42,13 @@ Download the *LogicAppUnit* testing framework package from nuget: https://www.nu
 [![NuGet Badge](https://buildstats.info/nuget/LogicAppUnit)](https://www.nuget.org/packages/LogicAppUnit)
 
 
+## Contributors
+
+- [![](https://github.com/mark-abrams.png?size=50)](https://github.com/mark-abrams)
+- [![](https://github.com/sanket-borhade.png?size=50)](https://github.com/sanket-borhade)
+- [![](https://github.com/shadhajSH.png?size=50)](https://github.com/shadhajSH)
+
+
 ## Documentation
 
 The best way to understand how the framework works and how to write tests using it is to read the [wiki](https://github.com/LogicAppUnit/TestingFramework/wiki) and look at the example tests in the *LogicAppUnit.Samples.LogicApps.Tests* project.
