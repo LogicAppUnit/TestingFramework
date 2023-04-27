@@ -11,6 +11,7 @@ namespace LogicAppUnit.Mocking
         private readonly List<HttpMethod> _requestMethods;
         private readonly List<MockRequestPath> _requestPaths;
         private readonly List<int> _requestCallIndexes;
+        private readonly List<int> _requestCallIndexesNot;
         private readonly Dictionary<string, string> _requestHeaders;
         private readonly Dictionary<string, string> _requestQueryParams;
 
@@ -27,6 +28,7 @@ namespace LogicAppUnit.Mocking
             _requestMethods = new List<HttpMethod>();
             _requestPaths = new List<MockRequestPath>();
             _requestCallIndexes = new List<int>();
+            _requestCallIndexesNot = new List<int>();
             _requestHeaders = new Dictionary<string, string>();              // TODO: Could allow multiple match values for each header or parameter (Dictionary<string, List<string>>)?
             _requestQueryParams = new Dictionary<string, string>();          // TODO: Could allow multiple match values for each header or parameter? Can have duplicates in query parameters.
         }
@@ -143,14 +145,27 @@ namespace LogicAppUnit.Mocking
             return this;
         }
 
-        /// <inheritdoc cref="IMockRequestMatcher.WithCallIndex(int[])" />
-        public IMockRequestMatcher WithCallIndex(params int[] callIndexes)
+        /// <inheritdoc cref="IMockRequestMatcher.WithMatchCount(int[])" />
+        public IMockRequestMatcher WithMatchCount(params int[] callIndexes)
         {
             foreach (int callIndex in callIndexes)
             {
                 if (!_requestCallIndexes.Contains(callIndex))
                 {
                     _requestCallIndexes.Add(callIndex);
+                }
+            }
+            return this;
+        }
+
+        /// <inheritdoc cref="IMockRequestMatcher.WithNotMatchCount(int[])" />
+        public IMockRequestMatcher WithNotMatchCount(params int[] callIndexes)
+        {
+            foreach (int callIndex in callIndexes)
+            {
+                if (!_requestCallIndexesNot.Contains(callIndex))
+                {
+                    _requestCallIndexesNot.Add(callIndex);
                 }
             }
             return this;
@@ -190,6 +205,9 @@ namespace LogicAppUnit.Mocking
             _requestMatchCount++;
             if (_requestCallIndexes.Count > 0 && !_requestCallIndexes.Contains(_requestMatchCount))
                 return false;
+            if (_requestCallIndexesNot.Count > 0 && _requestCallIndexesNot.Contains(_requestMatchCount))
+                return false;
+
 
             return true;
         }
