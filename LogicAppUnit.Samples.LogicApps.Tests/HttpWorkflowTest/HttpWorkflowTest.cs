@@ -119,7 +119,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithSuccess()
-                        .WithContent(GetCustomerResponse()));
+                        .WithContent(GetCustomerResponse));
                 testRunner
                     .AddMockResponse(
                         MockRequestMatcher.Create()
@@ -186,7 +186,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithSuccess()
-                        .WithContent(GetCustomerResponse()));
+                        .WithContent(GetCustomerResponse));
                 testRunner
                     .AddMockResponse(
                         MockRequestMatcher.Create()

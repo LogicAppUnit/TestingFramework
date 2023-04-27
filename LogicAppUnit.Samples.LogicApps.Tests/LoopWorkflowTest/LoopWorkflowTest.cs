@@ -1,4 +1,5 @@
 ﻿using LogicAppUnit.Helper;
+using LogicAppUnit.Mocking;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using System.Net;
@@ -36,39 +37,47 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
 
             using (ITestRunner testRunner = CreateTestRunner())
             {
-                // Mock the HTTP calls and customize responses
-                int iterationCounter = 0;
-                testRunner.AddApiMocks = (request) =>
-                {
-                    HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    iterationCounter += 1;
-                    if (request.RequestUri.AbsolutePath == "/api/v1/doSomethingInsideUntilLoop" && request.Method == HttpMethod.Post && iterationCounter == 4)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.InternalServerError;
-                        mockedResponse.Content = GetMockResponse(iterationCounter, "Internal server error detected in System One");
-                    }
-                    else if (request.RequestUri.AbsolutePath == "/api/v1/doSomethingInsideUntilLoop" && request.Method == HttpMethod.Post && iterationCounter != 4)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                        mockedResponse.Content = GetMockResponse(iterationCounter, "All working in System One");
-                    }
-                    else if (request.RequestUri.AbsolutePath == "/api/v1.1/doSomethingInsideForEachLoop" && request.Method == HttpMethod.Post && iterationCounter == 7)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.BadRequest;
-                        mockedResponse.Content = GetMockResponse(iterationCounter, "Bad request received by System Two");
-                    }
-                    else if (request.RequestUri.AbsolutePath == "/api/v1.1/doSomethingInsideForEachLoop" && request.Method == HttpMethod.Post && iterationCounter != 7)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                        mockedResponse.Content = GetMockResponse(iterationCounter, "All working in System Two");
-                    }
-
-                    return mockedResponse;
-                };
+                // Configure mock responses
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.Exact, "/api/v1/doSomethingInsideUntilLoop")
+                        // Match call number 4 only - all other calls to this API operation will "fall through" to the next request matcher
+                        .WithMatchCount(4))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError()
+                        .WithContent(() => GetMockResponse("Internal server error detected in System One")));
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.Exact, "/api/v1/doSomethingInsideUntilLoop"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess()
+                        .WithContent(() => GetMockResponse("All working in System One")));
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.Exact, "/api/v1.1/doSomethingInsideForEachLoop")
+                        // Match anything apart from call numbers 1, 4 and 5 - all other calls to this API operation will "fall through" to the next request matcher
+                        .WithNotMatchCount(1, 4, 5))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithStatusCode(HttpStatusCode.BadRequest)
+                        .WithContent(() => GetMockResponse("Bad request received by System Two")));
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.Exact, "/api/v1.1/doSomethingInsideForEachLoop"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess()
+                        .WithContent(() => GetMockResponse("All working in System Two")));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
@@ -110,7 +119,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
                 // If your FoEach loop is set up to use parallel iterations, assertions like this might not be possible
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service_Two", 1));
                 Assert.AreEqual(ActionStatus.Failed, testRunner.GetWorkflowActionStatus("Call_Service_Two", 2));
-                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service_Two", 3));
+                Assert.AreEqual(ActionStatus.Failed, testRunner.GetWorkflowActionStatus("Call_Service_Two", 3));
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service_Two", 4));
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service_Two", 5));
 
@@ -135,11 +144,10 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
             });
         }
 
-        private static StringContent GetMockResponse(int iterationNumber, string message)
+        private static StringContent GetMockResponse(string message)
         {
             return ContentHelper.CreateJsonStringContent(new
             {
-                iterationNumber,
                 message
             });
         }
