@@ -89,19 +89,19 @@ namespace LogicAppUnit.Mocking
         IMockRequestMatcher WithQueryParam(string name, string value);
 
         /// <summary>
-        /// Configure request matching using the request match count number, where the number of times that the request has been matched during the test execution matches <paramref name="matchCount"/>).
+        /// Configure request matching using the request match count number, where the number of times that the request has been matched during the test execution matches <paramref name="matchCounts"/>).
         /// </summary>
-        /// <param name="matchCount">The match count number.</param>
+        /// <param name="matchCounts">The match count number.</param>
         /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
         /// <remarks>This match is the logical inverse of <see cref="M:IMockRequestMatcher.WithNotMatchCount()"/>.</remarks>
-        IMockRequestMatcher WithMatchCount(params int[] matchCount);
+        IMockRequestMatcher WithMatchCount(params int[] matchCounts);
 
         /// <summary>
-        /// Configure request matching using the request match count number, where the number of times that the request has been matched during the test execution does not match <paramref name="matchCount"/>).
+        /// Configure request matching using the request match count number, where the number of times that the request has been matched during the test execution does not match <paramref name="matchCounts"/>).
         /// </summary>
-        /// <param name="matchCount">The match count number.</param>
+        /// <param name="matchCounts">The match count number.</param>
         /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
         /// <remarks>This match is the logical inverse of <see cref="M:IMockRequestMatcher.WithMatchCount()"/>.</remarks>
-        IMockRequestMatcher WithNotMatchCount(params int[] matchCount);
+        IMockRequestMatcher WithNotMatchCount(params int[] matchCounts);
     }
 }

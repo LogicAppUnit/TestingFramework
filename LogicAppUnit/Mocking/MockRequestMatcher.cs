@@ -10,12 +10,12 @@ namespace LogicAppUnit.Mocking
     {
         private readonly List<HttpMethod> _requestMethods;
         private readonly List<MockRequestPath> _requestPaths;
-        private readonly List<int> _requestCallIndexes;
-        private readonly List<int> _requestCallIndexesNot;
         private readonly Dictionary<string, string> _requestHeaders;
         private readonly Dictionary<string, string> _requestQueryParams;
+        private readonly List<int> _requestMatchCounts;
+        private readonly List<int> _requestMatchCountsNot;
 
-        private int _requestMatchCount = 0;
+        private int _requestMatchCounter = 0;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MockRequestMatcher"/> class.
@@ -27,10 +27,10 @@ namespace LogicAppUnit.Mocking
         {
             _requestMethods = new List<HttpMethod>();
             _requestPaths = new List<MockRequestPath>();
-            _requestCallIndexes = new List<int>();
-            _requestCallIndexesNot = new List<int>();
             _requestHeaders = new Dictionary<string, string>();              // TODO: Could allow multiple match values for each header or parameter (Dictionary<string, List<string>>)?
             _requestQueryParams = new Dictionary<string, string>();          // TODO: Could allow multiple match values for each header or parameter? Can have duplicates in query parameters.
+            _requestMatchCounts = new List<int>();
+            _requestMatchCountsNot = new List<int>();
         }
 
         /// <summary>
@@ -146,26 +146,26 @@ namespace LogicAppUnit.Mocking
         }
 
         /// <inheritdoc cref="IMockRequestMatcher.WithMatchCount(int[])" />
-        public IMockRequestMatcher WithMatchCount(params int[] callIndexes)
+        public IMockRequestMatcher WithMatchCount(params int[] matchCounts)
         {
-            foreach (int callIndex in callIndexes)
+            foreach (int matchCount in matchCounts)
             {
-                if (!_requestCallIndexes.Contains(callIndex))
+                if (!_requestMatchCounts.Contains(matchCount))
                 {
-                    _requestCallIndexes.Add(callIndex);
+                    _requestMatchCounts.Add(matchCount);
                 }
             }
             return this;
         }
 
         /// <inheritdoc cref="IMockRequestMatcher.WithNotMatchCount(int[])" />
-        public IMockRequestMatcher WithNotMatchCount(params int[] callIndexes)
+        public IMockRequestMatcher WithNotMatchCount(params int[] matchCounts)
         {
-            foreach (int callIndex in callIndexes)
+            foreach (int matchCount in matchCounts)
             {
-                if (!_requestCallIndexesNot.Contains(callIndex))
+                if (!_requestMatchCountsNot.Contains(matchCount))
                 {
-                    _requestCallIndexesNot.Add(callIndex);
+                    _requestMatchCountsNot.Add(matchCount);
                 }
             }
             return this;
@@ -202,10 +202,10 @@ namespace LogicAppUnit.Mocking
 
 
             // Match count
-            _requestMatchCount++;
-            if (_requestCallIndexes.Count > 0 && !_requestCallIndexes.Contains(_requestMatchCount))
+            _requestMatchCounter++;
+            if (_requestMatchCounts.Count > 0 && !_requestMatchCounts.Contains(_requestMatchCounter))
                 return false;
-            if (_requestCallIndexesNot.Count > 0 && _requestCallIndexesNot.Contains(_requestMatchCount))
+            if (_requestMatchCountsNot.Count > 0 && _requestMatchCountsNot.Contains(_requestMatchCounter))
                 return false;
 
 
