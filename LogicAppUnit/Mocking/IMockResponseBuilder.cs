@@ -78,11 +78,11 @@ namespace LogicAppUnit.Mocking
         IMockResponseBuilder WithDelay(TimeSpan from, TimeSpan to);
 
         /// <summary>
-        /// Configures response content using an implementation of <see cref="HttpContent"/>.
+        /// Configures response content using a delegate function that returns an implementation of <see cref="HttpContent"/>.
         /// </summary>
         /// <param name="content">The HTTP content.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
-        IMockResponseBuilder WithContent(HttpContent content);
+        IMockResponseBuilder WithContent(Func<HttpContent> content);
 
         /// <summary>
         /// Configures JSON response content using a <see cref="Stream"/>.

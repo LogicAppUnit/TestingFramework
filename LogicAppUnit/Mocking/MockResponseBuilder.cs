@@ -15,8 +15,8 @@ namespace LogicAppUnit.Mocking
         private HttpStatusCode _statusCode;
         private TimeSpan? _delay;
         private readonly Dictionary<string, string> _responseHeaders;       // TODO: Could allow multiple match values for each header or parameter (Dictionary<string, List<string>>)?
-        private HttpContent _content;
-        // TODO: Could add a delegate so that responses are creaed via the delegate?
+        private Func<HttpContent> _contentDelegate;
+
         // TODO: Do we want to allow users to set additional content headers?
 
         /// <summary>
@@ -40,6 +40,7 @@ namespace LogicAppUnit.Mocking
         {
             _statusCode = HttpStatusCode.OK;
             _responseHeaders = new Dictionary<string, string>();
+            _contentDelegate = () => null;
         }
 
         /// <summary>
@@ -62,7 +63,7 @@ namespace LogicAppUnit.Mocking
         /// <inheritdoc cref="IMockResponseBuilder.WithNoContent" />
         public IMockResponseBuilder WithNoContent()
         {
-            _content = null;
+            _contentDelegate = () => null;
             return WithStatusCode(HttpStatusCode.NoContent);
         }
 
@@ -128,10 +129,10 @@ namespace LogicAppUnit.Mocking
             return this;
         }
 
-        /// <inheritdoc cref="IMockResponseBuilder.WithContent(HttpContent)" />
-        public IMockResponseBuilder WithContent(HttpContent content)
+        /// <inheritdoc cref="IMockResponseBuilder.WithContent(Func{HttpContent})" />
+        public IMockResponseBuilder WithContent(Func<HttpContent> content)
         {
-            _content = content;
+            _contentDelegate = content;
             return this;
         }
 
@@ -140,21 +141,21 @@ namespace LogicAppUnit.Mocking
         {
             // TODO: WireMock allows you to enter dynamic JSON directly
             // TODO: Should this be an overload of 'WithContentAsJson()'?
-            _content = ContentHelper.CreateJsonStringContent(jsonString);
+            _contentDelegate = () => ContentHelper.CreateJsonStringContent(jsonString);
             return this;
         }
 
         /// <inheritdoc cref="IMockResponseBuilder.WithContentAsJsonStream(Stream)" />
         public IMockResponseBuilder WithContentAsJsonStream(Stream jsonStream)
         {
-            _content = ContentHelper.CreateJsonStreamContent(jsonStream);
+            _contentDelegate = () => ContentHelper.CreateJsonStreamContent(jsonStream);
             return this;
         }
 
         /// <inheritdoc cref="IMockResponseBuilder.WithContentAsPlainTextString(string)" />
         public IMockResponseBuilder WithContentAsPlainTextString(string value)
         {
-            _content = ContentHelper.CreatePlainStringContent(value);
+            _contentDelegate = () => ContentHelper.CreatePlainStringContent(value);
             return this;
         }
 
@@ -167,10 +168,10 @@ namespace LogicAppUnit.Mocking
         /// <returns>The HTTP response message.</returns>
         internal HttpResponseMessage BuildResponse(HttpRequestMessage request)
         {
-            HttpResponseMessage response = new HttpResponseMessage();
+            var response = new HttpResponseMessage();
             response.RequestMessage = request;
             response.StatusCode = _statusCode;
-            response.Content = _content;
+            response.Content = _contentDelegate();
 
             foreach (var header in _responseHeaders)
             {
