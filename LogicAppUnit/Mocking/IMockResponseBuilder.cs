@@ -56,6 +56,13 @@ namespace LogicAppUnit.Mocking
         IMockResponseBuilder WithHeader(string name, string value);
 
         /// <summary>
+        /// Configures a delay before the response is returned to the workflow being tested. The duration of the delay is set by a delegate function that returns a <see cref="TimeSpan"/>.
+        /// </summary>
+        /// <param name="delay">Delegate function that returns a <see cref="TimeSpan"/>.</param>
+        /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
+        IMockResponseBuilder WithDelay(Func<TimeSpan> delay);
+
+        /// <summary>
         /// Configures a delay (in seconds) before the response is returned to the workflow being tested.
         /// </summary>
         /// <param name="secondsDelay">The delay, in seconds.</param>
@@ -70,17 +77,25 @@ namespace LogicAppUnit.Mocking
         IMockResponseBuilder WithDelay(TimeSpan delay);
 
         /// <summary>
-        /// Configures a random delay (between the <paramref name="from"/> and <paramref name="to"/>) before the response is returned to the workflow being tested.
+        /// Configures a random delay (in seconds) before the response is returned to the workflow being tested. The duration of the delay is between <paramref name="secondsMin"/> and <paramref name="secondsMax"/>),
         /// </summary>
-        /// <param name="from">The from <see cref="TimeSpan"/>.</param>
-        /// <param name="to">The to <see cref="TimeSpan"/>.</param>
+        /// <param name="secondsMin">The minimum duration of the delay, in seconds.</param>
+        /// <param name="secondsMax">The maximum duration of the delay, in seconds.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
-        IMockResponseBuilder WithDelay(TimeSpan from, TimeSpan to);
+        IMockResponseBuilder WithDelay(int secondsMin, int secondsMax);
+
+        /// <summary>
+        /// Configures a random delay (in milliseconds) before the response is returned to the workflow being tested. The duration of the delay is between <paramref name="min"/> and <paramref name="max"/>),
+        /// </summary>
+        /// <param name="min">The minimum duration of the delay, as a <see cref="TimeSpan"/>.</param>
+        /// <param name="max">The maximum duration of the delay, as a <see cref="TimeSpan"/>.</param>
+        /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
+        IMockResponseBuilder WithDelay(TimeSpan min, TimeSpan max);
 
         /// <summary>
         /// Configures response content using a delegate function that returns an implementation of <see cref="HttpContent"/>.
         /// </summary>
-        /// <param name="content">The HTTP content.</param>
+        /// <param name="content">Delegate function that returns an implementation of <see cref="HttpContent"/>.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
         IMockResponseBuilder WithContent(Func<HttpContent> content);
 

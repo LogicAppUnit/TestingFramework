@@ -59,13 +59,7 @@ namespace LogicAppUnit.Mocking
             {
                 requestMatchingLog.Add("    Matched");
 
-                // Implement a delay if it is configured in the builder
-                if (_mockResponseBuilder.Delay.HasValue && _mockResponseBuilder.Delay.Value.TotalMilliseconds > 0)
-                {
-                    requestMatchingLog.Add($"    Delay for {_mockResponseBuilder.Delay.Value.TotalMilliseconds} milliseconds");
-                    await Task.Delay(_mockResponseBuilder.Delay.Value).ConfigureAwait(false);
-                }
-
+                await _mockResponseBuilder.ExecuteDelayAsync(requestMatchingLog);
                 return _mockResponseBuilder.BuildResponse(request);
             }
             else

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace LogicAppUnit.Mocking
 {
@@ -13,20 +14,27 @@ namespace LogicAppUnit.Mocking
     public class MockResponseBuilder : IMockResponseBuilder
     {
         private HttpStatusCode _statusCode;
-        private TimeSpan? _delay;
         private readonly Dictionary<string, string> _responseHeaders;       // TODO: Could allow multiple match values for each header or parameter (Dictionary<string, List<string>>)?
+        private Func<TimeSpan> _delayDelegate;
         private Func<HttpContent> _contentDelegate;
 
         // TODO: Do we want to allow users to set additional content headers?
 
         /// <summary>
-        /// Get the optional delay for the response, as a nullable <see cref="TimeSpan"/>.
+        /// Executes a delay.
         /// </summary>
-        public TimeSpan? Delay
+        /// <param name="requestMatchingLog">Request matching log.</param>
+        internal Task ExecuteDelayAsync(List<string> requestMatchingLog)
         {
-            get
+            if (_delayDelegate == null)
             {
-                return _delay;
+                return Task.CompletedTask;
+            }
+            else
+            {
+                TimeSpan delay = _delayDelegate();
+                requestMatchingLog.Add($"    Delay for {delay.TotalMilliseconds} milliseconds");
+                return Task.Delay(delay);
             }
         }
 
@@ -106,27 +114,42 @@ namespace LogicAppUnit.Mocking
             return this;
         }
 
+        /// <inheritdoc cref="IMockResponseBuilder.WithDelay(Func{TimeSpan})" />
+        public IMockResponseBuilder WithDelay(Func<TimeSpan> delay)
+        {
+            _delayDelegate = delay;
+            return this;
+        }
+
         /// <inheritdoc cref="IMockResponseBuilder.WithDelay(int)" />
         public IMockResponseBuilder WithDelay(int secondsDelay)
         {
-            return WithDelay(TimeSpan.FromSeconds(secondsDelay));
+            return WithDelay(() => TimeSpan.FromSeconds(secondsDelay));
         }
 
         /// <inheritdoc cref="IMockResponseBuilder.WithDelay(TimeSpan)" />
         public IMockResponseBuilder WithDelay(TimeSpan delay)
         {
-            _delay = delay;
-            return this;
+            return WithDelay(() => delay);
+        }
+
+        /// <inheritdoc cref="IMockResponseBuilder.WithDelay(int, int)" />
+        public IMockResponseBuilder WithDelay(int secondsMin, int secondsMax)
+        {
+            if (secondsMax <= secondsMin)
+                throw new ArgumentException("The 'min' seconds must be less than the 'max' seconds.", nameof(secondsMin));
+
+            // TODO: Implement Random() property using a single static instance
+            return WithDelay(() => TimeSpan.FromSeconds(new Random().Next(secondsMin, secondsMax)));
         }
 
         /// <inheritdoc cref="IMockResponseBuilder.WithDelay(TimeSpan, TimeSpan)" />
-        public IMockResponseBuilder WithDelay(TimeSpan from, TimeSpan to)
+        public IMockResponseBuilder WithDelay(TimeSpan min, TimeSpan max)
         {
-            if (to < from)
-                throw new ArgumentException("The 'from' timespan must be less than or equal to the 'to' timespan.", nameof(from));
+            if (max <= min)
+                throw new ArgumentException("The 'min' timespan must be less than the 'max' timespan.", nameof(min));
 
-            _delay = TimeSpan.FromMilliseconds(new Random().Next((int)from.TotalMilliseconds, (int)to.TotalMilliseconds));
-            return this;
+            return WithDelay(() => TimeSpan.FromMilliseconds(new Random().Next((int)min.TotalMilliseconds, (int)max.TotalMilliseconds)));
         }
 
         /// <inheritdoc cref="IMockResponseBuilder.WithContent(Func{HttpContent})" />
@@ -141,22 +164,19 @@ namespace LogicAppUnit.Mocking
         {
             // TODO: WireMock allows you to enter dynamic JSON directly
             // TODO: Should this be an overload of 'WithContentAsJson()'?
-            _contentDelegate = () => ContentHelper.CreateJsonStringContent(jsonString);
-            return this;
+            return WithContent(() => ContentHelper.CreateJsonStringContent(jsonString));
         }
 
         /// <inheritdoc cref="IMockResponseBuilder.WithContentAsJsonStream(Stream)" />
         public IMockResponseBuilder WithContentAsJsonStream(Stream jsonStream)
         {
-            _contentDelegate = () => ContentHelper.CreateJsonStreamContent(jsonStream);
-            return this;
+            return WithContent(() => ContentHelper.CreateJsonStreamContent(jsonStream));
         }
 
         /// <inheritdoc cref="IMockResponseBuilder.WithContentAsPlainTextString(string)" />
         public IMockResponseBuilder WithContentAsPlainTextString(string value)
         {
-            _contentDelegate = () => ContentHelper.CreatePlainStringContent(value);
-            return this;
+            return WithContent(() => ContentHelper.CreatePlainStringContent(value));
         }
 
         #endregion // IMockResponseBuilder implementation
