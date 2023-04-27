@@ -45,7 +45,9 @@ Download the *LogicAppUnit* testing framework package from nuget: https://www.nu
 ## Contributors
 
 - Mark Abrams [![](https://github.com/mark-abrams.png?size=50 "Mark Abrams")](https://github.com/mark-abrams)
+
 - Sanket Borhade [![](https://github.com/sanket-borhade.png?size=50 "Sanket Borhade")](https://github.com/sanket-borhade)
+
 - Shadhaj Kumar [![](https://github.com/shadhajSH.png?size=50 "Shadhaj Kumar")](https://github.com/shadhajSH)
 
 
