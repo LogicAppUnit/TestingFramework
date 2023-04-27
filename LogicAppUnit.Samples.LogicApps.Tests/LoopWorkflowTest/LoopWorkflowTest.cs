@@ -57,7 +57,9 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithSuccess()
-                        .WithContent(() => GetMockResponse("All working in System One")));
+                        .WithContent(() => GetMockResponse("All working in System One"))
+                        // Add a random delay in seconds
+                        .WithDelay(1, 5));
                 testRunner
                     .AddMockResponse(
                         MockRequestMatcher.Create()
@@ -77,7 +79,9 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithSuccess()
-                        .WithContent(() => GetMockResponse("All working in System Two")));
+                        .WithContent(() => GetMockResponse("All working in System Two"))
+                        // Add a random delay in milliseconds
+                        .WithDelay(new System.TimeSpan(0, 0, 1), new System.TimeSpan(0, 0, 8)));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
