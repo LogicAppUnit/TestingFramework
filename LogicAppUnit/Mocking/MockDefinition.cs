@@ -41,15 +41,20 @@ namespace LogicAppUnit.Mocking
             _mockRequestLog = new ConcurrentBag<MockRequestLog>();
 
             // Hook up a default mock delegate
-            _mockResponseDelegate = (request) => WrapDelegateDefinedInTestCase(request);
+            _mockResponseDelegate = (request) => WrapMockResponseDelegate(request);
         }
+
+        /// <summary>
+        /// Gets the thread-safe static <see cref="System.Random"/> instance.
+        /// </summary>
+        internal static Random Random { get; } = Random.Shared;
 
         /// <summary>
         /// Configures a delegate function that creates a mocked response based on a request.
         /// </summary>
         public Func<HttpRequestMessage, HttpResponseMessage> MockResponseDelegate
         {
-            set => _mockResponseDelegate = (request) => WrapDelegateDefinedInTestCase(request, value);
+            set => _mockResponseDelegate = (request) => WrapMockResponseDelegate(request, value);
         }
 
         /// <summary>
@@ -190,7 +195,7 @@ namespace LogicAppUnit.Mocking
         /// <param name="httpRequestMessage">Request message for the mocked API call.</param>
         /// <param name="mockDefinedInTestCase">Delegate function that sets the response message for the mocked API call.</param>
         /// <returns>The response message.</returns>
-        private static HttpResponseMessage WrapDelegateDefinedInTestCase(HttpRequestMessage httpRequestMessage, Func<HttpRequestMessage, HttpResponseMessage> mockDefinedInTestCase = null)
+        private static HttpResponseMessage WrapMockResponseDelegate(HttpRequestMessage httpRequestMessage, Func<HttpRequestMessage, HttpResponseMessage> mockDefinedInTestCase = null)
         {
             // Wire up the archive mock
             if (httpRequestMessage.RequestUri.AbsolutePath.Contains("Archive"))

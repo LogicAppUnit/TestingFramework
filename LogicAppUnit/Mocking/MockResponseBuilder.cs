@@ -21,24 +21,6 @@ namespace LogicAppUnit.Mocking
         // TODO: Do we want to allow users to set additional content headers?
 
         /// <summary>
-        /// Executes a delay.
-        /// </summary>
-        /// <param name="requestMatchingLog">Request matching log.</param>
-        internal Task ExecuteDelayAsync(List<string> requestMatchingLog)
-        {
-            if (_delayDelegate == null)
-            {
-                return Task.CompletedTask;
-            }
-            else
-            {
-                TimeSpan delay = _delayDelegate();
-                requestMatchingLog.Add($"    Delay for {delay.TotalMilliseconds} milliseconds");
-                return Task.Delay(delay);
-            }
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="MockResponseBuilder"/> class.
         /// </summary>
         /// <remarks>
@@ -139,8 +121,7 @@ namespace LogicAppUnit.Mocking
             if (secondsMax <= secondsMin)
                 throw new ArgumentException("The 'min' seconds must be less than the 'max' seconds.", nameof(secondsMin));
 
-            // TODO: Implement Random() property using a single static instance
-            return WithDelay(() => TimeSpan.FromSeconds(new Random().Next(secondsMin, secondsMax)));
+            return WithDelay(() => TimeSpan.FromSeconds(MockDefinition.Random.Next(secondsMin, secondsMax)));
         }
 
         /// <inheritdoc cref="IMockResponseBuilder.WithDelay(TimeSpan, TimeSpan)" />
@@ -149,7 +130,7 @@ namespace LogicAppUnit.Mocking
             if (max <= min)
                 throw new ArgumentException("The 'min' timespan must be less than the 'max' timespan.", nameof(min));
 
-            return WithDelay(() => TimeSpan.FromMilliseconds(new Random().Next((int)min.TotalMilliseconds, (int)max.TotalMilliseconds)));
+            return WithDelay(() => TimeSpan.FromMilliseconds(MockDefinition.Random.Next((int)min.TotalMilliseconds, (int)max.TotalMilliseconds)));
         }
 
         /// <inheritdoc cref="IMockResponseBuilder.WithContent(Func{HttpContent})" />
@@ -181,6 +162,8 @@ namespace LogicAppUnit.Mocking
 
         #endregion // IMockResponseBuilder implementation
 
+        #region Internal methods
+
         /// <summary>
         /// Build a HTTP response message using the builder configuration.
         /// </summary>
@@ -200,5 +183,25 @@ namespace LogicAppUnit.Mocking
 
             return response;
         }
+
+        /// <summary>
+        /// Executes a delay.
+        /// </summary>
+        /// <param name="requestMatchingLog">Request matching log.</param>
+        internal Task ExecuteDelayAsync(List<string> requestMatchingLog)
+        {
+            if (_delayDelegate == null)
+            {
+                return Task.CompletedTask;
+            }
+            else
+            {
+                TimeSpan delay = _delayDelegate();
+                requestMatchingLog.Add($"    Delay for {delay.TotalMilliseconds} milliseconds");
+                return Task.Delay(delay);
+            }
+        }
+
+        #endregion // Internal methods
     }
 }
