@@ -45,10 +45,8 @@ Download the *LogicAppUnit* testing framework package from nuget: https://www.nu
 ## Contributors
 
 - Mark Abrams [![](https://github.com/mark-abrams.png?size=50 "Mark Abrams")](https://github.com/mark-abrams)
-
-- Sanket Borhade [![](https://github.com/sanket-borhade.png?size=50 "Sanket Borhade")](https://github.com/sanket-borhade)
-
-- Shadhaj Kumar [![](https://github.com/shadhajSH.png?size=50 "Shadhaj Kumar")](https://github.com/shadhajSH)
+- [Sanket Borhade](https://github.com/sanket-borhade)
+- [Shadhaj Kumar](https://github.com/shadhajSH)
 
 
 ## Documentation
@@ -58,9 +56,10 @@ The best way to understand how the framework works and how to write tests using 
 
 ## Future Improvements and Changes
 
-This is a list of possible future improvements and changes for the framework. Please create a [new issue in GitHub](https://github.com/LogicAppUnit/TestingFramework/issues) if there are other features that you would like to see.
+This is a list of possible future improvements and changes for the framework. Please create a [new issue](https://github.com/LogicAppUnit/TestingFramework/issues) if there are other features that you would like to see.
 
 - Improve the creation of the mocked responses using the mock HTTP server.
   - The current approach is to use a delgate function that takes a *HttpRequestMessage* as an input and returns a *HttpResponseMessage*, where the delegate function creates a response message based on the request message and the requirements of the test case. This can be improved by including a fluent API to match requests and build responses, similar to that used by WireMock.net. A fluent API is more intuitive and easier to use for a test author.
   - The proposed solution will work with the existing delegate function, such that if a request is not matched by any request matcher defined in the fluent API, the delegate function will be called, if it is configured.
+- Allow mocked responses to be created in a test class's Initialize step, these responses would then be automatically configured for all tests within the test class. This would remove the need to repeatedly configure the same mocked responses in multiple tests.
 - Add a test configuration option to allow the port number for the mock HTTP server to be changed from the default of 7075.
