@@ -113,7 +113,6 @@ namespace LogicAppUnit.Hosting
                     }
 
                     using (var request = GetHttpRequestMessage(context))
-                    // TODO: Why is '_mockDefinition' public?
                     using (var responseMessage = await this.Host._mockDefinition.MatchRequestAndBuildResponseAsync(request))
                     {
                         var response = context.Response;
@@ -140,8 +139,7 @@ namespace LogicAppUnit.Hosting
                             var contentHeaders = responseMessage.Content.Headers;
 
                             // Copy the response content headers only after ensuring they are complete.
-                            // We ask for Content-Length first because HttpContent lazily computes this
-                            // and only afterwards writes the value into the content headers.
+                            // We ask for Content-Length first because HttpContent lazily computes this and only afterwards writes the value into the content headers.
                             var unused = contentHeaders.ContentLength;
 
                             foreach (var header in contentHeaders)
@@ -159,7 +157,7 @@ namespace LogicAppUnit.Hosting
         /// <summary>
         /// Gets the http request message.
         /// </summary>
-        /// <param name="httpContext">The http context.</param>
+        /// <param name="httpContext">The HTTP context.</param>
         public static HttpRequestMessage GetHttpRequestMessage(HttpContext httpContext)
         {
             var feature = httpContext.Features.Get<HttpRequestMessageFeature>();
