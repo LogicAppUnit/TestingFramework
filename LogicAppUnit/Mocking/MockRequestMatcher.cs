@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 
 namespace LogicAppUnit.Mocking
@@ -8,6 +9,7 @@ namespace LogicAppUnit.Mocking
     /// </summary>
     public class MockRequestMatcher : IMockRequestMatcher
     {
+        // TODO: We are not matching on the request content, or any of the content headers such as 'Content-Type'
         private readonly List<HttpMethod> _requestMethods;
         private readonly List<MockRequestPath> _requestPaths;
         private readonly Dictionary<string, string> _requestHeaders;
@@ -27,8 +29,8 @@ namespace LogicAppUnit.Mocking
         {
             _requestMethods = new List<HttpMethod>();
             _requestPaths = new List<MockRequestPath>();
-            _requestHeaders = new Dictionary<string, string>();              // TODO: Could allow multiple match values for each header or parameter (Dictionary<string, List<string>>)?
-            _requestQueryParams = new Dictionary<string, string>();          // TODO: Could allow multiple match values for each header or parameter? Can have duplicates in query parameters.
+            _requestHeaders = new Dictionary<string, string>();
+            _requestQueryParams = new Dictionary<string, string>();
             _requestMatchCounts = new List<int>();
             _requestMatchCountsNot = new List<int>();
         }
@@ -173,6 +175,8 @@ namespace LogicAppUnit.Mocking
 
         #endregion // IMockRequestMatcher implementation
 
+        #region Internal methods
+
         /// <summary>
         /// Compares a set of request match conditions with a mocked HTTP request message. 
         /// </summary>
@@ -180,6 +184,9 @@ namespace LogicAppUnit.Mocking
         /// <returns><c>true</c> if the request match conditions match the HTTP request message, otherwise <c>false</c>.</returns>
         internal bool MatchRequest(HttpRequestMessage request)
         {
+            // TODO: Instead of returning a bool, could return a type that indicates the return value and a textual message for logging?
+            // TODO: Do we want to break this up into separate private functions?
+
             // Method
             if (_requestMethods.Count > 0 && !_requestMethods.Contains(request.Method))
                 return false;
@@ -194,12 +201,39 @@ namespace LogicAppUnit.Mocking
             }
 
             // Headers
-            // TODO: Implement matching logic
+            // Headers defined in a request matcher with a null value are only validated for their existance and not their value
+            if (_requestHeaders.Count > 0)
+            {
+                if (request.Headers.Count() == 0)
+                    return false;
 
+                foreach (var requestHeader in _requestHeaders)
+                {
+                    if (!request.Headers.Contains(requestHeader.Key))
+                        return false;
+                    if (requestHeader.Value != null && requestHeader.Value != (request.Headers.GetValues(requestHeader.Key).FirstOrDefault() ?? ""))
+                        return false;
+                }
+            }
 
             // Query parameters
-            // TODO: Implement matching logic
+            // Parameters defined in a request matcher with a null value are only validated for their existance and not their value
+            if (_requestQueryParams.Count > 0)
+            {
+                var parsedParams = request.RequestUri.ParseQueryString();
+                var parsedParamsAsDictionary = request.RequestUri.ParseQueryString().AllKeys.ToDictionary(k => k, k => parsedParams[k]);
 
+                if (parsedParamsAsDictionary.Count == 0)
+                    return false;
+
+                foreach (var requestParam in _requestQueryParams)
+                {
+                    if (!parsedParamsAsDictionary.ContainsKey(requestParam.Key))
+                        return false;
+                    if (requestParam.Value != null && requestParam.Value != (parsedParamsAsDictionary[requestParam.Key] ?? ""))
+                        return false;
+                }
+            }
 
             // Match count
             _requestMatchCounter++;
@@ -211,6 +245,8 @@ namespace LogicAppUnit.Mocking
 
             return true;
         }
+
+        #endregion // Internal methods
     }
 
     /// <summary>
@@ -230,28 +266,5 @@ namespace LogicAppUnit.Mocking
         /// </summary>
         public PathMatchType MatchType { get; set; }
 
-    }
-
-    /// <summary>
-    /// Path match type.
-    /// </summary>
-    public enum PathMatchType
-    {
-        // TODO: Move to another file?
-
-        /// <summary>
-        /// Value is an exact match for the path, e.g. '\api\v1\this-service\this-operation'.
-        /// </summary>
-        Exact,
-
-        /// <summary>
-        /// Value is contained within the path, e.g. 'v1\this-service'.
-        /// </summary>
-        Contains,
-
-        /// <summary>
-        /// Value matches the end of the path, e.g. 'this-operation'.
-        /// </summary>
-        EndsWith
     }
 }
