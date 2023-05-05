@@ -64,7 +64,18 @@ namespace LogicAppUnit.Mocking
         /// <returns>The mocked response.</returns>
         public IMockResponse AddMockResponse(IMockRequestMatcher mockRequestMatcher)
         {
-            MockResponse mockResponse = new MockResponse(mockRequestMatcher);
+            return AddMockResponse(null, mockRequestMatcher);
+        }
+
+        /// <summary>
+        /// Add a named mocked response, consisting of a request matcher and a corresponding response builder.
+        /// </summary>
+        /// <param name="name">Name of the mock.</param>
+        /// <param name="mockRequestMatcher">The request matcher.</param>
+        /// <returns>The mocked response.</returns>
+        public IMockResponse AddMockResponse(string name, IMockRequestMatcher mockRequestMatcher)
+        {
+            MockResponse mockResponse = new MockResponse(name, mockRequestMatcher);
             _mockResponses.Add(mockResponse);
             return mockResponse;
         }
@@ -168,7 +179,7 @@ namespace LogicAppUnit.Mocking
 
             foreach (MockResponse mockResp in _mockResponses)
             {
-                requestMatchingLog.Add($"  Checking mock request matcher #{++count}");
+                requestMatchingLog.Add($"  Checking mock request matcher #{++count}" + (string.IsNullOrEmpty(mockResp.MockName) ? ":" : $" ({mockResp.MockName}):"));
 
                 try
                 {

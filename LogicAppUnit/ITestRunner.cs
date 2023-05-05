@@ -27,6 +27,14 @@ namespace LogicAppUnit
         IMockResponse AddMockResponse(IMockRequestMatcher mockRequestMatcher);
 
         /// <summary>
+        /// Configures a named mocked response, consisting of a request matcher and a corresponding response builder.
+        /// </summary>
+        /// <param name="name">Name of the mock.</param>
+        /// <param name="mockRequestMatcher">The request matcher.</param>
+        /// <returns>The mocked response.</returns>
+        IMockResponse AddMockResponse(string name, IMockRequestMatcher mockRequestMatcher);
+
+        /// <summary>
         /// Gets the mock requests that were created by the workflow during the test execution.
         /// </summary>
         /// <remarks>

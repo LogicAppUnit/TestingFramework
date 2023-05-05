@@ -37,10 +37,13 @@ namespace LogicAppUnit
         /// <inheritdoc cref="ITestRunner.AddApiMocks" />
         public Func<HttpRequestMessage, HttpResponseMessage> AddApiMocks
         {
-            set
-            {
-                _mockDefinition.MockResponseDelegate = value;
-            }
+            set => _mockDefinition.MockResponseDelegate = value;
+        }
+
+        /// <inheritdoc cref="ITestRunner.MockRequests" />
+        public List<MockRequest> MockRequests
+        {
+            get => _mockDefinition.MockRequests;
         }
 
         /// <inheritdoc cref="ITestRunner.AddMockResponse(IMockRequestMatcher)" />
@@ -49,13 +52,10 @@ namespace LogicAppUnit
             return _mockDefinition.AddMockResponse(mockRequestMatcher);
         }
 
-        /// <inheritdoc cref="ITestRunner.MockRequests" />
-        public List<MockRequest> MockRequests
+        /// <inheritdoc cref="ITestRunner.AddMockResponse(string, IMockRequestMatcher)" />
+        public IMockResponse AddMockResponse(string name, IMockRequestMatcher mockRequestMatcher)
         {
-            get
-            {
-                return _mockDefinition.MockRequests;
-            }
+            return _mockDefinition.AddMockResponse(name, mockRequestMatcher);
         }
 
         #endregion // Mock request handling

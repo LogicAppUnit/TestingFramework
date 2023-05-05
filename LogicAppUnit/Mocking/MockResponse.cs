@@ -10,18 +10,27 @@ namespace LogicAppUnit.Mocking
     /// </summary>
     public class MockResponse : IMockResponse
     {
+        // TODO: Could add a Verify() like moq!
+        private readonly string _mockName;
         private readonly MockRequestMatcher _mockRequestMatcher;
         private MockResponseBuilder _mockResponseBuilder;
+
+        internal string MockName
+        {
+            get => _mockName;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MockResponse"/> class using a request matcher.
         /// </summary>
+        /// <param name="name">The name of the mock, or <c>null</c> if it does not have a name.</param>
         /// <param name="mockRequestMatcher">The request matcher.</param>
-        internal MockResponse(IMockRequestMatcher mockRequestMatcher)
+        internal MockResponse(string name, IMockRequestMatcher mockRequestMatcher)
         {
             if (mockRequestMatcher == null)
                 throw new ArgumentNullException(nameof(mockRequestMatcher));
 
+            _mockName = name;
             _mockRequestMatcher = (MockRequestMatcher)mockRequestMatcher;
         }
 
@@ -58,7 +67,6 @@ namespace LogicAppUnit.Mocking
             if (_mockRequestMatcher.MatchRequest(request))
             {
                 requestMatchingLog.Add("    Matched");
-
                 await _mockResponseBuilder.ExecuteDelayAsync(requestMatchingLog);
                 return _mockResponseBuilder.BuildResponse(request);
             }
