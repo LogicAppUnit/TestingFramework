@@ -146,6 +146,7 @@ namespace LogicAppUnit.Mocking
             // TODO: WireMock allows you to enter dynamic JSON directly
             // TODO: Should this be an overload of 'WithContentAsJson()'?
             // TODO: Rename to be "UsingContent..."?
+            // TODO: Add a method to create a content from an assembly resource
             return WithContent(() => ContentHelper.CreateJsonStringContent(jsonString));
         }
 
