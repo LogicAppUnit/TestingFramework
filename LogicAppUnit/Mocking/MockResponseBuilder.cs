@@ -14,11 +14,11 @@ namespace LogicAppUnit.Mocking
     public class MockResponseBuilder : IMockResponseBuilder
     {
         private HttpStatusCode _statusCode;
-        private readonly Dictionary<string, string> _responseHeaders;       // TODO: Could allow multiple match values for each header or parameter (Dictionary<string, List<string>>)?
+        private readonly Dictionary<string, string> _responseHeaders;
         private Func<TimeSpan> _delayDelegate;
         private Func<HttpContent> _contentDelegate;
 
-        // TODO: Do we want to allow users to set additional content headers?
+        // TODO: (LOW) Do we want to allow users to set additional content headers?
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MockResponseBuilder"/> class.

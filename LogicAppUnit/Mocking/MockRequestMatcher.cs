@@ -9,8 +9,8 @@ namespace LogicAppUnit.Mocking
     /// </summary>
     public class MockRequestMatcher : IMockRequestMatcher
     {
-        // TODO: We are not matching on the request content, or any of the content headers such as 'Content-Type'
-        // TODO: We could add a 'WithAction' that matches using a workflow action name that is set using HTTP header?
+        // TODO: (LOW) Enable matching on the request content, or any of the content headers such as 'Content-Type'
+        // TODO: (LOW) Add a 'WithAction' that matches using a workflow action name that is set using HTTP header?
         private readonly List<HttpMethod> _requestMethods;
         private readonly List<MockRequestPath> _requestPaths;
         private readonly Dictionary<string, string> _requestHeaders;
@@ -198,9 +198,9 @@ namespace LogicAppUnit.Mocking
             bool pathMatch = false;
             foreach (MockRequestPath path in _requestPaths)
             {
-                if ((path.MatchType == PathMatchType.Exact && request.RequestUri.AbsolutePath != path.Path) ||
-                    (path.MatchType == PathMatchType.Contains && !request.RequestUri.AbsolutePath.Contains(path.Path)) ||
-                    (path.MatchType == PathMatchType.EndsWith && !request.RequestUri.AbsolutePath.EndsWith(path.Path)))
+                if ((path.MatchType == PathMatchType.Exact && request.RequestUri.AbsolutePath == path.Path) ||
+                    (path.MatchType == PathMatchType.Contains && request.RequestUri.AbsolutePath.Contains(path.Path)) ||
+                    (path.MatchType == PathMatchType.EndsWith && request.RequestUri.AbsolutePath.EndsWith(path.Path)))
                 {
                     pathMatch = true;
                     break;
@@ -258,24 +258,5 @@ namespace LogicAppUnit.Mocking
         }
 
         #endregion // Internal methods
-    }
-
-    /// <summary>
-    /// A header for mock request matching.
-    /// </summary>
-    public class MockRequestPath
-    {
-        // TODO: Move to another file?
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string Path { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public PathMatchType MatchType { get; set; }
-
     }
 }
