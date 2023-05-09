@@ -10,6 +10,7 @@ namespace LogicAppUnit.Mocking
     public class MockRequestMatcher : IMockRequestMatcher
     {
         // TODO: We are not matching on the request content, or any of the content headers such as 'Content-Type'
+        // TODO: We could add a 'WithAction' that matches using a workflow action name that is set using HTTP header?
         private readonly List<HttpMethod> _requestMethods;
         private readonly List<MockRequestPath> _requestPaths;
         private readonly Dictionary<string, string> _requestHeaders;
@@ -188,19 +189,27 @@ namespace LogicAppUnit.Mocking
             // TODO: Do we want to break this up into separate private functions?
 
             // Method
+            // This is OR logic when multiple methods are specified in the match
             if (_requestMethods.Count > 0 && !_requestMethods.Contains(request.Method))
                 return false;
 
             // Absolute Paths
+            // This is OR logic when multiple paths are specified in the match
+            bool pathMatch = false;
             foreach (MockRequestPath path in _requestPaths)
             {
-                if ((path.MatchType == PathMatchType.Exact && request.RequestUri.AbsolutePath != path.Path) || 
+                if ((path.MatchType == PathMatchType.Exact && request.RequestUri.AbsolutePath != path.Path) ||
                     (path.MatchType == PathMatchType.Contains && !request.RequestUri.AbsolutePath.Contains(path.Path)) ||
                     (path.MatchType == PathMatchType.EndsWith && !request.RequestUri.AbsolutePath.EndsWith(path.Path)))
-                    return false;
+                {
+                    pathMatch = true;
+                    break;
+                }
             }
+            if (!pathMatch) return false;
 
             // Headers
+            // This is AND logic when multiple headers are specified in the match
             // Headers defined in a request matcher with a null value are only validated for their existance and not their value
             if (_requestHeaders.Count > 0)
             {
@@ -217,6 +226,7 @@ namespace LogicAppUnit.Mocking
             }
 
             // Query parameters
+            // This is AND logic when multiple query parameters are specified in the match
             // Parameters defined in a request matcher with a null value are only validated for their existance and not their value
             if (_requestQueryParams.Count > 0)
             {
@@ -236,6 +246,7 @@ namespace LogicAppUnit.Mocking
             }
 
             // Match count
+            // This is OR logic when multiple counts are specified in the match
             _requestMatchCounter++;
             if (_requestMatchCounts.Count > 0 && !_requestMatchCounts.Contains(_requestMatchCounter))
                 return false;
