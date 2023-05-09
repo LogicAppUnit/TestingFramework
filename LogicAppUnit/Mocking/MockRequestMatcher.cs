@@ -195,18 +195,21 @@ namespace LogicAppUnit.Mocking
 
             // Absolute Paths
             // This is OR logic when multiple paths are specified in the match
-            bool pathMatch = false;
-            foreach (MockRequestPath path in _requestPaths)
+            if (_requestPaths.Count > 0)
             {
-                if ((path.MatchType == PathMatchType.Exact && request.RequestUri.AbsolutePath == path.Path) ||
-                    (path.MatchType == PathMatchType.Contains && request.RequestUri.AbsolutePath.Contains(path.Path)) ||
-                    (path.MatchType == PathMatchType.EndsWith && request.RequestUri.AbsolutePath.EndsWith(path.Path)))
+                bool pathMatch = false;
+                foreach (MockRequestPath path in _requestPaths)
                 {
-                    pathMatch = true;
-                    break;
+                    if ((path.MatchType == PathMatchType.Exact && request.RequestUri.AbsolutePath == path.Path) ||
+                        (path.MatchType == PathMatchType.Contains && request.RequestUri.AbsolutePath.Contains(path.Path)) ||
+                        (path.MatchType == PathMatchType.EndsWith && request.RequestUri.AbsolutePath.EndsWith(path.Path)))
+                    {
+                        pathMatch = true;
+                        break;
+                    }
                 }
+                if (!pathMatch) return false;
             }
-            if (!pathMatch) return false;
 
             // Headers
             // This is AND logic when multiple headers are specified in the match
@@ -245,14 +248,14 @@ namespace LogicAppUnit.Mocking
                 }
             }
 
+            _requestMatchCounter++;
+
             // Match count
             // This is OR logic when multiple counts are specified in the match
-            _requestMatchCounter++;
             if (_requestMatchCounts.Count > 0 && !_requestMatchCounts.Contains(_requestMatchCounter))
                 return false;
             if (_requestMatchCountsNot.Count > 0 && _requestMatchCountsNot.Contains(_requestMatchCounter))
                 return false;
-
 
             return true;
         }
