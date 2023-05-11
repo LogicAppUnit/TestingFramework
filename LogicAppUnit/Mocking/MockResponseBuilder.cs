@@ -18,7 +18,7 @@ namespace LogicAppUnit.Mocking
         private Func<TimeSpan> _delayDelegate;
         private Func<HttpContent> _contentDelegate;
 
-        // TODO: (LOW) Do we want to allow users to set additional content headers?
+        // TODO: (LOW) Allow users to set additional content headers
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MockResponseBuilder"/> class.
@@ -85,6 +85,11 @@ namespace LogicAppUnit.Mocking
         /// <inheritdoc cref="IMockResponseBuilder.WithHeader(string, string)" />
         public IMockResponseBuilder WithHeader(string name, string value)
         {
+            if (String.IsNullOrEmpty(name))
+                throw new ArgumentNullException(nameof(name));
+            if (String.IsNullOrEmpty(value))
+                throw new ArgumentNullException(nameof(value));
+
             if (_responseHeaders.ContainsKey(name))
             {
                 _responseHeaders[name] = value;
@@ -99,6 +104,9 @@ namespace LogicAppUnit.Mocking
         /// <inheritdoc cref="IMockResponseBuilder.WithDelay(Func{TimeSpan})" />
         public IMockResponseBuilder WithDelay(Func<TimeSpan> delay)
         {
+            if (delay == null)
+                throw new ArgumentNullException(nameof(delay));
+
             _delayDelegate = delay;
             return this;
         }
@@ -136,6 +144,9 @@ namespace LogicAppUnit.Mocking
         /// <inheritdoc cref="IMockResponseBuilder.WithContent(Func{HttpContent})" />
         public IMockResponseBuilder WithContent(Func<HttpContent> content)
         {
+            if (content == null)
+                throw new ArgumentNullException(nameof(content));
+
             _contentDelegate = content;
             return this;
         }
@@ -147,6 +158,7 @@ namespace LogicAppUnit.Mocking
             // TODO: Should this be an overload of 'WithContentAsJson()'?
             // TODO: Rename to be "UsingContent..."?
             // TODO: Add a method to create a content from an assembly resource
+            // TODO: Ensure parameters are validated somewhere
             return WithContent(() => ContentHelper.CreateJsonStringContent(jsonString));
         }
 
