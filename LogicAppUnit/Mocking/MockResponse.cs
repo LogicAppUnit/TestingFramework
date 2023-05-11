@@ -64,7 +64,8 @@ namespace LogicAppUnit.Mocking
             if (_mockResponseBuilder == null)
                 throw new TestException("A response builder has not been configured - use RespondWith() to create a response, or RespondWithDefault() to create a default response using a status code of 200 (OK) and no content");
 
-            if (_mockRequestMatcher.MatchRequest(request))
+            MockRequestMatchResult matchResult = _mockRequestMatcher.MatchRequest(request);
+            if (matchResult.IsMatch)
             {
                 requestMatchingLog.Add("    Matched");
                 await _mockResponseBuilder.ExecuteDelayAsync(requestMatchingLog);
@@ -72,7 +73,7 @@ namespace LogicAppUnit.Mocking
             }
             else
             {
-                requestMatchingLog.Add("    Not matched");
+                requestMatchingLog.Add($"    Not matched - {matchResult.MatchLog}");
                 return null;
             }
         }

@@ -51,6 +51,14 @@ namespace LogicAppUnit.Mocking
         IMockRequestMatcher UsingMethod(params HttpMethod[] methods);
 
         /// <summary>
+        /// Configure request matching using one or more URL absolute paths.
+        /// </summary>
+        /// <param name="matchType">The type of match to be used when matching the absolute paths.</param>
+        /// <param name="paths">The absolute paths to match.</param>
+        /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
+        IMockRequestMatcher WithPath(PathMatchType matchType, params string[] paths);
+
+        /// <summary>
         /// Configure request matching based on the existance of a HTTP header. The value of the header is not considered in the match.
         /// </summary>
         /// <param name="name">The header name.</param>
@@ -64,14 +72,6 @@ namespace LogicAppUnit.Mocking
         /// <param name="value">The header value.</param>
         /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
         IMockRequestMatcher WithHeader(string name, string value);
-
-        /// <summary>
-        /// Configure request matching using one or more URL absolute paths.
-        /// </summary>
-        /// <param name="matchType">The type of match to be used when matching the absolute paths.</param>
-        /// <param name="paths">The absolute paths to match.</param>
-        /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
-        IMockRequestMatcher WithPath(PathMatchType matchType, params string[] paths);
 
         /// <summary>
         /// Configure request matching based on the existance of a query parameter. The value of the parameter is not considered in the match.

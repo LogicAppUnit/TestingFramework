@@ -1,19 +1,18 @@
 ﻿namespace LogicAppUnit.Mocking
 {
     /// <summary>
-    /// A header for mock request matching.
+    /// A path for mock request matching.
     /// </summary>
     internal class MockRequestPath
     {
         /// <summary>
-        /// The path to be matched.
+        /// Gets the path to be matched.
         /// </summary>
-        public string Path { get; set; }
+        public string Path { init; get; }
 
         /// <summary>
-        /// The type of matching to be used.
+        /// Gets the type of matching to be used.
         /// </summary>
-        public PathMatchType MatchType { get; set; }
-
+        public PathMatchType MatchType { init; get; }
     }
 }

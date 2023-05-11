@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 
@@ -88,12 +89,28 @@ namespace LogicAppUnit.Mocking
         /// <inheritdoc cref="IMockRequestMatcher.UsingMethod(HttpMethod[])" />
         public IMockRequestMatcher UsingMethod(params HttpMethod[] methods)
         {
+            if (methods == null || methods.Length == 0)
+                throw new ArgumentNullException(nameof(methods));
+
             foreach (HttpMethod method in methods)
             {
                 if (!_requestMethods.Contains(method))
                 {
                     _requestMethods.Add(method);
                 }
+            }
+            return this;
+        }
+
+        /// <inheritdoc cref="IMockRequestMatcher.WithPath(PathMatchType, string[])" />
+        public IMockRequestMatcher WithPath(PathMatchType matchType, params string[] paths)
+        {
+            if (paths == null || paths.Length == 0)
+                throw new ArgumentNullException(nameof(paths));
+
+            foreach (string path in paths)
+            {
+                _requestPaths.Add(new MockRequestPath() { Path = path, MatchType = matchType });
             }
             return this;
         }
@@ -107,6 +124,9 @@ namespace LogicAppUnit.Mocking
         /// <inheritdoc cref="IMockRequestMatcher.WithHeader(string, string)" />
         public IMockRequestMatcher WithHeader(string name, string value)
         {
+            if (String.IsNullOrEmpty(name))
+                throw new ArgumentNullException(nameof(name));
+
             if (_requestHeaders.ContainsKey(name))
             {
                 _requestHeaders[name] = value;
@@ -114,16 +134,6 @@ namespace LogicAppUnit.Mocking
             else
             {
                 _requestHeaders.Add(name, value);
-            }
-            return this;
-        }
-
-        /// <inheritdoc cref="IMockRequestMatcher.WithPath(PathMatchType, string[])" />
-        public IMockRequestMatcher WithPath(PathMatchType matchType, params string[] paths)
-        {
-            foreach (string path in paths)
-            {
-                _requestPaths.Add(new MockRequestPath() { Path = path, MatchType = matchType });
             }
             return this;
         }
@@ -137,6 +147,9 @@ namespace LogicAppUnit.Mocking
         /// <inheritdoc cref="IMockRequestMatcher.WithQueryParam(string, string)" />
         public IMockRequestMatcher WithQueryParam(string name, string value)
         {
+            if (String.IsNullOrEmpty(name))
+                throw new ArgumentNullException(nameof(name));
+
             if (_requestQueryParams.ContainsKey(name))
             {
                 _requestQueryParams[name] = value;
@@ -151,6 +164,9 @@ namespace LogicAppUnit.Mocking
         /// <inheritdoc cref="IMockRequestMatcher.WithMatchCount(int[])" />
         public IMockRequestMatcher WithMatchCount(params int[] matchCounts)
         {
+            if (matchCounts == null || matchCounts.Length == 0)
+                throw new ArgumentNullException(nameof(matchCounts));
+
             foreach (int matchCount in matchCounts)
             {
                 if (!_requestMatchCounts.Contains(matchCount))
@@ -164,6 +180,9 @@ namespace LogicAppUnit.Mocking
         /// <inheritdoc cref="IMockRequestMatcher.WithNotMatchCount(int[])" />
         public IMockRequestMatcher WithNotMatchCount(params int[] matchCounts)
         {
+            if (matchCounts == null || matchCounts.Length == 0)
+                throw new ArgumentNullException(nameof(matchCounts));
+
             foreach (int matchCount in matchCounts)
             {
                 if (!_requestMatchCountsNot.Contains(matchCount))
@@ -182,16 +201,13 @@ namespace LogicAppUnit.Mocking
         /// Compares a set of request match conditions with a mocked HTTP request message. 
         /// </summary>
         /// <param name="request">The HTTP request message to be compared.</param>
-        /// <returns><c>true</c> if the request match conditions match the HTTP request message, otherwise <c>false</c>.</returns>
-        internal bool MatchRequest(HttpRequestMessage request)
+        /// <returns>A <see cref="MockRequestMatchResult"/> that contains the result of the request matching.</returns>
+        internal MockRequestMatchResult MatchRequest(HttpRequestMessage request)
         {
-            // TODO: Instead of returning a bool, could return a type that indicates the return value and a textual message for logging?
-            // TODO: Do we want to break this up into separate private functions?
-
             // Method
             // This is OR logic when multiple methods are specified in the match
             if (_requestMethods.Count > 0 && !_requestMethods.Contains(request.Method))
-                return false;
+                return new MockRequestMatchResult(false, $"The request method '{request.Method}' is not matched with {string.Join(", ", _requestMethods)}");
 
             // Absolute Paths
             // This is OR logic when multiple paths are specified in the match
@@ -208,7 +224,8 @@ namespace LogicAppUnit.Mocking
                         break;
                     }
                 }
-                if (!pathMatch) return false;
+                if (!pathMatch)
+                    return new MockRequestMatchResult(false, $"The request absolute path '{request.RequestUri.AbsolutePath}' is not matched");
             }
 
             // Headers
@@ -217,14 +234,14 @@ namespace LogicAppUnit.Mocking
             if (_requestHeaders.Count > 0)
             {
                 if (request.Headers.Count() == 0)
-                    return false;
+                    return new MockRequestMatchResult(false, $"The request does not have any headers so matching has failed");
 
                 foreach (var requestHeader in _requestHeaders)
                 {
                     if (!request.Headers.Contains(requestHeader.Key))
-                        return false;
+                        return new MockRequestMatchResult(false, $"The request does not contain a header named '{requestHeader.Key}'");
                     if (requestHeader.Value != null && requestHeader.Value != (request.Headers.GetValues(requestHeader.Key).FirstOrDefault() ?? ""))
-                        return false;
+                        return new MockRequestMatchResult(false, $"The request does not contain a header named '{requestHeader.Key}' with a value of '{requestHeader.Value}'");
                 }
             }
 
@@ -237,14 +254,14 @@ namespace LogicAppUnit.Mocking
                 var parsedParamsAsDictionary = request.RequestUri.ParseQueryString().AllKeys.ToDictionary(k => k, k => parsedParams[k]);
 
                 if (parsedParamsAsDictionary.Count == 0)
-                    return false;
+                    return new MockRequestMatchResult(false, $"The request does not have any query parameters so matching has failed");
 
                 foreach (var requestParam in _requestQueryParams)
                 {
                     if (!parsedParamsAsDictionary.ContainsKey(requestParam.Key))
-                        return false;
+                        return new MockRequestMatchResult(false, $"The request does not contain a query parameter named '{requestParam.Key}'");
                     if (requestParam.Value != null && requestParam.Value != (parsedParamsAsDictionary[requestParam.Key] ?? ""))
-                        return false;
+                        return new MockRequestMatchResult(false, $"The request does not contain a query parameter named '{requestParam.Key}' with a value of '{requestParam.Value}'");
                 }
             }
 
@@ -253,11 +270,11 @@ namespace LogicAppUnit.Mocking
             // Match count
             // This is OR logic when multiple counts are specified in the match
             if (_requestMatchCounts.Count > 0 && !_requestMatchCounts.Contains(_requestMatchCounter))
-                return false;
+                return new MockRequestMatchResult(false, $"The current request match count is {_requestMatchCounter} which is not matched with {string.Join(", ", _requestMatchCounts)}");
             if (_requestMatchCountsNot.Count > 0 && _requestMatchCountsNot.Contains(_requestMatchCounter))
-                return false;
+                return new MockRequestMatchResult(false, $"The current request match count is {_requestMatchCounter} which is not matched with NOT {string.Join(", ", _requestMatchCountsNot)}");
 
-            return true;
+            return new MockRequestMatchResult(true);
         }
 
         #endregion // Internal methods
