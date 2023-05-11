@@ -14,13 +14,160 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflowTest
         [TestInitialize]
         public void TestInitialize()
         {
-            Initialize(Constants.LOGIC_APP_TEST_EXAMPLE_BASE_PATH, "play");
+            Initialize(Constants.LOGIC_APP_TEST_EXAMPLE_BASE_PATH, Constants.FLUENT_REQUEST_MATCHING_WORKFLOW);
         }
 
         [ClassCleanup]
         public static void CleanResources()
         {
             Close();
+        }
+
+        /// <summary>
+        /// Tests the matching of requests using HTTP methods and the <see cref="IMockRequestMatcher.UsingAnyMethod()"/> method.
+        /// </summary>
+        [TestMethod]
+        public void Test_MethodAny()
+        {
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Configure mock responses
+                testRunner
+                    .AddMockResponse("PutMethod",
+                        MockRequestMatcher.Create()
+                        .UsingPut())
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithUnauthorized());
+                testRunner
+                    .AddMockResponse("AnyMethod",
+                        MockRequestMatcher.Create()
+                        .UsingAnyMethod())
+                    .RespondWithDefault();
+                testRunner
+                    .AddMockResponse("DefaultError",
+                        MockRequestMatcher.Create())
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
+
+                // Run the workflow
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    GetWebhookRequest(),
+                    HttpMethod.Post);
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
+            }
+        }
+
+        /// <summary>
+        /// Tests the matching of requests using HTTP methods and the <see cref="IMockRequestMatcher.UsingPost()"/> method.
+        /// </summary>
+        [TestMethod]
+        public void Test_MethodPost()
+        {
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Configure mock responses
+                // The first matcher will match PUT, DELETE, TRACE and HEAD, but not POST
+                testRunner
+                    .AddMockResponse("NotAPostMethod",
+                        MockRequestMatcher.Create()
+                        .UsingPut()
+                        .UsingDelete()
+                        .UsingMethod(HttpMethod.Trace, HttpMethod.Head))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithUnauthorized());
+                testRunner
+                    .AddMockResponse("PostMethod",
+                        MockRequestMatcher.Create()
+                        .UsingPost())
+                    .RespondWithDefault();
+                testRunner
+                    .AddMockResponse("DefaultError",
+                        MockRequestMatcher.Create())
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
+
+                // Run the workflow
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    GetWebhookRequest(),
+                    HttpMethod.Post);
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
+            }
+        }
+
+        /// <summary>
+        /// Tests the matching of requests using the path.
+        /// </summary>
+        [TestMethod]
+        public void Test_Path()
+        {
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Configure mock responses
+                testRunner
+                    .AddMockResponse("PathNotMatched",
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.Contains, "notMatch"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
+                testRunner
+                    .AddMockResponse("PathMatched",
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.Contains, "external-service-one.testing.net"))
+                    .RespondWithDefault();
+
+                // Run the workflow
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    GetWebhookRequest(),
+                    HttpMethod.Post);
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
+            }
+        }
+
+        /// <summary>
+        /// Tests the matching of requests using multiple paths.
+        /// </summary>
+        [TestMethod]
+        public void Test_PathMany()
+        {
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Configure mock responses
+                testRunner
+                    .AddMockResponse("PathNotMatched",
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.EndsWith, "thisPath", "another/path", "/notMatch"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
+                testRunner
+                    .AddMockResponse("PathMatched",
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.EndsWith, "/api/v1/service"))
+                    .RespondWithDefault();
+
+                // Run the workflow
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    GetWebhookRequest(),
+                    HttpMethod.Post);
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
+            }
         }
 
         /// <summary>

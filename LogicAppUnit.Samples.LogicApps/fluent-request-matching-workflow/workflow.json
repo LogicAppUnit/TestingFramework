@@ -1,0 +1,54 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Call_Service_One": {
+                "type": "Http",
+                "inputs": {
+                    "uri": "@{parameters('ServiceOne-Url')}/service",
+                    "method": "POST",
+                    "headers": {
+                        "Accept": "application/json",
+                        "Expect": "application/json",
+                        "UserAgent": "LogicAppUnit",
+			"MyCustomHeader": "MyValue"
+                    },
+                    "queries": {
+                        "one": "oneValue",
+                        "two": "twoValue",
+                        "three": "",
+                        "four": "fourValue",
+                        "five": "55555"
+                    },
+                    "body": "@triggerBody()"
+                },
+                "runAfter": {}
+            },
+            "Response": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": "@outputs('Call_Service_One')?['statusCode']",
+                    "body": "@body('Call_Service_One')"
+                },
+                "runAfter": {
+                    "Call_Service_One": [
+                        "SUCCEEDED"
+                    ]
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_a_HTTP_request_is_received": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "method": "POST"
+                }
+            }
+        }
+    },
+    "kind": "Stateful"
+}
