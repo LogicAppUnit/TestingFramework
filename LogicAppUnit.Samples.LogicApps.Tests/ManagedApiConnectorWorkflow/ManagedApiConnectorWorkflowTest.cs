@@ -6,10 +6,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 
-namespace LogicAppUnit.Samples.LogicApps.Tests.ManagedApiConnectorWorkflowTest
+namespace LogicAppUnit.Samples.LogicApps.Tests.ManagedApiConnectorWorkflow
 {
     /// <summary>
-    /// Test cases for the <i>managed-api-connector-test-workflow</i> workflow.
+    /// Test cases for the <i>managed-api-connector-workflow</i> workflow.
     /// </summary>
     [TestClass]
     public class ManagedApiConnectorWorkflowTest : WorkflowTestBase

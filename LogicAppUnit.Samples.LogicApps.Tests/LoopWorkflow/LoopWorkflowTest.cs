@@ -5,10 +5,10 @@ using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Net.Http;
 
-namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
+namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflow
 {
     /// <summary>
-    /// Test cases for the <i>loop-test-workflow</i> workflow.
+    /// Test cases for the <i>loop-workflow</i> workflow.
     /// This workflow includes actions in an <i>Until</i> loop and a <i>ForEach</i>/> loop to demonstrate how the testing framework can be used to test actions that are run multiple times in a workflow run.
     /// These types of actions are known as action repetitions.
     /// </summary>

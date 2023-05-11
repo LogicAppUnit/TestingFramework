@@ -4,10 +4,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 
-namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflowTest
+namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflow
 {
     /// <summary>
-    /// Test cases for the <i>built-in-connector-test-workflow</i> workflow.
+    /// Test cases for the <i>built-in-connector-workflow</i> workflow.
     /// </summary>
     [TestClass]
     public class BuiltInConnectorWorkflowTest : WorkflowTestBase

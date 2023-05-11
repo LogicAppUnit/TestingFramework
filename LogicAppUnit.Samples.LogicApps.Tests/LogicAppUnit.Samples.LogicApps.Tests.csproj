@@ -18,40 +18,40 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="BuiltInConnectorWorkflowTest\MockData\ServiceBus_Request_LanguageCode.json" />
-    <None Remove="BuiltInConnectorWorkflowTest\MockData\ServiceBus_Request_NoLanguageCode.json" />
-    <None Remove="BuiltInConnectorWorkflowTest\MockData\SQL_Request.json" />
-    <None Remove="BuiltInConnectorWorkflowTest\MockData\SQL_Request_en_GB.json" />
-    <None Remove="BuiltInConnectorWorkflowTest\MockData\SQL_Request_xx_GB.json" />
-    <None Remove="HttpWorkflowTest\MockData\SystemTwo_Request.json" />
-    <None Remove="InvokeWorkflowTest\MockData\AddToPriorityQueueRequest.json" />
-    <None Remove="InvokeWorkflowTest\MockData\InvokeWorkflowNotPriorityRequest.json" />
-    <None Remove="InvokeWorkflowTest\MockData\InvokeWorkflowPriorityRequest.json" />
-    <None Remove="InvokeWorkflowTest\MockData\WorkflowRequest.json" />
-    <None Remove="LoopWorkflowTest\MockData\Response.json" />
-    <None Remove="ManagedApiConnectorWorkflowTest\MockData\Outlook_Request.json" />
-    <None Remove="ManagedApiConnectorWorkflowTest\MockData\Salesforce_Request.json" />
-    <None Remove="StatelessWorkflowTest\MockData\UploadBlobRequest.json" />
-    <None Remove="StatelessWorkflowTest\MockData\UploadBlobResponseFailed.json" />
-    <None Remove="StatelessWorkflowTest\MockData\WorkflowRequest.json" />
+    <None Remove="BuiltInConnectorWorkflow\MockData\ServiceBus_Request_LanguageCode.json" />
+    <None Remove="BuiltInConnectorWorkflow\MockData\ServiceBus_Request_NoLanguageCode.json" />
+    <None Remove="BuiltInConnectorWorkflow\MockData\SQL_Request.json" />
+    <None Remove="BuiltInConnectorWorkflow\MockData\SQL_Request_en_GB.json" />
+    <None Remove="BuiltInConnectorWorkflow\MockData\SQL_Request_xx_GB.json" />
+    <None Remove="HttpWorkflow\MockData\SystemTwo_Request.json" />
+    <None Remove="InvokeWorkflow\MockData\AddToPriorityQueueRequest.json" />
+    <None Remove="InvokeWorkflow\MockData\InvokeWorkflowNotPriorityRequest.json" />
+    <None Remove="InvokeWorkflow\MockData\InvokeWorkflowPriorityRequest.json" />
+    <None Remove="InvokeWorkflow\MockData\WorkflowRequest.json" />
+    <None Remove="LoopWorkflow\MockData\Response.json" />
+    <None Remove="ManagedApiConnectorWorkflow\MockData\Outlook_Request.json" />
+    <None Remove="ManagedApiConnectorWorkflow\MockData\Salesforce_Request.json" />
+    <None Remove="StatelessWorkflow\MockData\UploadBlobRequest.json" />
+    <None Remove="StatelessWorkflow\MockData\UploadBlobResponseFailed.json" />
+    <None Remove="StatelessWorkflow\MockData\WorkflowRequest.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="BuiltInConnectorWorkflowTest\MockData\ServiceBus_Request_LanguageCode.json" />
-    <EmbeddedResource Include="BuiltInConnectorWorkflowTest\MockData\ServiceBus_Request_NoLanguageCode.json" />
-    <EmbeddedResource Include="BuiltInConnectorWorkflowTest\MockData\SQL_Request_xx_GB.json" />
-    <EmbeddedResource Include="BuiltInConnectorWorkflowTest\MockData\SQL_Request_en_GB.json" />
-    <EmbeddedResource Include="HttpWorkflowTest\MockData\SystemTwo_Request.json" />
-    <EmbeddedResource Include="InvokeWorkflowTest\MockData\AddToPriorityQueueRequest.json" />
-    <EmbeddedResource Include="InvokeWorkflowTest\MockData\InvokeWorkflowNotPriorityRequest.json" />
-    <EmbeddedResource Include="InvokeWorkflowTest\MockData\InvokeWorkflowPriorityRequest.json" />
-    <EmbeddedResource Include="InvokeWorkflowTest\MockData\WorkflowRequest.json" />
-    <EmbeddedResource Include="LoopWorkflowTest\MockData\Response.json" />
-    <EmbeddedResource Include="ManagedApiConnectorWorkflowTest\MockData\Outlook_Request.json" />
-    <EmbeddedResource Include="ManagedApiConnectorWorkflowTest\MockData\Salesforce_Request.json" />
-    <EmbeddedResource Include="StatelessWorkflowTest\MockData\UploadBlobRequest.json" />
-    <EmbeddedResource Include="StatelessWorkflowTest\MockData\UploadBlobResponseFailed.json" />
-    <EmbeddedResource Include="StatelessWorkflowTest\MockData\WorkflowRequest.json" />
+    <EmbeddedResource Include="BuiltInConnectorWorkflow\MockData\ServiceBus_Request_LanguageCode.json" />
+    <EmbeddedResource Include="BuiltInConnectorWorkflow\MockData\ServiceBus_Request_NoLanguageCode.json" />
+    <EmbeddedResource Include="BuiltInConnectorWorkflow\MockData\SQL_Request_xx_GB.json" />
+    <EmbeddedResource Include="BuiltInConnectorWorkflow\MockData\SQL_Request_en_GB.json" />
+    <EmbeddedResource Include="HttpWorkflow\MockData\SystemTwo_Request.json" />
+    <EmbeddedResource Include="InvokeWorkflow\MockData\AddToPriorityQueueRequest.json" />
+    <EmbeddedResource Include="InvokeWorkflow\MockData\InvokeWorkflowNotPriorityRequest.json" />
+    <EmbeddedResource Include="InvokeWorkflow\MockData\InvokeWorkflowPriorityRequest.json" />
+    <EmbeddedResource Include="InvokeWorkflow\MockData\WorkflowRequest.json" />
+    <EmbeddedResource Include="LoopWorkflow\MockData\Response.json" />
+    <EmbeddedResource Include="ManagedApiConnectorWorkflow\MockData\Outlook_Request.json" />
+    <EmbeddedResource Include="ManagedApiConnectorWorkflow\MockData\Salesforce_Request.json" />
+    <EmbeddedResource Include="StatelessWorkflow\MockData\UploadBlobRequest.json" />
+    <EmbeddedResource Include="StatelessWorkflow\MockData\UploadBlobResponseFailed.json" />
+    <EmbeddedResource Include="StatelessWorkflow\MockData\WorkflowRequest.json" />
   </ItemGroup>
 
   <ItemGroup>

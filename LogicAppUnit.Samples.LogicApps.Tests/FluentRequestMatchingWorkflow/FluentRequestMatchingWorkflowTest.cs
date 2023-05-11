@@ -3,10 +3,10 @@ using LogicAppUnit.Mocking;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net.Http;
 
-namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflowTest
+namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
 {
     /// <summary>
-    /// Test cases for the <i>fluent-test-workflow</i> workflow.
+    /// Test cases for the <i>fluent-request-matching-workflow</i> workflow.
     /// </summary>
     [TestClass]
     public class FluentRequestMatchingWorkflowTest : WorkflowTestBase

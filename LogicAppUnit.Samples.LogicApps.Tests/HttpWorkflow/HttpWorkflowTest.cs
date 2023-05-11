@@ -8,10 +8,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 
-namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
+namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflow
 {
     /// <summary>
-    /// Test cases for the <i>http-test-workflow</i> workflow.
+    /// Test cases for the <i>http-workflow</i> workflow.
     /// </summary>
     [TestClass]
     public class HttpWorkflowTest : WorkflowTestBase

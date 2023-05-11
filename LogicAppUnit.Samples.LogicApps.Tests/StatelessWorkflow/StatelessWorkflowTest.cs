@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 
-namespace LogicAppUnit.Samples.LogicApps.Tests.StatelessWorkflowTest
+namespace LogicAppUnit.Samples.LogicApps.Tests.StatelessWorkflow
 {
     /// <summary>
     /// Test cases for the <i>stateless-workflow</i> workflow.
