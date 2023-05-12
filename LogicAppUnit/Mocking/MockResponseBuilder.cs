@@ -101,8 +101,8 @@ namespace LogicAppUnit.Mocking
             return this;
         }
 
-        /// <inheritdoc cref="IMockResponseBuilder.WithDelay(Func{TimeSpan})" />
-        public IMockResponseBuilder WithDelay(Func<TimeSpan> delay)
+        /// <inheritdoc cref="IMockResponseBuilder.AfterDelay(Func{TimeSpan})" />
+        public IMockResponseBuilder AfterDelay(Func<TimeSpan> delay)
         {
             if (delay == null)
                 throw new ArgumentNullException(nameof(delay));
@@ -111,34 +111,34 @@ namespace LogicAppUnit.Mocking
             return this;
         }
 
-        /// <inheritdoc cref="IMockResponseBuilder.WithDelay(int)" />
-        public IMockResponseBuilder WithDelay(int secondsDelay)
+        /// <inheritdoc cref="IMockResponseBuilder.AfterDelay(int)" />
+        public IMockResponseBuilder AfterDelay(int secondsDelay)
         {
-            return WithDelay(() => TimeSpan.FromSeconds(secondsDelay));
+            return AfterDelay(() => TimeSpan.FromSeconds(secondsDelay));
         }
 
-        /// <inheritdoc cref="IMockResponseBuilder.WithDelay(TimeSpan)" />
-        public IMockResponseBuilder WithDelay(TimeSpan delay)
+        /// <inheritdoc cref="IMockResponseBuilder.AfterDelay(TimeSpan)" />
+        public IMockResponseBuilder AfterDelay(TimeSpan delay)
         {
-            return WithDelay(() => delay);
+            return AfterDelay(() => delay);
         }
 
-        /// <inheritdoc cref="IMockResponseBuilder.WithDelay(int, int)" />
-        public IMockResponseBuilder WithDelay(int secondsMin, int secondsMax)
+        /// <inheritdoc cref="IMockResponseBuilder.AfterDelay(int, int)" />
+        public IMockResponseBuilder AfterDelay(int secondsMin, int secondsMax)
         {
             if (secondsMax <= secondsMin)
                 throw new ArgumentException("The 'min' seconds must be less than the 'max' seconds.", nameof(secondsMin));
 
-            return WithDelay(() => TimeSpan.FromSeconds(MockDefinition.Random.Next(secondsMin, secondsMax)));
+            return AfterDelay(() => TimeSpan.FromSeconds(MockDefinition.Random.Next(secondsMin, secondsMax)));
         }
 
-        /// <inheritdoc cref="IMockResponseBuilder.WithDelay(TimeSpan, TimeSpan)" />
-        public IMockResponseBuilder WithDelay(TimeSpan min, TimeSpan max)
+        /// <inheritdoc cref="IMockResponseBuilder.AfterDelay(TimeSpan, TimeSpan)" />
+        public IMockResponseBuilder AfterDelay(TimeSpan min, TimeSpan max)
         {
             if (max <= min)
                 throw new ArgumentException("The 'min' timespan must be less than the 'max' timespan.", nameof(min));
 
-            return WithDelay(() => TimeSpan.FromMilliseconds(MockDefinition.Random.Next((int)min.TotalMilliseconds, (int)max.TotalMilliseconds)));
+            return AfterDelay(() => TimeSpan.FromMilliseconds(MockDefinition.Random.Next((int)min.TotalMilliseconds, (int)max.TotalMilliseconds)));
         }
 
         /// <inheritdoc cref="IMockResponseBuilder.WithContent(Func{HttpContent})" />

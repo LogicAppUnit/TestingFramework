@@ -60,21 +60,21 @@ namespace LogicAppUnit.Mocking
         /// </summary>
         /// <param name="delay">Delegate function that returns a <see cref="TimeSpan"/>.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
-        IMockResponseBuilder WithDelay(Func<TimeSpan> delay);
+        IMockResponseBuilder AfterDelay(Func<TimeSpan> delay);
 
         /// <summary>
         /// Configures a delay (in seconds) before the response is returned to the workflow being tested.
         /// </summary>
         /// <param name="secondsDelay">The delay, in seconds.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
-        IMockResponseBuilder WithDelay(int secondsDelay);
+        IMockResponseBuilder AfterDelay(int secondsDelay);
 
         /// <summary>
         /// Configures a delay (as a <see cref="TimeSpan"/>) before the response is returned to the workflow being tested.
         /// </summary>
         /// <param name="delay">The delay, as a <see cref="TimeSpan"/>.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
-        IMockResponseBuilder WithDelay(TimeSpan delay);
+        IMockResponseBuilder AfterDelay(TimeSpan delay);
 
         /// <summary>
         /// Configures a random delay (in seconds) before the response is returned to the workflow being tested. The duration of the delay is between <paramref name="secondsMin"/> and <paramref name="secondsMax"/>),
@@ -82,7 +82,7 @@ namespace LogicAppUnit.Mocking
         /// <param name="secondsMin">The minimum duration of the delay, in seconds.</param>
         /// <param name="secondsMax">The maximum duration of the delay, in seconds.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
-        IMockResponseBuilder WithDelay(int secondsMin, int secondsMax);
+        IMockResponseBuilder AfterDelay(int secondsMin, int secondsMax);
 
         /// <summary>
         /// Configures a random delay (in milliseconds) before the response is returned to the workflow being tested. The duration of the delay is between <paramref name="min"/> and <paramref name="max"/>),
@@ -90,7 +90,7 @@ namespace LogicAppUnit.Mocking
         /// <param name="min">The minimum duration of the delay, as a <see cref="TimeSpan"/>.</param>
         /// <param name="max">The maximum duration of the delay, as a <see cref="TimeSpan"/>.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
-        IMockResponseBuilder WithDelay(TimeSpan min, TimeSpan max);
+        IMockResponseBuilder AfterDelay(TimeSpan min, TimeSpan max);
 
         /// <summary>
         /// Configures response content using a delegate function that returns an implementation of <see cref="HttpContent"/>.
