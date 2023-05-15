@@ -154,8 +154,7 @@ namespace LogicAppUnit.Mocking
         /// <inheritdoc cref="IMockResponseBuilder.WithContentAsJsonString(string)" />
         public IMockResponseBuilder WithContentAsJsonString(string jsonString)
         {
-            // TODO: WireMock allows you to enter dynamic JSON directly
-            // TODO: Should this be an overload of 'WithContentAsJson()'?
+            // TODO: Should this be an overload of 'WithContentAsJson()'? We seem to include the data type in the name which defeats the point of overloads
             // TODO: Rename to be "UsingContent..."?
             // TODO: Add a method to create a content from an assembly resource
             // TODO: Ensure parameters are validated somewhere
@@ -166,6 +165,12 @@ namespace LogicAppUnit.Mocking
         public IMockResponseBuilder WithContentAsJsonStream(Stream jsonStream)
         {
             return WithContent(() => ContentHelper.CreateJsonStreamContent(jsonStream));
+        }
+
+        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsJsonObject(object)" />
+        public IMockResponseBuilder WithContentAsJsonObject(object body)
+        {
+            return WithContent(() => ContentHelper.CreateJsonStringContent(body));
         }
 
         /// <inheritdoc cref="IMockResponseBuilder.WithContentAsPlainTextString(string)" />

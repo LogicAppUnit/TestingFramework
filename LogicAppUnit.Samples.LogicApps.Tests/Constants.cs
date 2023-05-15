@@ -10,7 +10,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests
 
         // Workflows
         public static readonly string BUILT_IN_CONNECTOR_WORKFLOW = "built-in-connector-workflow";
-        public static readonly string FLUENT_REQUEST_MATCHING_WORKFLOW = "fluent-request-matching-workflow";
+        public static readonly string FLUENT_REQUEST_MATCHING_WORKFLOW = "fluent-workflow";
         public static readonly string HTTP_WORKFLOW = "http-workflow";
         public static readonly string INVOKE_WORKFLOW = "invoke-workflow";
         public static readonly string LOOP_WORKFLOW = "loop-workflow";

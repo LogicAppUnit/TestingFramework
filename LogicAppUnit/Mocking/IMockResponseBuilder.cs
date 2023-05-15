@@ -114,6 +114,13 @@ namespace LogicAppUnit.Mocking
         IMockResponseBuilder WithContentAsJsonString(string jsonString);
 
         /// <summary>
+        /// Configures JSON response content using an object that is serialised into JSON.
+        /// </summary>
+        /// <param name="body">Object to be used for HTTP content.</param>
+        /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
+        IMockResponseBuilder WithContentAsJsonObject(object body);
+
+        /// <summary>
         /// Configures plain-text response content using a string value.
         /// </summary>
         /// <param name="value">String to be used for HTTP content.</param>

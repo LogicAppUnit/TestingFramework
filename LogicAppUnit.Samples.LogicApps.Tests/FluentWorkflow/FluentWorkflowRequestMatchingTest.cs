@@ -1,15 +1,16 @@
 ﻿using LogicAppUnit.Helper;
 using LogicAppUnit.Mocking;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 using System.Net.Http;
 
-namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
+namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
 {
     /// <summary>
-    /// Test cases for the <i>fluent-request-matching-workflow</i> workflow.
+    /// Test cases for the <i>fluent-workflow</i> workflow and the Request Matching features.
     /// </summary>
     [TestClass]
-    public class FluentRequestMatchingWorkflowTest : WorkflowTestBase
+    public class FluentWorkflowRequestMatchingTest : WorkflowTestBase
     {
         [TestInitialize]
         public void TestInitialize()
@@ -27,7 +28,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
         /// Tests the matching of requests using HTTP methods and the <see cref="IMockRequestMatcher.UsingAnyMethod()"/> method.
         /// </summary>
         [TestMethod]
-        public void Test_MethodAny()
+        public void Test_RequestMatcher_MethodAny()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -53,7 +54,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
-                    GetWebhookRequest(),
+                    GetRequest(),
                     HttpMethod.Post);
 
                 // Check workflow run status
@@ -65,7 +66,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
         /// Tests the matching of requests using HTTP methods and the <see cref="IMockRequestMatcher.UsingPost()"/> method.
         /// </summary>
         [TestMethod]
-        public void Test_MethodPost()
+        public void Test_RequestMatcher_MethodPost()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -94,7 +95,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
-                    GetWebhookRequest(),
+                    GetRequest(),
                     HttpMethod.Post);
 
                 // Check workflow run status
@@ -106,7 +107,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
         /// Tests the matching of requests using the path.
         /// </summary>
         [TestMethod]
-        public void Test_Path()
+        public void Test_RequestMatcher_PathSingle()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -128,7 +129,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
-                    GetWebhookRequest(),
+                    GetRequest(),
                     HttpMethod.Post);
 
                 // Check workflow run status
@@ -140,7 +141,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
         /// Tests the matching of requests using multiple paths.
         /// </summary>
         [TestMethod]
-        public void Test_PathMany()
+        public void Test_RequestMatcher_PathMany()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -162,7 +163,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
-                    GetWebhookRequest(),
+                    GetRequest(),
                     HttpMethod.Post);
 
                 // Check workflow run status
@@ -174,7 +175,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
         /// Tests the matching of requests using query parameters, when the first request is matched.
         /// </summary>
         [TestMethod]
-        public void Test_QueryParams_Matched()
+        public void Test_RequestMatcher_QueryParamsMatched()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -198,7 +199,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
-                    GetWebhookRequest(),
+                    GetRequest(),
                     HttpMethod.Post);
 
                 // Check workflow run status
@@ -210,7 +211,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
         /// Tests the matching of requests using query parameters, when the first request is not matched.
         /// </summary>
         [TestMethod]
-        public void Test_QueryParams_NotMatched()
+        public void Test_RequestMatcher_QueryParamsNotMatched()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -234,7 +235,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
-                    GetWebhookRequest(),
+                    GetRequest(),
                     HttpMethod.Post);
 
                 // Check workflow run status
@@ -246,7 +247,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
         /// Tests the matching of requests using HTTP headers, when the first request is matched.
         /// </summary>
         [TestMethod]
-        public void Test_Headers_Matched()
+        public void Test_RequestMatcher_HeadersMatched()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -270,7 +271,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
-                    GetWebhookRequest(),
+                    GetRequest(),
                     HttpMethod.Post);
 
                 // Check workflow run status
@@ -282,7 +283,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
         /// Tests the matching of requests using HTTP headers, when the first request is not matched.
         /// </summary>
         [TestMethod]
-        public void Test_Headers_NotMatched()
+        public void Test_RequestMatcher_HeadersNotMatched()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -306,25 +307,20 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentRequestMatchingWorkflow
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
-                    GetWebhookRequest(),
+                    GetRequest(),
                     HttpMethod.Post);
 
                 // Check workflow run status
                 Assert.AreEqual(WorkflowRunStatus.Failed, testRunner.WorkflowRunStatus);
             }
         }
-        private static StringContent GetWebhookRequest()
+
+        private static StringContent GetRequest()
         {
             return ContentHelper.CreateJsonStringContent(new
             {
-                id = "71fbcb8e-f974-449a-bb14-ac2400b150aa",
-                correlationId = "c2ddb2f2-7bff-4cce-b724-ac2400b12760",
-                sourceSystem = "SystemOne",
-                timestamp = "2022-08-27T08:45:00.1493711Z",
-                type = "CustomerUpdated",
-                customerId = 54617,
-                resourceId = "54617",
-                resourceURI = "https://external-service-one.testing.net/api/v1/customer/54617"
+                name = "",
+                manufacturer = "SpaceX"
             });
         }
     }
