@@ -282,17 +282,35 @@ namespace LogicAppUnit
         /// <inheritdoc cref="ITestRunner.TriggerWorkflow(HttpMethod, Dictionary{string, string})" />
         public HttpResponseMessage TriggerWorkflow(HttpMethod method, Dictionary<string, string> requestHeaders = null)
         {
-            return TriggerWorkflow(null, method, requestHeaders);
+            return TriggerWorkflow(null, null, method, string.Empty, requestHeaders);
+        }
+
+        /// <inheritdoc cref="ITestRunner.TriggerWorkflow(Dictionary{string, string}, HttpMethod, Dictionary{string, string})" />
+        public HttpResponseMessage TriggerWorkflow(Dictionary<string, string> queryParams, HttpMethod method, Dictionary<string, string> requestHeaders = null)
+        {
+            return TriggerWorkflow(queryParams, null, method, string.Empty, requestHeaders);
+        }
+
+        /// <inheritdoc cref="ITestRunner.TriggerWorkflow(Dictionary{string, string}, HttpMethod, string, Dictionary{string, string})" />
+        public HttpResponseMessage TriggerWorkflow(Dictionary<string, string> queryParams, HttpMethod method, string relativePath, Dictionary<string, string> requestHeaders = null)
+        {
+            return TriggerWorkflow(queryParams, null, method, relativePath, requestHeaders);
         }
 
         /// <inheritdoc cref="ITestRunner.TriggerWorkflow(HttpContent, HttpMethod, Dictionary{string, string})" />
         public HttpResponseMessage TriggerWorkflow(HttpContent content, HttpMethod method, Dictionary<string, string> requestHeaders = null)
         {
-            return TriggerWorkflow(content, method, string.Empty, requestHeaders);
+            return TriggerWorkflow(null, content, method, string.Empty, requestHeaders);
         }
 
         /// <inheritdoc cref="ITestRunner.TriggerWorkflow(HttpContent, HttpMethod, string, Dictionary{string, string})" />
         public HttpResponseMessage TriggerWorkflow(HttpContent content, HttpMethod method, string relativePath, Dictionary<string, string> requestHeaders = null)
+        {
+            return TriggerWorkflow(null, content, method, relativePath, requestHeaders);
+        }
+
+        /// <inheritdoc cref="ITestRunner.TriggerWorkflow(Dictionary{string, string}, HttpContent, HttpMethod, string, Dictionary{string, string})" />
+        public HttpResponseMessage TriggerWorkflow(Dictionary<string, string> queryParams, HttpContent content, HttpMethod method, string relativePath, Dictionary<string, string> requestHeaders = null)
         {
             string triggerName = _workflowDefinition.HttpTriggerName;
             if (string.IsNullOrEmpty(triggerName))
@@ -306,7 +324,7 @@ namespace LogicAppUnit
             {
                 Content = content,
                 Method = method,
-                RequestUri = callbackDef.ValueWithRelativePath(relativePath)
+                RequestUri = callbackDef.ValueWithQueryAndRelativePath(queryParams, relativePath)
             };
 
             if (requestHeaders != null)
