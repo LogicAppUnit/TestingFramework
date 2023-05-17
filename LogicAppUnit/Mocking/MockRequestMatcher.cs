@@ -10,11 +10,13 @@ namespace LogicAppUnit.Mocking
     /// </summary>
     public class MockRequestMatcher : IMockRequestMatcher
     {
-        // TODO: (LOW) Enable matching on the request content, or any of the content headers such as 'Content-Type'
         // TODO: (LOW) Add a 'WithAction' that matches using a workflow action name that is set using HTTP header?
+        // TODO: Add a delegate function that can be used to validate the content
+
         private readonly List<HttpMethod> _requestMethods;
         private readonly List<MockRequestPath> _requestPaths;
         private readonly Dictionary<string, string> _requestHeaders;
+        private string _requestContentType;
         private readonly Dictionary<string, string> _requestQueryParams;
         private readonly List<int> _requestMatchCounts;
         private readonly List<int> _requestMatchCountsNot;
@@ -138,6 +140,16 @@ namespace LogicAppUnit.Mocking
             return this;
         }
 
+        /// <inheritdoc cref="IMockRequestMatcher.WithContentType(string)" />
+        public IMockRequestMatcher WithContentType(string contentType)
+        {
+            if (String.IsNullOrEmpty(contentType))
+                throw new ArgumentNullException(nameof(contentType));
+
+            _requestContentType = contentType;
+            return this;
+        }
+
         /// <inheritdoc cref="IMockRequestMatcher.WithQueryParam(string)" />
         public IMockRequestMatcher WithQueryParam(string name)
         {
@@ -147,6 +159,7 @@ namespace LogicAppUnit.Mocking
         /// <inheritdoc cref="IMockRequestMatcher.WithQueryParam(string, string)" />
         public IMockRequestMatcher WithQueryParam(string name, string value)
         {
+            // TODO: This is all repetitive, refactor to remove duplicated code
             if (String.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
 
@@ -233,7 +246,7 @@ namespace LogicAppUnit.Mocking
             // Headers defined in a request matcher with a null value are only validated for their existance and not their value
             if (_requestHeaders.Count > 0)
             {
-                if (request.Headers.Count() == 0)
+                if (!request.Headers.Any())
                     return new MockRequestMatchResult(false, $"The request does not have any headers so matching has failed");
 
                 foreach (var requestHeader in _requestHeaders)
@@ -243,6 +256,13 @@ namespace LogicAppUnit.Mocking
                     if (requestHeader.Value != null && requestHeader.Value != (request.Headers.GetValues(requestHeader.Key).FirstOrDefault() ?? ""))
                         return new MockRequestMatchResult(false, $"The request does not contain a header named '{requestHeader.Key}' with a value of '{requestHeader.Value}'");
                 }
+            }
+
+            // Content Type
+            if (!String.IsNullOrEmpty(_requestContentType))
+            {
+                if (request.Content.Headers.ContentType.ToString() != _requestContentType)
+                    return new MockRequestMatchResult(false, $"The request content type '{request.Content.Headers.ContentType}' is not matched with '{_requestContentType}'");
             }
 
             // Query parameters

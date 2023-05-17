@@ -33,6 +33,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
             using (ITestRunner testRunner = CreateTestRunner())
             {
                 // Configure mock responses
+                // The last matcher is a 'catch-all' and only matches when the previous mock responses are not matched
                 testRunner
                     .AddMockResponse("PutMethod",
                         MockRequestMatcher.Create()
@@ -46,7 +47,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                         .UsingAnyMethod())
                     .RespondWithDefault();
                 testRunner
-                    .AddMockResponse("DefaultError",
+                    .AddMockResponse("Default-Error",
                         MockRequestMatcher.Create())
                     .RespondWith(
                         MockResponseBuilder.Create()
@@ -72,6 +73,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
             {
                 // Configure mock responses
                 // The first matcher will match PUT, DELETE, TRACE and HEAD, but not POST
+                // The last matcher is a 'catch-all' and only matches when the previous mock responses are not matched
                 testRunner
                     .AddMockResponse("NotAPostMethod",
                         MockRequestMatcher.Create()
@@ -87,7 +89,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                         .UsingPost())
                     .RespondWithDefault();
                 testRunner
-                    .AddMockResponse("DefaultError",
+                    .AddMockResponse("Default-Error",
                         MockRequestMatcher.Create())
                     .RespondWith(
                         MockResponseBuilder.Create()
@@ -112,6 +114,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
             using (ITestRunner testRunner = CreateTestRunner())
             {
                 // Configure mock responses
+                // The last matcher is a 'catch-all' and only matches when the previous mock responses are not matched
                 testRunner
                     .AddMockResponse("PathNotMatched",
                         MockRequestMatcher.Create()
@@ -126,6 +129,12 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                         .UsingPost()
                         .WithPath(PathMatchType.Contains, "external-service-one.testing.net"))
                     .RespondWithDefault();
+                testRunner
+                    .AddMockResponse("Default-Error",
+                        MockRequestMatcher.Create())
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
@@ -146,6 +155,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
             using (ITestRunner testRunner = CreateTestRunner())
             {
                 // Configure mock responses
+                // The last matcher is a 'catch-all' and only matches when the previous mock responses are not matched
                 testRunner
                     .AddMockResponse("PathNotMatched",
                         MockRequestMatcher.Create()
@@ -160,6 +170,58 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                         .UsingPost()
                         .WithPath(PathMatchType.EndsWith, "/api/v1/service"))
                     .RespondWithDefault();
+                testRunner
+                    .AddMockResponse("Default-Error",
+                        MockRequestMatcher.Create())
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
+
+                // Run the workflow
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    GetRequest(),
+                    HttpMethod.Post);
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
+            }
+        }
+
+        /// <summary>
+        /// Tests the matching of requests using the content type.
+        /// </summary>
+        [TestMethod]
+        public void Test_RequestMatcher_ContentType()
+        {
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Configure mock responses
+                // The last matcher is a 'catch-all' and only matches when the previous mock responses are not matched
+                testRunner
+                    .AddMockResponse("ContentType-TextPlain",
+                        MockRequestMatcher.Create()
+                        .WithContentType("text/plain"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
+                testRunner
+                    .AddMockResponse("ContentType-XML",
+                        MockRequestMatcher.Create()
+                        .WithContentType("application/xml; charset=utf-8"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
+                testRunner
+                    .AddMockResponse("ContentType-JSON",
+                        MockRequestMatcher.Create()
+                        .WithContentType("application/json; charset=utf-8"))
+                    .RespondWithDefault();
+                testRunner
+                    .AddMockResponse("Default-Error",
+                        MockRequestMatcher.Create())
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
@@ -180,7 +242,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
             using (ITestRunner testRunner = CreateTestRunner())
             {
                 // Configure mock responses
-                // The last mocked response is a 'catch-all' and only matches when the previous mock responses are not matched
+                // The last matcher is a 'catch-all' and only matches when the previous mock responses are not matched
                 testRunner
                     .AddMockResponse("MockToTestQueryParameters",
                         MockRequestMatcher.Create()
@@ -191,7 +253,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                         .WithQueryParam("five", "55555"))
                     .RespondWithDefault();
                 testRunner
-                    .AddMockResponse("DefaultError",
+                    .AddMockResponse("Default-Error",
                         MockRequestMatcher.Create())
                     .RespondWith(
                         MockResponseBuilder.Create()
@@ -216,7 +278,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
             using (ITestRunner testRunner = CreateTestRunner())
             {
                 // Configure mock responses
-                // The last mocked response is a 'catch-all' and only matches when the previous mock responses are not matched
+                // The last matcher is a 'catch-all' and only matches when the previous mock responses are not matched
                 testRunner
                     .AddMockResponse("MockToTestQueryParameters",
                         MockRequestMatcher.Create()
@@ -227,7 +289,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                         .WithQueryParam("ten", "ParameterThatIsNotMatched"))
                     .RespondWithDefault();
                 testRunner
-                    .AddMockResponse("DefaultError",
+                    .AddMockResponse("Default-Error",
                         MockRequestMatcher.Create())
                     .RespondWith(
                         MockResponseBuilder.Create()
@@ -252,7 +314,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
             using (ITestRunner testRunner = CreateTestRunner())
             {
                 // Configure mock responses
-                // The last mocked response is a 'catch-all' and only matches when the previous mock responses are not matched
+                // The last matcher is a 'catch-all' and only matches when the previous mock responses are not matched
                 testRunner
                     .AddMockResponse(
                         MockRequestMatcher.Create()
@@ -288,7 +350,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
             using (ITestRunner testRunner = CreateTestRunner())
             {
                 // Configure mock responses
-                // The last mocked response is a 'catch-all' and only matches when the previous mock responses are not matched
+                // The last matcher is a 'catch-all' and only matches when the previous mock responses are not matched
                 testRunner
                     .AddMockResponse(
                         MockRequestMatcher.Create()

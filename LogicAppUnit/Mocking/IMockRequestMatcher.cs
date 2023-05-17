@@ -74,6 +74,13 @@ namespace LogicAppUnit.Mocking
         IMockRequestMatcher WithHeader(string name, string value);
 
         /// <summary>
+        /// Configure request matching using a content type, for example <c>application/json</c>.
+        /// </summary>
+        /// <param name="contentType">The content type. This must be an exact match.</param>
+        /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
+        IMockRequestMatcher WithContentType(string contentType);
+
+        /// <summary>
         /// Configure request matching based on the existance of a query parameter. The value of the parameter is not considered in the match.
         /// </summary>
         /// <param name="name">The query parameter name.</param>
