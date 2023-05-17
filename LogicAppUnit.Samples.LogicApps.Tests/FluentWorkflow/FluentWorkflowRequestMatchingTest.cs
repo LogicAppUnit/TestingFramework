@@ -116,7 +116,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                 // Configure mock responses
                 // The last matcher is a 'catch-all' and only matches when the previous mock responses are not matched
                 testRunner
-                    .AddMockResponse("PathNotMatched",
+                    .AddMockResponse("Path-ContainsNotMatched",
                         MockRequestMatcher.Create()
                         .UsingPost()
                         .WithPath(PathMatchType.Contains, "notMatch"))
@@ -124,10 +124,19 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                         MockResponseBuilder.Create()
                         .WithInternalServerError());
                 testRunner
-                    .AddMockResponse("PathMatched",
+                    .AddMockResponse("Path-EndsWithNotMatched",
                         MockRequestMatcher.Create()
                         .UsingPost()
-                        .WithPath(PathMatchType.Contains, "external-service-one.testing.net"))
+                        .WithPath(PathMatchType.EndsWith, "/v1"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
+
+                testRunner
+                    .AddMockResponse("Path-EndWithMatched",
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.EndsWith, "/v1/service"))
                     .RespondWithDefault();
                 testRunner
                     .AddMockResponse("Default-Error",
@@ -157,7 +166,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                 // Configure mock responses
                 // The last matcher is a 'catch-all' and only matches when the previous mock responses are not matched
                 testRunner
-                    .AddMockResponse("PathNotMatched",
+                    .AddMockResponse("Path-EndsWithNotMatched",
                         MockRequestMatcher.Create()
                         .UsingPost()
                         .WithPath(PathMatchType.EndsWith, "thisPath", "another/path", "/notMatch"))
@@ -165,7 +174,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                         MockResponseBuilder.Create()
                         .WithInternalServerError());
                 testRunner
-                    .AddMockResponse("PathMatched",
+                    .AddMockResponse("Path-EndsWithMatched",
                         MockRequestMatcher.Create()
                         .UsingPost()
                         .WithPath(PathMatchType.EndsWith, "/api/v1/service"))
