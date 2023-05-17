@@ -87,47 +87,13 @@ namespace LogicAppUnit.Helper
         /// <returns>The HTTP content.</returns>
         public static StringContent CreateXmlStringContent(XmlDocument xmlDoc)
         {
+            if (xmlDoc == null)
+                throw new ArgumentNullException(nameof(xmlDoc));
+
             return new StringContent(xmlDoc.ToString(), Encoding.UTF8, XmlContentType);
         }
 
         #endregion // HTTP Content
-
-        #region JSON Serialization
-
-        /// <summary>
-        /// Serialize a .NET object into a JSON string.
-        /// </summary>
-        /// <param name="inputObject">The .NET object to be serialized.</param>
-        /// <returns>THe JSON string representation of the object.</returns>
-        public static string SerializeObject(this object inputObject)
-        {
-            return JsonConvert.SerializeObject(inputObject, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Deserialize a JSON string into a .NET object.
-        /// </summary>
-        /// <param name="inputObject">The JSON string to be deserialized.</param>
-        /// <returns>The .NET object representation of the JSON.</returns>
-        public static object DeserializeObject(string inputObject)
-        {
-            return JsonConvert.DeserializeObject(inputObject);
-        }
-
-        /// <summary>
-        /// Clone a dynamic JSON object.
-        /// </summary>
-        /// <param name="source">THe object to be cloned.</param>
-        /// <returns>The clone.</returns>
-        public static dynamic JClone(dynamic source)
-        {
-            if (source == null)
-                return null;
-
-            return JsonConvert.DeserializeObject(JsonConvert.SerializeObject(source));
-        }
-
-        #endregion // JSON Serialization
 
         #region Streams
 
