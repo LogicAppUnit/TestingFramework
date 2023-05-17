@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 
 namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
 {
@@ -152,6 +153,40 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                 // Check workflow response
                 Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode);
                 Assert.AreEqual(JsonConvert.SerializeObject(responseAsClass), workflowResponse.Content.ReadAsStringAsync().Result);
+            }
+        }
+
+        /// <summary>
+        /// Tests the response builder using JSON content from an embedded resource.
+        /// </summary>
+        [TestMethod]
+        public void Test_ResponseBuilder_ContentAsJsonResource()
+        {
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Configure mock responses
+                // The request matcher will match all requests because there are no match criteria
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create())
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess()
+                        .WithContentAsJsonResource($"{GetType().Namespace}.MockData.Response.json", Assembly.GetExecutingAssembly()));
+
+                // Run the workflow
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    GetRequest(),
+                    HttpMethod.Post);
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
+
+                // Check workflow response
+                Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode);
+                Assert.AreEqual(
+                    ContentHelper.FormatJson(ResourceHelper.GetAssemblyResourceAsString($"{GetType().Namespace}.MockData.Response.json")),
+                    ContentHelper.FormatJson(workflowResponse.Content.ReadAsStringAsync().Result));
             }
         }
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace LogicAppUnit.Mocking
@@ -156,8 +157,7 @@ namespace LogicAppUnit.Mocking
         {
             // TODO: Should this be an overload of 'WithContentAsJson()'? We seem to include the data type in the name which defeats the point of overloads
             // TODO: Rename to be "UsingContent..."?
-            // TODO: Add a method to create a content from an assembly resource
-            // TODO: Ensure parameters are validated somewhere
+            // TODO: There is no way to set the Content Type!
             return WithContent(() => ContentHelper.CreateJsonStringContent(jsonString));
         }
 
@@ -171,6 +171,12 @@ namespace LogicAppUnit.Mocking
         public IMockResponseBuilder WithContentAsJsonObject(object body)
         {
             return WithContent(() => ContentHelper.CreateJsonStringContent(body));
+        }
+
+        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsJsonResource(string, Assembly)" />
+        public IMockResponseBuilder WithContentAsJsonResource(string resourceName, Assembly containingAssembly)
+        {
+            return WithContent(() => ContentHelper.CreateJsonStreamContent(ResourceHelper.GetAssemblyResourceAsStream(resourceName, containingAssembly)));
         }
 
         /// <inheritdoc cref="IMockResponseBuilder.WithContentAsPlainTextString(string)" />

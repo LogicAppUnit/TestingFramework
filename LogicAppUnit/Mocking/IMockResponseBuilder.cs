@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 
 namespace LogicAppUnit.Mocking
 {
@@ -119,6 +120,14 @@ namespace LogicAppUnit.Mocking
         /// <param name="body">Object to be used for HTTP content.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
         IMockResponseBuilder WithContentAsJsonObject(object body);
+
+        /// <summary>
+        /// Configures JSON response content using an embedded assembly resource that is serialised into JSON.
+        /// </summary>
+        /// <param name="resourceName">The fully-qualified name of the resource.</param>
+        /// <param name="containingAssembly">The assembly containing the embedded resource.</param>
+        /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
+        IMockResponseBuilder WithContentAsJsonResource(string resourceName, Assembly containingAssembly);
 
         /// <summary>
         /// Configures plain-text response content using a string value.
