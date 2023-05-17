@@ -102,16 +102,6 @@ namespace LogicAppUnit.Mocking
             return this;
         }
 
-        /// <inheritdoc cref="IMockResponseBuilder.AfterDelay(Func{TimeSpan})" />
-        public IMockResponseBuilder AfterDelay(Func<TimeSpan> delay)
-        {
-            if (delay == null)
-                throw new ArgumentNullException(nameof(delay));
-
-            _delayDelegate = delay;
-            return this;
-        }
-
         /// <inheritdoc cref="IMockResponseBuilder.AfterDelay(int)" />
         public IMockResponseBuilder AfterDelay(int secondsDelay)
         {
@@ -152,12 +142,13 @@ namespace LogicAppUnit.Mocking
             return this;
         }
 
+        // TODO: Should this be an overload of 'WithContentAsJson()'? We seem to include the data type in the name which defeats the point of overloads
+        // TODO: Rename to be "UsingContent..."?
+        // TODO: There is no way to set the Content Type!
+
         /// <inheritdoc cref="IMockResponseBuilder.WithContentAsJsonString(string)" />
         public IMockResponseBuilder WithContentAsJsonString(string jsonString)
         {
-            // TODO: Should this be an overload of 'WithContentAsJson()'? We seem to include the data type in the name which defeats the point of overloads
-            // TODO: Rename to be "UsingContent..."?
-            // TODO: There is no way to set the Content Type!
             return WithContent(() => ContentHelper.CreateJsonStringContent(jsonString));
         }
 
@@ -188,6 +179,20 @@ namespace LogicAppUnit.Mocking
         #endregion // IMockResponseBuilder implementation
 
         #region Internal methods
+
+        /// <summary>
+        /// Configures a delay before the response is returned to the workflow being tested. The duration of the delay is set by a delegate function that returns a <see cref="TimeSpan"/>.
+        /// </summary>
+        /// <param name="delay">Delegate function that returns a <see cref="TimeSpan"/>.</param>
+        /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
+        internal IMockResponseBuilder AfterDelay(Func<TimeSpan> delay)
+        {
+            if (delay == null)
+                throw new ArgumentNullException(nameof(delay));
+
+            _delayDelegate = delay;
+            return this;
+        }
 
         /// <summary>
         /// Build a HTTP response message using the builder configuration.

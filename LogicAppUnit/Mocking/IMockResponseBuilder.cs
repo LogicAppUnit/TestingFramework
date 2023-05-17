@@ -57,13 +57,6 @@ namespace LogicAppUnit.Mocking
         IMockResponseBuilder WithHeader(string name, string value);
 
         /// <summary>
-        /// Configures a delay before the response is returned to the workflow being tested. The duration of the delay is set by a delegate function that returns a <see cref="TimeSpan"/>.
-        /// </summary>
-        /// <param name="delay">Delegate function that returns a <see cref="TimeSpan"/>.</param>
-        /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
-        IMockResponseBuilder AfterDelay(Func<TimeSpan> delay);
-
-        /// <summary>
         /// Configures a delay (in seconds) before the response is returned to the workflow being tested.
         /// </summary>
         /// <param name="secondsDelay">The delay, in seconds.</param>
