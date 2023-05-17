@@ -377,6 +377,49 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
             }
         }
 
+        /// <summary>
+        /// Tests the matching of requests using the content.
+        /// </summary>
+        [TestMethod]
+        public void Test_RequestMatcher_ContentContains()
+        {
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Configure mock responses
+                // The last matcher is a 'catch-all' and only matches when the previous mock responses are not matched
+                testRunner
+                    .AddMockResponse("Content-Blue Origin",
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithContent((requestContent) => { return requestContent.Contains("Blue Origin"); } ))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
+                testRunner
+                    .AddMockResponse("Content-SpaceX",
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithContent((requestContent) => { return requestContent.Contains("SpaceX"); }))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess());
+                testRunner
+                    .AddMockResponse("Default-Error",
+                        MockRequestMatcher.Create())
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
+
+                // Run the workflow
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    GetRequest(),
+                    HttpMethod.Post);
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
+            }
+        }
+
         private static StringContent GetRequest()
         {
             return ContentHelper.CreateJsonStringContent(new

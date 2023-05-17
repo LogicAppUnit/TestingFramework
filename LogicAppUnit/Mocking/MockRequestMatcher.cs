@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace LogicAppUnit.Mocking
 {
@@ -11,15 +12,16 @@ namespace LogicAppUnit.Mocking
     public class MockRequestMatcher : IMockRequestMatcher
     {
         // TODO: (LOW) Add a 'WithAction' that matches using a workflow action name that is set using HTTP header?
-        // TODO: Add a delegate function that can be used to validate the content
 
         private readonly List<HttpMethod> _requestMethods;
         private readonly List<MockRequestPath> _requestPaths;
         private readonly Dictionary<string, string> _requestHeaders;
-        private string _requestContentType;
         private readonly Dictionary<string, string> _requestQueryParams;
+        private string _requestContentType;
         private readonly List<int> _requestMatchCounts;
         private readonly List<int> _requestMatchCountsNot;
+
+        private Func<string, bool> _requestContentMatchDelegate;
 
         private int _requestMatchCounter = 0;
 
@@ -206,6 +208,16 @@ namespace LogicAppUnit.Mocking
             return this;
         }
 
+        /// <inheritdoc cref="IMockRequestMatcher.WithContent(Func{string, bool})" />
+        public IMockRequestMatcher WithContent(Func<string, bool> requestContentMatch)
+        {
+            if (requestContentMatch == null)
+                throw new ArgumentNullException(nameof(requestContentMatch));
+
+            _requestContentMatchDelegate = requestContentMatch;
+            return this;
+        }
+
         #endregion // IMockRequestMatcher implementation
 
         #region Internal methods
@@ -215,7 +227,7 @@ namespace LogicAppUnit.Mocking
         /// </summary>
         /// <param name="request">The HTTP request message to be compared.</param>
         /// <returns>A <see cref="MockRequestMatchResult"/> that contains the result of the request matching.</returns>
-        internal MockRequestMatchResult MatchRequest(HttpRequestMessage request)
+        internal async Task<MockRequestMatchResult> MatchRequestAsync(HttpRequestMessage request)
         {
             // Method
             // This is OR logic when multiple methods are specified in the match
@@ -258,13 +270,6 @@ namespace LogicAppUnit.Mocking
                 }
             }
 
-            // Content Type
-            if (!String.IsNullOrEmpty(_requestContentType))
-            {
-                if (request.Content.Headers.ContentType.ToString() != _requestContentType)
-                    return new MockRequestMatchResult(false, $"The request content type '{request.Content.Headers.ContentType}' is not matched with '{_requestContentType}'");
-            }
-
             // Query parameters
             // This is AND logic when multiple query parameters are specified in the match
             // Parameters defined in a request matcher with a null value are only validated for their existance and not their value
@@ -283,6 +288,19 @@ namespace LogicAppUnit.Mocking
                     if (requestParam.Value != null && requestParam.Value != (parsedParamsAsDictionary[requestParam.Key] ?? ""))
                         return new MockRequestMatchResult(false, $"The request does not contain a query parameter named '{requestParam.Key}' with a value of '{requestParam.Value}'");
                 }
+            }
+
+            // Content Type
+            if (!String.IsNullOrEmpty(_requestContentType))
+            {
+                if (request.Content.Headers.ContentType.ToString() != _requestContentType)
+                    return new MockRequestMatchResult(false, $"The request content type '{request.Content.Headers.ContentType}' is not matched with '{_requestContentType}'");
+            }
+
+            // Content
+            if (_requestContentMatchDelegate != null && !_requestContentMatchDelegate(await request.Content.ReadAsStringAsync()))
+            {
+                return new MockRequestMatchResult(false, $"The request content is not matched");
             }
 
             _requestMatchCounter++;

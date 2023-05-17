@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 
 namespace LogicAppUnit.Mocking
 {
@@ -110,5 +111,12 @@ namespace LogicAppUnit.Mocking
         /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
         /// <remarks>This match is the logical inverse of <see cref="M:IMockRequestMatcher.WithMatchCount()"/>.</remarks>
         IMockRequestMatcher WithNotMatchCount(params int[] matchCounts);
+
+        /// <summary>
+        /// Configure request matching based on the request content (as a <see cref="String"/>) and a delegate function that determines if the request is matched.
+        /// </summary>
+        /// <param name="requestContentMatch">Delegate function that returns <c>true</c> if the content is matched, otherwise <c>false</c>.</param>
+        /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
+        IMockRequestMatcher WithContent(Func<string, bool> requestContentMatch);
     }
 }
