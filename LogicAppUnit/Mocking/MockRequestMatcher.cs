@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -21,7 +22,8 @@ namespace LogicAppUnit.Mocking
         private readonly List<int> _requestMatchCounts;
         private readonly List<int> _requestMatchCountsNot;
 
-        private Func<string, bool> _requestContentMatchDelegate;
+        private Func<string, bool> _requestContentStringMatcherDelegate;
+        private Func<JToken, bool> _requestContentJsonMatcherDelegate;
 
         private int _requestMatchCounter = 0;
 
@@ -208,13 +210,23 @@ namespace LogicAppUnit.Mocking
             return this;
         }
 
-        /// <inheritdoc cref="IMockRequestMatcher.WithContent(Func{string, bool})" />
-        public IMockRequestMatcher WithContent(Func<string, bool> requestContentMatch)
+        /// <inheritdoc cref="IMockRequestMatcher.WithContentAsString(Func{string, bool})" />
+        public IMockRequestMatcher WithContentAsString(Func<string, bool> requestContentMatch)
         {
             if (requestContentMatch == null)
                 throw new ArgumentNullException(nameof(requestContentMatch));
 
-            _requestContentMatchDelegate = requestContentMatch;
+            _requestContentStringMatcherDelegate = requestContentMatch;
+            return this;
+        }
+
+        /// <inheritdoc cref="IMockRequestMatcher.WithContentAsJson(Func{JToken, bool})" />
+        public IMockRequestMatcher WithContentAsJson(Func<JToken, bool> requestContentMatch)
+        {
+            if (requestContentMatch == null)
+                throw new ArgumentNullException(nameof(requestContentMatch));
+
+            _requestContentJsonMatcherDelegate = requestContentMatch;
             return this;
         }
 
@@ -226,8 +238,9 @@ namespace LogicAppUnit.Mocking
         /// Compares a set of request match conditions with a mocked HTTP request message. 
         /// </summary>
         /// <param name="request">The HTTP request message to be compared.</param>
+        /// <param name="requestCache">Cache for parts of the request for performance and efficiency.</param>
         /// <returns>A <see cref="MockRequestMatchResult"/> that contains the result of the request matching.</returns>
-        internal async Task<MockRequestMatchResult> MatchRequestAsync(HttpRequestMessage request)
+        internal async Task<MockRequestMatchResult> MatchRequestAsync(HttpRequestMessage request, MockRequestCache requestCache)
         {
             // Method
             // This is OR logic when multiple methods are specified in the match
@@ -298,7 +311,11 @@ namespace LogicAppUnit.Mocking
             }
 
             // Content
-            if (_requestContentMatchDelegate != null && !_requestContentMatchDelegate(await request.Content.ReadAsStringAsync()))
+            if (_requestContentStringMatcherDelegate != null && !_requestContentStringMatcherDelegate(await requestCache.ContentAsStringAsync()))
+            {
+                return new MockRequestMatchResult(false, $"The request content is not matched");
+            }
+            if (_requestContentJsonMatcherDelegate != null && !_requestContentJsonMatcherDelegate(await requestCache.ContentAsJsonAsync()))
             {
                 return new MockRequestMatchResult(false, $"The request content is not matched");
             }

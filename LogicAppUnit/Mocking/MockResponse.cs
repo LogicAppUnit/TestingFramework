@@ -53,18 +53,22 @@ namespace LogicAppUnit.Mocking
         /// Match a HTTP request with a request matcher and create a response if there is a match.
         /// </summary>
         /// <param name="request">The HTTP request to be matched.</param>
+        /// <param name="requestCache">Cache for parts of the request for performance and efficiency.</param>
         /// <param name="requestMatchingLog">Request matching log.</param>
         /// <returns>The response for the matching request, or <c>null</c> if there was no match.</returns>
-        internal async Task<HttpResponseMessage> MatchRequestAndCreateResponseAsync(HttpRequestMessage request, List<string> requestMatchingLog)
+        internal async Task<HttpResponseMessage> MatchRequestAndCreateResponseAsync(HttpRequestMessage request, MockRequestCache requestCache, List<string> requestMatchingLog)
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
+            if (requestCache == null)
+                throw new ArgumentNullException(nameof(requestCache));
+
             if (_mockRequestMatcher == null)
                 throw new TestException("A request matcher has not been configured");
             if (_mockResponseBuilder == null)
                 throw new TestException("A response builder has not been configured - use RespondWith() to create a response, or RespondWithDefault() to create a default response using a status code of 200 (OK) and no content");
 
-            MockRequestMatchResult matchResult = await _mockRequestMatcher.MatchRequestAsync(request);
+            MockRequestMatchResult matchResult = await _mockRequestMatcher.MatchRequestAsync(request, requestCache);
             if (matchResult.IsMatch)
             {
                 requestMatchingLog.Add("    Matched");

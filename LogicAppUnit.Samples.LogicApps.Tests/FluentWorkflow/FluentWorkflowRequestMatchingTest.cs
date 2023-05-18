@@ -387,10 +387,10 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         }
 
         /// <summary>
-        /// Tests the matching of requests using the content.
+        /// Tests the matching of requests using the content as a String.
         /// </summary>
         [TestMethod]
-        public void Test_RequestMatcher_ContentContains()
+        public void Test_RequestMatcher_ContentAsString()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -400,7 +400,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                     .AddMockResponse("Content-Blue Origin",
                         MockRequestMatcher.Create()
                         .UsingPost()
-                        .WithContent((requestContent) => { return requestContent.Contains("Blue Origin"); } ))
+                        .WithContentAsString((requestContent) => { return requestContent.Contains("Blue Origin"); } ))
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithInternalServerError());
@@ -408,7 +408,50 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                     .AddMockResponse("Content-SpaceX",
                         MockRequestMatcher.Create()
                         .UsingPost()
-                        .WithContent((requestContent) => { return requestContent.Contains("SpaceX"); }))
+                        .WithContentAsString((requestContent) => { return requestContent.Contains("SpaceX"); }))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess());
+                testRunner
+                    .AddMockResponse("Default-Error",
+                        MockRequestMatcher.Create())
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
+
+                // Run the workflow
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    GetRequest(),
+                    HttpMethod.Post);
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
+            }
+        }
+
+        /// <summary>
+        /// Tests the matching of requests using the content as JSON.
+        /// </summary>
+        [TestMethod]
+        public void Test_RequestMatcher_ContentAsJson()
+        {
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Configure mock responses
+                // The last matcher is a 'catch-all' and only matches when the previous mock responses are not matched
+                testRunner
+                    .AddMockResponse("Content-Blue Origin",
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithContentAsJson((requestContent) => { return (string)requestContent.SelectToken("manufacturer") == "Blue Origin"; }))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
+                testRunner
+                    .AddMockResponse("Content-SpaceX",
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithContentAsJson((requestContent) => { return (string)requestContent.SelectToken("manufacturer") == "SpaceX"; }))
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithSuccess());

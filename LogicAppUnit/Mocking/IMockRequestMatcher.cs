@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Net.Http;
 
 namespace LogicAppUnit.Mocking
@@ -117,6 +118,13 @@ namespace LogicAppUnit.Mocking
         /// </summary>
         /// <param name="requestContentMatch">Delegate function that returns <c>true</c> if the content is matched, otherwise <c>false</c>.</param>
         /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
-        IMockRequestMatcher WithContent(Func<string, bool> requestContentMatch);
+        IMockRequestMatcher WithContentAsString(Func<string, bool> requestContentMatch);
+
+        /// <summary>
+        /// Configure request matching based on the JSON request content (as a <see cref="JToken"/>) and a delegate function that determines if the request is matched.
+        /// </summary>
+        /// <param name="requestContentMatch">Delegate function that returns <c>true</c> if the content is matched, otherwise <c>false</c>.</param>
+        /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
+        IMockRequestMatcher WithContentAsJson(Func<JToken, bool> requestContentMatch);
     }
 }

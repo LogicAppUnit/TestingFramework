@@ -174,6 +174,7 @@ namespace LogicAppUnit.Mocking
         /// <returns>The HTTP response message.</returns>
         public async Task<HttpResponseMessage> GetResponseUsingFluentMocksAsync(HttpRequestMessage request, List<string> requestMatchingLog)
         {
+            MockRequestCache mockRequestCache = new MockRequestCache(request);
             HttpResponseMessage matchedResponse = null;
             int count = 0;
 
@@ -183,7 +184,7 @@ namespace LogicAppUnit.Mocking
 
                 try
                 {
-                    matchedResponse = await mockResp.MatchRequestAndCreateResponseAsync(request, requestMatchingLog);
+                    matchedResponse = await mockResp.MatchRequestAndCreateResponseAsync(request, mockRequestCache, requestMatchingLog);
                 }
                 catch (Exception ex)
                 {
