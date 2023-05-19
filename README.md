@@ -18,6 +18,7 @@ The testing framework has been designed to make it easier to perform isolated un
 - Remove dependencies on invoked workflows by replacing the Invoke Workflow actions with HTTP actions and a mock HTTP server that is managed by the framework.
 - Remove external service dependencies for managed API connectors by automatically re-configuring managed API connections to use a mock HTTP server that is managed by the framework.
 - Remove all retry policies to ensure that tests exercising failure scenarios do not take a long time to execute.
+- A fluent API to configure request matching and the creation of responses for the mock HTTP server.
 - Detailed logging to help with workflow test authoring and debugging.
 - Programmatic access to the workflow run history to enable assertion of workflow run status, response status, action status, input and output messages and more. This includes support for action repetitions inside a loop.
 - Programmatic access to the requests sent to the mock HTTP server to enable assertion of the data sent from the workflow to external services and APIs.
@@ -58,8 +59,8 @@ The best way to understand how the framework works and how to write tests using 
 
 This is a list of possible future improvements and changes for the framework. Please create a [new issue](https://github.com/LogicAppUnit/TestingFramework/issues) if there are other features that you would like to see.
 
-- Improve the creation of the mocked responses using the mock HTTP server.
-  - The current approach is to use a delgate function that takes a *HttpRequestMessage* as an input and returns a *HttpResponseMessage*, where the delegate function creates a response message based on the request message and the requirements of the test case. This can be improved by including a fluent API to match requests and build responses, similar to that used by WireMock.net. A fluent API is more intuitive and easier to use for a test author.
-  - The proposed solution will work with the existing delegate function, such that if a request is not matched by any request matcher defined in the fluent API, the delegate function will be called, if it is configured.
-- Allow mocked responses to be created in a test class's Initialize step, these responses would then be automatically configured for all tests within the test class. This would remove the need to repeatedly configure the same mocked responses in multiple tests.
+- Add more features to the fluent API for request matching and the creation of mock responses.
+- Add a feature to the fluent API to allow a mock response to be matched using just the name of the workflow action that created the request. This would make it easier to match the request, compared to using multiple properties of the request such as the HTTP method, URI path and/or request content.
+- Allow mocked responses to be configured in a test class's Initialize step, these responses would then be automatically applied to all tests within the test class. This would remove the need to repeatedly configure the same mocked responses in multiple tests.
+- Add a `Verifiable()` feature to the fluent API so that a test case can assert that a test execution did send a request to the mock HTTP server that was successfully matched. This would work in a simialar way to the `Verifiable()` feature in the `moq` unit testing framework.
 - Add a test configuration option to allow the port number for the mock HTTP server to be changed from the default of 7075.
