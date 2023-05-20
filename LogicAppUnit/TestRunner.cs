@@ -457,23 +457,25 @@ namespace LogicAppUnit
             _runId = GetHeader(initialWorkflowHttpResponse.Headers, "x-ms-workflow-run-id");
             _clientTrackingId = GetHeader(initialWorkflowHttpResponse.Headers, "x-ms-client-tracking-id");
 
-            if (initialWorkflowHttpResponse.StatusCode != HttpStatusCode.Accepted)
-            {
-                return initialWorkflowHttpResponse;
-            }
-
+            // Wait till the workflow ends, i.e., workflow status is not "Running".
+            // This should be checked in case of HTTP trigger workflows as well to make sure that any
+            // actions after the Response action are properly run before testing their outputs.
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-
             while (stopwatch.Elapsed < TimeSpan.FromMinutes(Constants.MAX_TIME_MINUTES_WHILE_POLLING_WORKFLOW_RESULT))
             {
                 using (var latestWorkflowHttpResponse = _client.GetAsync(TestEnvironment.GetRunsRequestUriWithManagementHost(flowName: _workflowDefinition.WorkflowName)).Result)
                 {
                     var latestWorkflowHttpResponseContent = latestWorkflowHttpResponse.Content.ReadAsAsync<JToken>().Result;
                     var runStatusOfWorkflow = latestWorkflowHttpResponseContent["value"][0]["properties"]["status"].ToString();
-                    // If we got status code other than Accepted then return the response
+                    // If we got status code other than Accepted then return the appropriate response.
                     if (latestWorkflowHttpResponse.StatusCode != HttpStatusCode.Accepted && runStatusOfWorkflow != ActionStatus.Running.ToString())
                     {
+                        // If the initial response was from an HTTP trigger workflow, return it.
+                        if (initialWorkflowHttpResponse.StatusCode != HttpStatusCode.Accepted)
+                            return initialWorkflowHttpResponse;
+
+                        // It must be a non-HTTP trigger workflow, return the output of the workflow run.
                         return latestWorkflowHttpResponse;
                     }
                     Thread.Sleep(1000);
