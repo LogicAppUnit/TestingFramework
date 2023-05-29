@@ -39,17 +39,22 @@ namespace LogicAppUnit.Hosting
         /// <summary>
         /// The management host name.
         /// </summary>
-        public static readonly string ManagementHostName = $"{Environment.MachineName}";
+        public static readonly string MachineHostName = OperatingSystem.IsWindows() ? Environment.MachineName : "localhost";
+
+        /// <summary>
+        /// The management host name.
+        /// </summary>
+        public static readonly string ManagementHostName = OperatingSystem.IsWindows() ? Environment.MachineName : "localhost";
 
         /// <summary>
         /// The test host uri.
         /// </summary>
-        public static readonly string FlowV2TestHostUri = (new UriBuilder(Uri.UriSchemeHttp, Environment.MachineName, 7071).Uri.ToString()).TrimEnd('/');
+        public static readonly string FlowV2TestHostUri = (new UriBuilder(Uri.UriSchemeHttp, MachineHostName, 7071).Uri.ToString()).TrimEnd('/');
 
         /// <summary>
         /// The mock test host uri.
         /// </summary>
-        public static readonly string FlowV2MockTestHostUri = (new UriBuilder(Uri.UriSchemeHttp, Environment.MachineName, 7075).Uri.ToString()).TrimEnd('/');
+        public static readonly string FlowV2MockTestHostUri = (new UriBuilder(Uri.UriSchemeHttp, MachineHostName, 7075).Uri.ToString()).TrimEnd('/');
 
         /// <summary>
         /// The test host uri.

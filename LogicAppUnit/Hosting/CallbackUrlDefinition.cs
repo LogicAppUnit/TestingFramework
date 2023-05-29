@@ -64,12 +64,20 @@ namespace LogicAppUnit.Hosting
         /// <summary>
         /// Gets the value, with a relative path component.
         /// </summary>
+        /// <param name="queryParams">The query parameters to be passed to the workflow.</param>
         /// <param name="relativePath">The relative path to be used in the trigger. The path must already be URL-encoded.</param>
-        public Uri ValueWithRelativePath(string relativePath)
+        public Uri ValueWithQueryAndRelativePath(Dictionary<string, string> queryParams, string relativePath)
         {
-            // If there is no relative path, use the 'Value'
-            if (string.IsNullOrEmpty(relativePath))
-                return Value;
+            // If there is a relative path, remove the preceding "/"
+            // Relative path should not have a preceding "/";
+            // See Remark under https://learn.microsoft.com/en-us/dotnet/api/system.uri.-ctor?view=net-7.0#system-uri-ctor(system-uri-system-string)
+            if (!string.IsNullOrEmpty(relativePath))
+                relativePath = relativePath.TrimStart('/');
+
+            // If there are query parameters, add them to the Queries property
+            if (queryParams is not null)
+                foreach (var pair in queryParams)
+                    Queries.Add(pair.Key, pair.Value);
 
             // Make sure the base path has a trailing slash to preserve the relative path in 'Value'
             string basePathAsString = BasePath.ToString();
