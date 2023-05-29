@@ -104,10 +104,7 @@ namespace LogicAppUnit
 
         #region Lifetime management
 
-        /// <summary>
-        /// Configure the runner to wait for and return the asynchronous response.
-        /// </summary>
-        /// <param name="maxTimeout">The maximum time to poll for the asynchronous response after which runner should time out.</param>
+        /// <inheritdoc cref="ITestRunner.WaitForAsynchronousResponse(TimeSpan)"/>
         public void WaitForAsynchronousResponse(TimeSpan maxTimeout)
         {
             _waitForAsyncResponse = true;

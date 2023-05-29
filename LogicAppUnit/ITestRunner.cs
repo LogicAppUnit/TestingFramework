@@ -211,5 +211,11 @@ namespace LogicAppUnit
         /// <param name="assertion">The test assertion to be run.</param>
         /// <exception cref="AssertFailedException">Thrown when the test assertion fails.</exception>
         void ExceptionWrapper(Action assertion);
+
+        /// <summary>
+        /// Configure the runner to wait for and return the asynchronous response.
+        /// </summary>
+        /// <param name="maxTimeout">The maximum time to poll for the asynchronous response after which runner should time out.</param>
+        void WaitForAsynchronousResponse(TimeSpan maxTimeout);
     }
 }
