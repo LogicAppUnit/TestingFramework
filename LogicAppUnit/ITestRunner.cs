@@ -152,6 +152,28 @@ namespace LogicAppUnit
         HttpResponseMessage TriggerWorkflow(HttpMethod method, Dictionary<string, string> requestHeaders = null);
 
         /// <summary>
+        /// Trigger a workflow using query parameters, an empty request content and optional request headers.
+        /// </summary>
+        /// <param name="queryParams">The query parameters to be passed to the workflow.</param>
+        /// <param name="method">The HTTP method, this needs to match the method defined in the HTTP trigger in the workflow.</param>
+        /// <param name="requestHeaders">The request headers.</param>
+        /// <returns>The response from the workflow.</returns>
+        /// <remarks>
+        /// An empty request body may be used for workflows that contain triggers that do not use a request body, for example a Recurrence trigger.
+        /// </remarks>
+        HttpResponseMessage TriggerWorkflow(Dictionary<string, string> queryParams, HttpMethod method, Dictionary<string, string> requestHeaders = null);
+
+        /// <summary>
+        /// Trigger a workflow using query parameters, a relative path and optional request headers.
+        /// </summary>
+        /// <param name="queryParams">The query parameters to be passed to the workflow.</param>
+        /// <param name="method">The HTTP method, this needs to match the method defined in the HTTP trigger in the workflow.</param>
+        /// <param name="relativePath">The relative path to be used in the trigger. The path must already be URL-encoded.</param>
+        /// <param name="requestHeaders">The request headers.</param>
+        /// <returns>The response from the workflow.</returns>
+        HttpResponseMessage TriggerWorkflow(Dictionary<string, string> queryParams, HttpMethod method, string relativePath, Dictionary<string, string> requestHeaders = null);
+
+        /// <summary>
         /// Trigger a workflow using a request body and optional request headers.
         /// </summary>
         /// <param name="content">The content (including any content headers) for running the workflow, or <c>null</c> if there is no content.</param>
@@ -170,6 +192,17 @@ namespace LogicAppUnit
         /// <returns>The response from the workflow.</returns>
         HttpResponseMessage TriggerWorkflow(HttpContent content, HttpMethod method, string relativePath, Dictionary<string, string> requestHeaders = null);
 
+        /// <summary>
+        /// Trigger a workflow using query parameters, a request body, a relative path and optional request headers.
+        /// </summary>
+        /// <param name="queryParams">The query parameters to be passed to the workflow.</param>
+        /// <param name="content">The content (including any content headers) for running the workflow, or <c>null</c> if there is no content.</param>
+        /// <param name="method">The HTTP method, this needs to match the method defined in the HTTP trigger in the workflow.</param>
+        /// <param name="relativePath">The relative path to be used in the trigger. The path must already be URL-encoded.</param>
+        /// <param name="requestHeaders">The request headers.</param>
+        /// <returns>The response from the workflow.</returns>
+        HttpResponseMessage TriggerWorkflow(Dictionary<string, string> queryParams, HttpContent content, HttpMethod method, string relativePath, Dictionary<string, string> requestHeaders = null);
+
         #endregion // TriggerWorkflow
 
         /// <summary>
@@ -178,5 +211,11 @@ namespace LogicAppUnit
         /// <param name="assertion">The test assertion to be run.</param>
         /// <exception cref="AssertFailedException">Thrown when the test assertion fails.</exception>
         void ExceptionWrapper(Action assertion);
+
+        /// <summary>
+        /// Configure the runner to wait for and return the asynchronous response.
+        /// </summary>
+        /// <param name="maxTimeout">The maximum time to poll for the asynchronous response after which runner should time out.</param>
+        void WaitForAsynchronousResponse(TimeSpan maxTimeout);
     }
 }
