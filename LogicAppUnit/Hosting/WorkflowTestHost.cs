@@ -215,21 +215,21 @@ namespace LogicAppUnit.Hosting
         private static string GetEnvPathForFunctionTools()
         {
             string exePath;
-            if(OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows())
             {
                 var enviromentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine);
-                exePath = enviromentPath.Split(';').Select(x => Path.Combine(x, "func.exe")).Where(x => File.Exists(x)).FirstOrDefault();
+                exePath = enviromentPath.Split(Path.PathSeparator).Select(x => Path.Combine(x, "func.exe")).Where(x => File.Exists(x)).FirstOrDefault();
             }
             else
             {
                 var enviromentPath = Environment.GetEnvironmentVariable("PATH");
-                exePath = enviromentPath.Split(':').Select(x => Path.Combine(x, "func")).Where(x => File.Exists(x)).FirstOrDefault();
+                exePath = enviromentPath.Split(Path.PathSeparator).Select(x => Path.Combine(x, "func")).Where(x => File.Exists(x)).FirstOrDefault();
             }
 
-            if (!string.IsNullOrWhiteSpace(exePath))
+            if (!string.IsNullOrWhiteSpace(exePathWithExtension))
             {
-                Console.WriteLine($"Path for Azure Function Core tools: {exePath}");
-                return exePath;
+                Console.WriteLine($"Path for Azure Function Core tools: {exePathWithExtension}");
+                return exePathWithExtension;
             }
             else
             {
