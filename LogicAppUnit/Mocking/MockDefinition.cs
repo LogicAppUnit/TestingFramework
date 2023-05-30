@@ -91,11 +91,11 @@ namespace LogicAppUnit.Mocking
             get => _mockRequestsAsList;
         }
 
-       /// <summary>
-       /// Called when the test execution has completed.
-       /// </summary>
-       public void TestRunComplete()
-       {
+        /// <summary>
+        /// Called when the test execution has completed.
+        /// </summary>
+        public void TestRunComplete()
+        {
             // Copy the collection of mock requests from the thread-safe collection into a List that is accessible to the test case
             // The requests in the list are ordered in chronological order
             // The list is not thread-safe but this does not matter because the test case is not multi-threaded
@@ -121,7 +121,7 @@ namespace LogicAppUnit.Mocking
             {
                 Console.WriteLine("No mocked requests were logged");
             }
-       }
+        }
 
         /// <summary>
         /// Match a HTTP request message and return the corresponding HTTP response message.
@@ -151,20 +151,20 @@ namespace LogicAppUnit.Mocking
             {
                 requestLog.Log.Add($"Checking {_mockResponses.Count} mock request matchers:");
                 response = await GetResponseUsingFluentMocksAsync(request, requestLog.Log);
+
+                if (response != null)
+                    return response;
             }
             else
             {
                 requestLog.Log.Add("No mock request matchers have been configured");
             }
 
-            if (response != null)
-                return response;
-            else
-            {
-                requestLog.Log.Add("Runing mock response delegate because no requests were matched");
-                return _mockResponseDelegate(request);
-            }
+            requestLog.Log.Add("Runing mock response delegate because no requests were matched");
+            return GetResponseUsingDelegate(request, requestLog.Log);
         }
+
+        #region Private methods
 
         /// <summary>
         /// Match a HTTP request message against the set of request matchers and return the corresponding HTTP response message.
@@ -172,7 +172,7 @@ namespace LogicAppUnit.Mocking
         /// <param name="request">The HTTP request message./</param>
         /// <param name="requestMatchingLog">Request matching log.</param>
         /// <returns>The HTTP response message.</returns>
-        public async Task<HttpResponseMessage> GetResponseUsingFluentMocksAsync(HttpRequestMessage request, List<string> requestMatchingLog)
+        private async Task<HttpResponseMessage> GetResponseUsingFluentMocksAsync(HttpRequestMessage request, List<string> requestMatchingLog)
         {
             MockRequestCache mockRequestCache = new MockRequestCache(request);
             HttpResponseMessage matchedResponse = null;
@@ -188,6 +188,7 @@ namespace LogicAppUnit.Mocking
                 }
                 catch (Exception ex)
                 {
+                    // This exception will flow up to the Mock HTTP Server which will then return a HTTP 500 (Internal Server Error) to the workflow being tested
                     requestMatchingLog.Add($"    EXCEPTION: {ex.Message}");
                     throw;
                 }
@@ -199,7 +200,25 @@ namespace LogicAppUnit.Mocking
             return matchedResponse;
         }
 
-        #region Private methods
+        /// <summary>
+        /// Match a HTTP request message using the delegate function and return the corresponding HTTP response message.
+        /// </summary>
+        /// <param name="request">The HTTP request message./</param>
+        /// <param name="requestMatchingLog">Request matching log.</param>
+        /// <returns>The HTTP response message.</returns>
+        private HttpResponseMessage GetResponseUsingDelegate(HttpRequestMessage request, List<string> requestMatchingLog)
+        {
+            try
+            {
+                return _mockResponseDelegate(request);
+            }
+            catch (Exception ex)
+            {
+                // This exception will flow up to the Mock HTTP Server which will then return a HTTP 500 (Internal Server Error) to the workflow being tested
+                requestMatchingLog.Add($"    EXCEPTION: {ex.Message}");
+                throw;
+            }
+        }
 
         /// <summary>
         /// Wrap the mock delegate defined in the test case with additional functionality.
