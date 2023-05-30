@@ -110,11 +110,6 @@ namespace LogicAppUnit.InternalHelper
             // Documentation: https://learn.microsoft.com/en-us/rest/api/logic/workflow-triggers/list-callback-url
             try
             {
-                // On a mac device, without some delay, the test fails 
-                // with a "System.Net.Http.HttpRequestException: Connection refused" exception
-                if (!OperatingSystem.IsWindows())
-                    System.Threading.Thread.Sleep(500);
-
                 using (var workflowTriggerCallbackResponse = _client.PostAsync(
                     TestEnvironment.GetTriggerCallbackRequestUri(flowName: _workflowName, triggerName: triggerName),
                     ContentHelper.CreatePlainStringContent("")).Result)

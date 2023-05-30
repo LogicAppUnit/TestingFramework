@@ -328,6 +328,11 @@ namespace LogicAppUnit
             if (string.IsNullOrEmpty(triggerName))
                 throw new TestException($"Workflow does not have a HTTP Request trigger, so the workflow cannot be started.");
 
+            // On Mac and Linux platforms, without a short delay the call to the Functions Management host to get the callback URL will fail with
+            // a "System.Net.Http.HttpRequestException: Connection refused" exception
+            if (!OperatingSystem.IsWindows())
+                System.Threading.Thread.Sleep(500);
+
             // Get the callback information for the workflow, including the trigger URL
             CallbackUrlDefinition callbackDef = _apiHelper.GetWorkflowCallbackDefinition(triggerName);
 
