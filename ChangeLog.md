@@ -1,3 +1,15 @@
+# 1.6.0 (2nd June 2023)
+
+LogicAppUnit Testing Framework:
+
+- Added support for Linux and MacOS platforms. [[PR #14](https://github.com/LogicAppUnit/TestingFramework/pull/14), [@easchi](https://github.com/eashi) and [PR #15](https://github.com/LogicAppUnit/TestingFramework/pull/15), [@atthevergeof](https://github.com/atthevergeof)]
+- Added new overloads to `TestRunner.TriggerWorkflow()` to configure query parameters when triggering a workflow with a HTTP trigger. [[PR #15](https://github.com/LogicAppUnit/TestingFramework/pull/15), [@atthevergeof](https://github.com/atthevergeof)]
+- Added support for workflows using a HTTP trigger with an asynchronous response. Previous versions of the framework assumed that all responses were synchronous. Now the framework handles a 202 (Accepted) response and uses the callback URL (in the `Location` header) to poll the workflow and get the response. [[PR #15](https://github.com/LogicAppUnit/TestingFramework/pull/15), [@atthevergeof](https://github.com/atthevergeof)]
+- Added support for workflows using a HTTP trigger where the response action is not the last action in the workflow. Previous versions of the framework assumed that the workflow was complete once the response was received. Now the framework polls the workflow status to ensure that the workflow has completed. [[PR #15](https://github.com/LogicAppUnit/TestingFramework/pull/15), [@atthevergeof](https://github.com/atthevergeof)]
+
+Thanks to [@easchi](https://github.com/eashi) and [@atthevergeof](https://github.com/atthevergeof) for their contributions.
+
+
 # 1.5.0 (14th April 2023)
 
 LogicAppUnit Testing Framework:
