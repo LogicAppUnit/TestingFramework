@@ -2,6 +2,8 @@
 using LogicAppUnit.Mocking;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Net;
 using System.Net.Http;
 
 namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
@@ -387,7 +389,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         }
 
         /// <summary>
-        /// Tests the matching of requests using the content as a String.
+        /// Tests the matching of requests using content as a <see cref="string"/>.
         /// </summary>
         [TestMethod]
         public void Test_RequestMatcher_ContentAsString()
@@ -430,7 +432,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         }
 
         /// <summary>
-        /// Tests the matching of requests using the content as JSON.
+        /// Tests the matching of requests using content as JSON.
         /// </summary>
         [TestMethod]
         public void Test_RequestMatcher_ContentAsJson()
@@ -472,6 +474,57 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
             }
         }
 
+        /// <summary>
+        /// Tests the matching of requests using content as JSON, and request matching using fluent matchers and a delegate function.
+        /// </summary>
+        [TestMethod]
+        public void Test_RequestMatcher_ContentUsingBothApproaches()
+        {
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Configure mock responses
+                testRunner
+                    .AddMockResponse("Content-Virgin Orbit",
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithContentAsString((requestContent) => { return requestContent.Contains("Virgin Orbit"); }))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
+                //testRunner
+                //    .AddMockResponse("Content-SpaceX",
+                //        MockRequestMatcher.Create()
+                //        .UsingPost()
+                //        .WithContentAsJson((requestContent) => { return (string)requestContent.SelectToken("manufacturer") == "Blue Origin"; }))
+                //    .RespondWith(
+                //        MockResponseBuilder.Create()
+                //        .WithInternalServerError());
+
+                // Configure mock response delegate that runs if no mock responses are matched
+                testRunner.AddApiMocks = (request) =>
+                {
+                    HttpResponseMessage mockedResponse = new HttpResponseMessage();
+                    mockedResponse.RequestMessage = request;
+
+                    JToken requestAsJson = request.Content.ReadAsAsync<JToken>().Result;
+                    if (request.Method == HttpMethod.Post && (string)requestAsJson.SelectToken("manufacturer") == "SpaceX")
+                        mockedResponse.StatusCode = HttpStatusCode.OK;
+                    else
+                        mockedResponse.StatusCode = HttpStatusCode.InternalServerError;
+                    
+                    return mockedResponse;
+                };
+
+                // Run the workflow
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    GetRequest(),
+                    HttpMethod.Post);
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
+            }
+        }
+        
         private static StringContent GetRequest()
         {
             return ContentHelper.CreateJsonStringContent(new
