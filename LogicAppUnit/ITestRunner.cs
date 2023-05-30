@@ -213,9 +213,9 @@ namespace LogicAppUnit
         void ExceptionWrapper(Action assertion);
 
         /// <summary>
-        /// Configure the runner to wait for and return the asynchronous response.
+        /// Configure the test runner to wait for and return the asynchronous response.
         /// </summary>
-        /// <param name="maxTimeout">The maximum time to poll for the asynchronous response after which runner should time out.</param>
+        /// <param name="maxTimeout">The maximum time to poll for the asynchronous response after which test runner will time out.</param>
         void WaitForAsynchronousResponse(TimeSpan maxTimeout);
     }
 }
