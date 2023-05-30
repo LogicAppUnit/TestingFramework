@@ -341,7 +341,7 @@ namespace LogicAppUnit
             {
                 Content = content,
                 Method = method,
-                RequestUri = callbackDef.ValueWithQueryAndRelativePath(queryParams, relativePath)
+                RequestUri = callbackDef.ValueWithRelativePathAndQueryParams(relativePath, queryParams)
             };
 
             if (requestHeaders != null)
