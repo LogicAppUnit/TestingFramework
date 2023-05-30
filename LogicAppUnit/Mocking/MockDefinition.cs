@@ -146,14 +146,13 @@ namespace LogicAppUnit.Mocking
             _mockRequestLog.Add(requestLog);
 
             // Use fluent mock reponses first, then the mock response delegate
-            HttpResponseMessage response = null;
             if (_mockResponses.Count > 0)
             {
                 requestLog.Log.Add($"Checking {_mockResponses.Count} mock request matchers:");
-                response = await GetResponseUsingFluentMocksAsync(request, requestLog.Log);
+                HttpResponseMessage fluentResponse = await GetResponseUsingFluentMocksAsync(request, requestLog.Log);
 
-                if (response != null)
-                    return response;
+                if (fluentResponse != null)
+                    return fluentResponse;
             }
             else
             {
