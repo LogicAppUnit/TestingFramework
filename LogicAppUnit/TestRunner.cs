@@ -33,6 +33,7 @@ namespace LogicAppUnit
 
         // Whether to wait for the asynchronous response by polling the redirected URI
         private bool _waitForAsyncResponse;
+
         // Maximum time to wait for the asynchronous response before timing out 
         private TimeSpan _asyncResponseTimeout;
 
@@ -103,13 +104,6 @@ namespace LogicAppUnit
         #endregion // Workflow properties
 
         #region Lifetime management
-
-        /// <inheritdoc cref="ITestRunner.WaitForAsynchronousResponse(TimeSpan)"/>
-        public void WaitForAsynchronousResponse(TimeSpan maxTimeout)
-        {
-            _waitForAsyncResponse = true;
-            _asyncResponseTimeout = maxTimeout;
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TestRunner"/> class.
@@ -390,6 +384,23 @@ namespace LogicAppUnit
 
         #endregion // TriggerWorkflow
 
+        #region WaitForAsynchronousResponse
+
+        /// <inheritdoc cref="ITestRunner.WaitForAsynchronousResponse(int)" />
+        public void WaitForAsynchronousResponse(int maxTimeoutSeconds)
+        {
+            WaitForAsynchronousResponse(TimeSpan.FromSeconds(maxTimeoutSeconds));
+        }
+
+        /// <inheritdoc cref="ITestRunner.WaitForAsynchronousResponse(TimeSpan)" />
+        public void WaitForAsynchronousResponse(TimeSpan maxTimeout)
+        {
+            _waitForAsyncResponse = true;
+            _asyncResponseTimeout = maxTimeout;
+        }
+
+        #endregion // WaitForAsynchronousResponse
+
         /// <inheritdoc cref="ITestRunner.ExceptionWrapper(Action)" />
         public void ExceptionWrapper(Action assertion)
         {
@@ -540,7 +551,7 @@ namespace LogicAppUnit
                 }
             }
 
-            throw new TestException($"Workflow is taking more than {Constants.MAX_TIME_MINUTES_WHILE_POLLING_WORKFLOW_RESULT} minutes for its execution.");
+            throw new TestException($"Workflow is taking more than {Constants.MAX_TIME_MINUTES_WHILE_POLLING_WORKFLOW_RESULT} minutes to complete its execution.");
         }
 
         /// <summary>

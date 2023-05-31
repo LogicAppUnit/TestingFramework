@@ -205,17 +205,27 @@ namespace LogicAppUnit
 
         #endregion // TriggerWorkflow
 
+        #region WaitForAsynchronousResponse
+
         /// <summary>
-        /// Wraps a test assertion in a <c>catch</c> block which logs additional workflow execution information when the assertion fails.
+        /// Configure the test runner (in seconds) to wait for and return the asynchronous response.
         /// </summary>
-        /// <param name="assertion">The test assertion to be run.</param>
-        /// <exception cref="AssertFailedException">Thrown when the test assertion fails.</exception>
-        void ExceptionWrapper(Action assertion);
+        /// <param name="maxTimeoutSeconds">The maximum number of seconds to poll for the asynchronous response after which test runner will time out.</param>
+        void WaitForAsynchronousResponse(int maxTimeoutSeconds);
 
         /// <summary>
         /// Configure the test runner to wait for and return the asynchronous response.
         /// </summary>
         /// <param name="maxTimeout">The maximum time to poll for the asynchronous response after which test runner will time out.</param>
         void WaitForAsynchronousResponse(TimeSpan maxTimeout);
+
+        #endregion // WaitForAsynchronousResponse
+
+        /// <summary>
+        /// Wraps a test assertion in a <c>catch</c> block which logs additional workflow execution information when the assertion fails.
+        /// </summary>
+        /// <param name="assertion">The test assertion to be run.</param>
+        /// <exception cref="AssertFailedException">Thrown when the test assertion fails.</exception>
+        void ExceptionWrapper(Action assertion);
     }
 }
