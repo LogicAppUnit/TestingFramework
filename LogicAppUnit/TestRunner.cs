@@ -472,7 +472,7 @@ namespace LogicAppUnit
         }
 
         /// <summary>
-        /// Poll the workflow run result every 1 second for MAX_TIME_MINUTES_WHILE_POLLING_WORKFLOW_RESULT time, and try to get the final workflow status other than running.
+        /// Poll the workflow run result.
         /// </summary>
         /// <param name="httpRequestMessage">The request message to trigger the workflow.</param>
         /// <returns>The response from the workflow.</returns>
@@ -493,6 +493,12 @@ namespace LogicAppUnit
             var callbackLocation = initialWorkflowResponse.Headers?.Location;
             if (initialWorkflowResponse.StatusCode == HttpStatusCode.Accepted && callbackLocation != null && _waitForAsyncResponse)
             {
+                Console.WriteLine();
+                Console.WriteLine("Workflow async callback:");
+                Console.WriteLine($"    URL: GET {callbackLocation}");
+                Console.WriteLine($"    Timeout for receipt of async response: {_asyncResponseTimeout.TotalSeconds} seconds");
+                Console.WriteLine();
+
                 var retryAfterSeconds = initialWorkflowResponse.Headers?.RetryAfter?.Delta ?? TimeSpan.FromSeconds(5);
 
                 var stopwatchAsyncResponse = new Stopwatch();
@@ -514,13 +520,12 @@ namespace LogicAppUnit
 
                 if (asyncWorkflowResponse == null)
                 {
-                    throw new TestException($"Workflow is taking more than {_asyncResponseTimeout.TotalMinutes} minutes to return the final async response.");
+                    throw new TestException($"Workflow is taking more than {_asyncResponseTimeout.TotalSeconds} seconds to return the final async response.");
                 }
             }
 
             // Wait till the workflow ends, i.e. workflow status is not "Running".
-            // This should be checked in case of HTTP trigger workflows to make sure that any actions after the Response action have completed before
-            // testing their outputs.
+            // This should be checked in case of HTTP trigger workflows to make sure that any actions after the Response action have completed before testing their outputs.
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -538,7 +543,7 @@ namespace LogicAppUnit
                         if (asyncWorkflowResponse != null)
                             return asyncWorkflowResponse;
 
-                        // Return the initial response from the HTTP trigger
+                        // Otherwise return the initial response from the HTTP trigger
                         // For a workflow with a HTTP trigger that replaces a non-HTTP trigger, the response will have a HTTP 202 (Accepted) status
                         return initialWorkflowResponse;
                     }
