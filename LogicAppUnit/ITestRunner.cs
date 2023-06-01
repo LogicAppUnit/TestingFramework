@@ -148,6 +148,7 @@ namespace LogicAppUnit
         /// <returns>The response from the workflow.</returns>
         /// <remarks>
         /// An empty request body may be used for workflows that contain triggers that do not use a request body, for example a Recurrence trigger.
+        /// This method waits for the workflow to complete before returning a response.
         /// </remarks>
         HttpResponseMessage TriggerWorkflow(HttpMethod method, Dictionary<string, string> requestHeaders = null);
 
@@ -160,6 +161,7 @@ namespace LogicAppUnit
         /// <returns>The response from the workflow.</returns>
         /// <remarks>
         /// An empty request body may be used for workflows that contain triggers that do not use a request body, for example a Recurrence trigger.
+        /// This method waits for the workflow to complete before returning a response.
         /// </remarks>
         HttpResponseMessage TriggerWorkflow(Dictionary<string, string> queryParams, HttpMethod method, Dictionary<string, string> requestHeaders = null);
 
@@ -171,6 +173,10 @@ namespace LogicAppUnit
         /// <param name="relativePath">The relative path to be used in the trigger. The path must already be URL-encoded.</param>
         /// <param name="requestHeaders">The request headers.</param>
         /// <returns>The response from the workflow.</returns>
+        /// <remarks>
+        /// An empty request body may be used for workflows that contain triggers that do not use a request body, for example a Recurrence trigger.
+        /// This method waits for the workflow to complete before returning a response.
+        /// </remarks>
         HttpResponseMessage TriggerWorkflow(Dictionary<string, string> queryParams, HttpMethod method, string relativePath, Dictionary<string, string> requestHeaders = null);
 
         /// <summary>
@@ -180,6 +186,9 @@ namespace LogicAppUnit
         /// <param name="method">The HTTP method, this needs to match the method defined in the HTTP trigger in the workflow.</param>
         /// <param name="requestHeaders">The request headers.</param>
         /// <returns>The response from the workflow.</returns>
+        /// <remarks>
+        /// This method waits for the workflow to complete before returning a response.
+        /// </remarks>
         HttpResponseMessage TriggerWorkflow(HttpContent content, HttpMethod method, Dictionary<string, string> requestHeaders = null);
 
         /// <summary>
@@ -190,6 +199,9 @@ namespace LogicAppUnit
         /// <param name="relativePath">The relative path to be used in the trigger. The path must already be URL-encoded.</param>
         /// <param name="requestHeaders">The request headers.</param>
         /// <returns>The response from the workflow.</returns>
+        /// <remarks>
+        /// This method waits for the workflow to complete before returning a response.
+        /// </remarks>
         HttpResponseMessage TriggerWorkflow(HttpContent content, HttpMethod method, string relativePath, Dictionary<string, string> requestHeaders = null);
 
         /// <summary>
@@ -201,6 +213,9 @@ namespace LogicAppUnit
         /// <param name="relativePath">The relative path to be used in the trigger. The path must already be URL-encoded.</param>
         /// <param name="requestHeaders">The request headers.</param>
         /// <returns>The response from the workflow.</returns>
+        /// <remarks>
+        /// This method waits for the workflow to complete before returning a response.
+        /// </remarks>
         HttpResponseMessage TriggerWorkflow(Dictionary<string, string> queryParams, HttpContent content, HttpMethod method, string relativePath, Dictionary<string, string> requestHeaders = null);
 
         #endregion // TriggerWorkflow
