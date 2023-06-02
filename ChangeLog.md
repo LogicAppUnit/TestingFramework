@@ -8,7 +8,7 @@ LogicAppUnit Testing Framework:
 - Added support for workflows using a HTTP trigger where the response action is not the last action in the workflow. Previous versions of the framework assumed that the workflow was complete once the response was received. Now the framework polls the workflow status to ensure that the workflow has completed. [[PR #15](https://github.com/LogicAppUnit/TestingFramework/pull/15), [@atthevergeof](https://github.com/atthevergeof)]
 - Fixed a bug in `TestRunner.TriggerWorkflow()` where the return value was being incorrectly set to the (disposed) workflow run history API response. The response is now correctly set to the workflow trigger API response. This bug only occurred for workflows that have a non-HTTP trigger (which is then replaced by a HTTP trigger by the framework).
   <br />
-  <font color="orange">***This is a breaking change. Previously the status code for the response would have been HTTP 200 (OK), now it will be HTTP 202 (Accepted).***</font>
+  :warning: ***This is a breaking change. Previously the status code for the response would have been HTTP 200 (OK), now it will be HTTP 202 (Accepted).*** :warning:
 
 LogicAppUnit.Samples.LogicApps.Tests:
 
