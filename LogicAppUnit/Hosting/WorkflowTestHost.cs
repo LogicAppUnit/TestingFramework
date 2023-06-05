@@ -3,6 +3,7 @@
 
 namespace LogicAppUnit.Hosting
 {
+    using LogicAppUnit.InternalHelper;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -277,6 +278,12 @@ namespace LogicAppUnit.Hosting
         /// </summary>
         public void Dispose()
         {
+            LoggingHelper.LogBanner("Test completed");
+
+            // Log the version number
+            var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            Console.WriteLine($"LogicAppUnit version {version.Major}.{version.Minor}.{version.Build}");
+
             try
             {
                 // Kill any remaining function host processes so that we can then delete the working directory
