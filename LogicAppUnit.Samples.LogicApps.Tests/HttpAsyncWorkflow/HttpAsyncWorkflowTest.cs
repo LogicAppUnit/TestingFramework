@@ -1,4 +1,5 @@
 ﻿using LogicAppUnit.Helper;
+using LogicAppUnit.Mocking;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net;
 using System.Net.Http;
@@ -35,20 +36,18 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpAsyncWorkflow
                 // Configure async response handling
                 testRunner.WaitForAsynchronousResponse(30);
 
-                // Mock the HTTP calls and customize responses
-                testRunner.AddApiMocks = (request) =>
-                {
-                    HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    if (request.RequestUri.AbsolutePath == "/api/v1/customers/12345" && request.Method == HttpMethod.Get)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.InternalServerError;
-                        mockedResponse.Content = ContentHelper.CreatePlainStringContent("Internal server error detected in System One");
-                    }
-
-                    Thread.Sleep(5000);         // wait for 5 seconds to give a gap between (i) the trigger's sync response and (ii) the workflow's async response
-                    return mockedResponse;
-                };
+                // Configure mock responses
+                // Wait for 5 seconds to give a gap between (i) the trigger's sync response and (ii) the workflow's async response
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingGet()
+                        .WithPath(PathMatchType.Exact, "/api/v1/customers/12345"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError()
+                        .WithContentAsPlainTextString("Internal server error detected in System One")
+                        .AfterDelay(5));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
@@ -82,26 +81,28 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpAsyncWorkflow
                 // Configure async response handling
                 testRunner.WaitForAsynchronousResponse(30);
 
-                // Mock the HTTP calls and customize responses
-                testRunner.AddApiMocks = (request) =>
-                {
-                    HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    if (request.RequestUri.AbsolutePath == "/api/v1/customers/12345" && request.Method == HttpMethod.Get)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                        mockedResponse.Content = GetCustomerResponse();
-                    }
-                    else if (request.RequestUri.AbsolutePath == "/api/v1.1/membership/customers/12345" && request.Method == HttpMethod.Put)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.InternalServerError;
-                        mockedResponse.Content = ContentHelper.CreatePlainStringContent("System Two is not feeling well today");
-                    }
-
-                    Thread.Sleep(5000);         // wait for 5 seconds to give a gap between (i) the trigger's sync response and (ii) the workflow's async response
-                    return mockedResponse;
-                };
+                // Configure mock responses
+                // Wait for 5 seconds to give a gap between (i) the trigger's sync response and (ii) the workflow's async response
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingGet()
+                        .WithPath(PathMatchType.Exact, "/api/v1/customers/12345"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess()
+                        .WithContent(GetCustomerResponse)
+                        .AfterDelay(5));
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingPut()
+                        .WithPath(PathMatchType.Exact, "/api/v1.1/membership/customers/12345"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError()
+                        .WithContentAsPlainTextString("System Two is not feeling well today")
+                        .AfterDelay(5));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
@@ -137,26 +138,28 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpAsyncWorkflow
                 // Configure async response handling
                 testRunner.WaitForAsynchronousResponse(30);
 
-                // Mock the HTTP calls and customize responses
-                testRunner.AddApiMocks = (request) =>
-                {
-                    HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    if (request.RequestUri.AbsolutePath == "/api/v1/customers/12345" && request.Method == HttpMethod.Get)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                        mockedResponse.Content = GetCustomerResponse();
-                    }
-                    else if (request.RequestUri.AbsolutePath == "/api/v1.1/membership/customers/12345" && request.Method == HttpMethod.Put)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                        mockedResponse.Content = ContentHelper.CreatePlainStringContent("success");
-                    }
-
-                    Thread.Sleep(5000);         // wait for 5 seconds to give a gap between (i) the trigger's sync response and (ii) the workflow's async response and then (iii) the completion of the workflow
-                    return mockedResponse;
-                };
+                // Configure mock responses
+                // Wait for 5 seconds to give a gap between (i) the trigger's sync response and (ii) the workflow's async response and then (iii) the completion of the workflow
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingGet()
+                        .WithPath(PathMatchType.Exact, "/api/v1/customers/12345"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess()
+                        .WithContent(GetCustomerResponse)
+                        .AfterDelay(5));
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingPut()
+                        .WithPath(PathMatchType.Exact, "/api/v1.1/membership/customers/12345"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess()
+                        .WithContentAsPlainTextString("success")
+                        .AfterDelay(5));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
