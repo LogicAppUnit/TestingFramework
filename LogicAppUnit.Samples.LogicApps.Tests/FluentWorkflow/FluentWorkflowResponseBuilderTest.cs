@@ -30,7 +30,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the response builder with a response of <see cref="HttpStatusCode.NoContent"/>.
         /// </summary>
         [TestMethod]
-        public void Test_ResponseBuilder_StatusCodeNoContent()
+        public void FluentWorkflowTest_ResponseBuilder_StatusCodeNoContent()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -61,7 +61,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the response builder with a response of <see cref="HttpStatusCode.ResetContent"/>.
         /// </summary>
         [TestMethod]
-        public void Test_ResponseBuilder_StatusCodeResetContent()
+        public void FluentWorkflowTest_ResponseBuilder_StatusCodeResetContent()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -92,7 +92,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the response builder using JSON content that is a serialised from a dynamic object.
         /// </summary>
         [TestMethod]
-        public void Test_ResponseBuilder_ContentAsJsonObject()
+        public void FluentWorkflowTest_ResponseBuilder_ContentAsJsonObject()
         {
             object responseAsDynamicObject = new { name = "Falcon 9", manufacturer = "SpaceX", diameter = 3.7, height = 70, massToLeo = 22.8 };
 
@@ -126,7 +126,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the response builder using JSON content that is a serialised from a class instance.
         /// </summary>
         [TestMethod]
-        public void Test_ResponseBuilder_ContentAsJsonClass()
+        public void FluentWorkflowTest_ResponseBuilder_ContentAsJsonClass()
         {
             Rocket responseAsClass = new (){  Name = "Starship", Manufacturer = "SpaceX", Diameter = 9, Height = 120, MassToLeo = 150, VolumeToLeo = 1000 };
 
@@ -160,7 +160,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the response builder using JSON content from an embedded resource.
         /// </summary>
         [TestMethod]
-        public void Test_ResponseBuilder_ContentAsJsonResource()
+        public void FluentWorkflowTest_ResponseBuilder_ContentAsJsonResource()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {

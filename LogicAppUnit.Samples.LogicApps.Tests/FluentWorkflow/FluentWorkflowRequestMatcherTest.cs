@@ -9,10 +9,10 @@ using System.Net.Http;
 namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
 {
     /// <summary>
-    /// Test cases for the <i>fluent-workflow</i> workflow and the Request Matching features.
+    /// Test cases for the <i>fluent-workflow</i> workflow and the Request Matcher features.
     /// </summary>
     [TestClass]
-    public class FluentWorkflowRequestMatchingTest : WorkflowTestBase
+    public class FluentWorkflowRequestMatcherTest : WorkflowTestBase
     {
         [TestInitialize]
         public void TestInitialize()
@@ -30,7 +30,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the matching of requests using HTTP methods and the <see cref="IMockRequestMatcher.UsingAnyMethod()"/> method.
         /// </summary>
         [TestMethod]
-        public void Test_RequestMatcher_MethodAny()
+        public void FluentWorkflowTest_RequestMatcher_MethodAny()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -69,7 +69,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the matching of requests using HTTP methods and the <see cref="IMockRequestMatcher.UsingPost()"/> method.
         /// </summary>
         [TestMethod]
-        public void Test_RequestMatcher_MethodPost()
+        public void FluentWorkflowTest_RequestMatcher_MethodPost()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -111,7 +111,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the matching of requests using the path.
         /// </summary>
         [TestMethod]
-        public void Test_RequestMatcher_PathSingle()
+        public void FluentWorkflowTest_RequestMatcher_PathSingle()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -161,7 +161,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the matching of requests using multiple paths.
         /// </summary>
         [TestMethod]
-        public void Test_RequestMatcher_PathMany()
+        public void FluentWorkflowTest_RequestMatcher_PathMany()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -202,7 +202,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the matching of requests using the content type.
         /// </summary>
         [TestMethod]
-        public void Test_RequestMatcher_ContentType()
+        public void FluentWorkflowTest_RequestMatcher_ContentType()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -248,7 +248,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the matching of requests using query parameters, when the first request is matched.
         /// </summary>
         [TestMethod]
-        public void Test_RequestMatcher_QueryParamsMatched()
+        public void FluentWorkflowTest_RequestMatcher_QueryParamsMatched()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -284,7 +284,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the matching of requests using query parameters, when the first request is not matched.
         /// </summary>
         [TestMethod]
-        public void Test_RequestMatcher_QueryParamsNotMatched()
+        public void FluentWorkflowTest_RequestMatcher_QueryParamsNotMatched()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -320,7 +320,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the matching of requests using HTTP headers, when the first request is matched.
         /// </summary>
         [TestMethod]
-        public void Test_RequestMatcher_HeadersMatched()
+        public void FluentWorkflowTest_RequestMatcher_HeadersMatched()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -356,7 +356,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the matching of requests using HTTP headers, when the first request is not matched.
         /// </summary>
         [TestMethod]
-        public void Test_RequestMatcher_HeadersNotMatched()
+        public void FluentWorkflowTest_RequestMatcher_HeadersNotMatched()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -392,7 +392,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the matching of requests using content as a <see cref="string"/>.
         /// </summary>
         [TestMethod]
-        public void Test_RequestMatcher_ContentAsString()
+        public void FluentWorkflowTest_RequestMatcher_ContentAsString()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -435,7 +435,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the matching of requests using content as JSON.
         /// </summary>
         [TestMethod]
-        public void Test_RequestMatcher_ContentAsJson()
+        public void FluentWorkflowTest_RequestMatcher_ContentAsJson()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -478,7 +478,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         /// Tests the matching of requests using content as JSON, and request matching using fluent matchers and a delegate function.
         /// </summary>
         [TestMethod]
-        public void Test_RequestMatcher_ContentUsingBothApproaches()
+        public void FluentWorkflowTest_RequestMatcher_ContentUsingBothApproaches()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
