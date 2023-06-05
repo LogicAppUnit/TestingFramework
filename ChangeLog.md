@@ -4,6 +4,7 @@ LogicAppUnit Testing Framework:
 
 - Mock responses can be configured using a fluent API, this includes the definition of the request matching conditions and the response. 
 - Removed public methods `ContentHelper.SerializeObject()`, `ContentHelper.DeserializeObject()` and `ContentHelper.JClone()`, these were for internal use only and are now obsolete.
+- Include the LogicAppUnit version at the end of a test log.
 
 LogicAppUnit.Samples.LogicApps.Tests:
 

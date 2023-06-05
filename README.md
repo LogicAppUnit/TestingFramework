@@ -23,7 +23,7 @@ The testing framework has been designed to make it easier to perform isolated un
 - Programmatic access to the workflow run history to enable assertion of workflow run status, response status, action status, input and output messages and more. This includes support for action repetitions inside a loop.
 - Programmatic access to the requests sent to the mock HTTP server to enable assertion of the data sent from the workflow to external services and APIs.
 - Override specific local settings for a test case to enable more testing scenarios (e.g. feature flags).
-- Automatically enable run history for stateless workflows by creating the `Workflows.<workflow name>.OperationOptions` setting.
+
 
 ## Projects
 
