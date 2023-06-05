@@ -4,10 +4,10 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 
-namespace LogicAppUnit.Samples.LogicApps.Tests.HttpAsyncTriggerWorkflowTest
+namespace LogicAppUnit.Samples.LogicApps.Tests.HttpAsyncWorkflow
 {
     /// <summary>
-    /// Test cases for the <i>http-async-test-workflow</i> workflow which uses an asynchronous response for the HTTP trigger.
+    /// Test cases for the <i>http-async-workflow</i> workflow which uses an asynchronous response for the HTTP trigger.
     /// </summary>
     [TestClass]
     public class HttpAsyncWorkflowTest : WorkflowTestBase
