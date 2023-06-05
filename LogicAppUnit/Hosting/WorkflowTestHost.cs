@@ -208,16 +208,28 @@ namespace LogicAppUnit.Hosting
         }
 
         /// <summary>
-        /// Retrieve the exact path of func.exe (Azure Function core tools). 
+        /// Retrieve the path of the 'func' executable (Azure Function core tools). 
         /// </summary>
-        /// <returns>The path to func.exe.</returns>
-        /// <exception cref="Exception">Thrown when the location of func.exe could not be found.</exception>
+        /// <returns>The path to the 'func' executable.</returns>
+        /// <exception cref="Exception">Thrown when the location of the 'func' executable could not be found.</exception>
         private static string GetEnvPathForFunctionTools()
         {
-            var enviromentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine);
+            string enviromentPath;
+            string exeName;
 
-            var exePath = enviromentPath.Split(';').Select(x => Path.Combine(x, "func.exe")).Where(x => File.Exists(x)).FirstOrDefault();
+            // Handle the differences between platforms
+            if (OperatingSystem.IsWindows())
+            {
+                enviromentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine);
+                exeName = "func.exe";
+            }
+            else
+            {
+                enviromentPath = Environment.GetEnvironmentVariable("PATH");
+                exeName = "func";
+            }
 
+            string exePath = enviromentPath.Split(Path.PathSeparator).Select(x => Path.Combine(x, exeName)).Where(x => File.Exists(x)).FirstOrDefault();
             if (!string.IsNullOrWhiteSpace(exePath))
             {
                 Console.WriteLine($"Path for Azure Function Core tools: {exePath}");
@@ -225,7 +237,7 @@ namespace LogicAppUnit.Hosting
             }
             else
             {
-                throw new Exception("Enviroment variables do not have FUNC.EXE path added.");
+                throw new Exception("The enviroment variable PATH does not include the path for the 'func' executable.");
             }
         }
 

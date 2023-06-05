@@ -32,6 +32,12 @@ namespace LogicAppUnit
         private string _runId;
         private string _clientTrackingId;
 
+        // Whether to wait for the asynchronous response by polling the redirected URI
+        private bool _waitForAsyncResponse;
+
+        // Maximum time to wait for the asynchronous response before timing out 
+        private TimeSpan _asyncResponseTimeout;
+
         #region Mock request handling
 
         /// <inheritdoc cref="ITestRunner.AddApiMocks" />
@@ -281,21 +287,44 @@ namespace LogicAppUnit
         /// <inheritdoc cref="ITestRunner.TriggerWorkflow(HttpMethod, Dictionary{string, string})" />
         public HttpResponseMessage TriggerWorkflow(HttpMethod method, Dictionary<string, string> requestHeaders = null)
         {
-            return TriggerWorkflow(null, method, requestHeaders);
+            return TriggerWorkflow(null, null, method, string.Empty, requestHeaders);
+        }
+
+        /// <inheritdoc cref="ITestRunner.TriggerWorkflow(Dictionary{string, string}, HttpMethod, Dictionary{string, string})" />
+        public HttpResponseMessage TriggerWorkflow(Dictionary<string, string> queryParams, HttpMethod method, Dictionary<string, string> requestHeaders = null)
+        {
+            return TriggerWorkflow(queryParams, null, method, string.Empty, requestHeaders);
+        }
+
+        /// <inheritdoc cref="ITestRunner.TriggerWorkflow(Dictionary{string, string}, HttpMethod, string, Dictionary{string, string})" />
+        public HttpResponseMessage TriggerWorkflow(Dictionary<string, string> queryParams, HttpMethod method, string relativePath, Dictionary<string, string> requestHeaders = null)
+        {
+            return TriggerWorkflow(queryParams, null, method, relativePath, requestHeaders);
         }
 
         /// <inheritdoc cref="ITestRunner.TriggerWorkflow(HttpContent, HttpMethod, Dictionary{string, string})" />
         public HttpResponseMessage TriggerWorkflow(HttpContent content, HttpMethod method, Dictionary<string, string> requestHeaders = null)
         {
-            return TriggerWorkflow(content, method, string.Empty, requestHeaders);
+            return TriggerWorkflow(null, content, method, string.Empty, requestHeaders);
         }
 
         /// <inheritdoc cref="ITestRunner.TriggerWorkflow(HttpContent, HttpMethod, string, Dictionary{string, string})" />
         public HttpResponseMessage TriggerWorkflow(HttpContent content, HttpMethod method, string relativePath, Dictionary<string, string> requestHeaders = null)
         {
+            return TriggerWorkflow(null, content, method, relativePath, requestHeaders);
+        }
+
+        /// <inheritdoc cref="ITestRunner.TriggerWorkflow(Dictionary{string, string}, HttpContent, HttpMethod, string, Dictionary{string, string})" />
+        public HttpResponseMessage TriggerWorkflow(Dictionary<string, string> queryParams, HttpContent content, HttpMethod method, string relativePath, Dictionary<string, string> requestHeaders = null)
+        {
             string triggerName = _workflowDefinition.HttpTriggerName;
             if (string.IsNullOrEmpty(triggerName))
                 throw new TestException($"Workflow does not have a HTTP Request trigger, so the workflow cannot be started.");
+
+            // On Mac and Linux platforms, without a short delay the call to the Functions Management host to get the callback URL will fail with
+            // a "System.Net.Http.HttpRequestException: Connection refused" exception
+            if (!OperatingSystem.IsWindows())
+                System.Threading.Thread.Sleep(500);
 
             // Get the callback information for the workflow, including the trigger URL
             CallbackUrlDefinition callbackDef = _apiHelper.GetWorkflowCallbackDefinition(triggerName);
@@ -305,7 +334,7 @@ namespace LogicAppUnit
             {
                 Content = content,
                 Method = method,
-                RequestUri = callbackDef.ValueWithRelativePath(relativePath)
+                RequestUri = callbackDef.ValueWithRelativePathAndQueryParams(relativePath, queryParams)
             };
 
             if (requestHeaders != null)
@@ -334,6 +363,23 @@ namespace LogicAppUnit
         }
 
         #endregion // TriggerWorkflow
+
+        #region WaitForAsynchronousResponse
+
+        /// <inheritdoc cref="ITestRunner.WaitForAsynchronousResponse(int)" />
+        public void WaitForAsynchronousResponse(int maxTimeoutSeconds)
+        {
+            WaitForAsynchronousResponse(TimeSpan.FromSeconds(maxTimeoutSeconds));
+        }
+
+        /// <inheritdoc cref="ITestRunner.WaitForAsynchronousResponse(TimeSpan)" />
+        public void WaitForAsynchronousResponse(TimeSpan maxTimeout)
+        {
+            _waitForAsyncResponse = true;
+            _asyncResponseTimeout = maxTimeout;
+        }
+
+        #endregion // WaitForAsynchronousResponse
 
         /// <inheritdoc cref="ITestRunner.ExceptionWrapper(Action)" />
         public void ExceptionWrapper(Action assertion)
@@ -406,24 +452,60 @@ namespace LogicAppUnit
         }
 
         /// <summary>
-        /// Poll the workflow run result every 1 second for MAX_TIME_MINUTES_WHILE_POLLING_WORKFLOW_RESULT time, and try to get the final workflow status other than running.
+        /// Poll the workflow run result.
         /// </summary>
         /// <param name="httpRequestMessage">The request message to trigger the workflow.</param>
         /// <returns>The response from the workflow.</returns>
         private HttpResponseMessage PollAndReturnFinalWorkflowResponse(HttpRequestMessage httpRequestMessage)
         {
+            HttpResponseMessage asyncWorkflowResponse = null;
+
             // Call the endpoint for the HTTP trigger
-            var initialWorkflowHttpResponse = _client.SendAsync(httpRequestMessage).Result;
+            // If a workflow doesn't include a Response action, the endpoint responds immediately with a HTTP 202 (Accepted) status
+            // If a workflow includes an asynchronous Response action, the endpoint responds immediately with a HTTP 202 (Accepted) status and a callback URL to get the asynchronous response
+            var initialWorkflowResponse = _client.SendAsync(httpRequestMessage).Result;
 
-            // Store some of the run metadata for test assertions, this may not exist for stateless workflows
-            _runId = GetHeader(initialWorkflowHttpResponse.Headers, "x-ms-workflow-run-id");
-            _clientTrackingId = GetHeader(initialWorkflowHttpResponse.Headers, "x-ms-client-tracking-id");
+            // Store some of the run metadata for test assertions, this may not exist for stateless workflows or for workflows with asynchronous responses 
+            _runId = GetHeader(initialWorkflowResponse.Headers, "x-ms-workflow-run-id");
+            _clientTrackingId = GetHeader(initialWorkflowResponse.Headers, "x-ms-client-tracking-id");
 
-            if (initialWorkflowHttpResponse.StatusCode != HttpStatusCode.Accepted)
+            // Check for and handle asynchronous response
+            var callbackLocation = initialWorkflowResponse.Headers?.Location;
+            if (initialWorkflowResponse.StatusCode == HttpStatusCode.Accepted && callbackLocation != null && _waitForAsyncResponse)
             {
-                return initialWorkflowHttpResponse;
+                Console.WriteLine();
+                Console.WriteLine("Workflow async callback:");
+                Console.WriteLine($"    URL: GET {callbackLocation}");
+                Console.WriteLine($"    Timeout for receipt of async response: {_asyncResponseTimeout.TotalSeconds} seconds");
+                Console.WriteLine();
+
+                var retryAfterSeconds = initialWorkflowResponse.Headers?.RetryAfter?.Delta ?? TimeSpan.FromSeconds(5);
+
+                var stopwatchAsyncResponse = new Stopwatch();
+                stopwatchAsyncResponse.Start();
+
+                while (stopwatchAsyncResponse.Elapsed < _asyncResponseTimeout)
+                {
+                    HttpResponseMessage latestAsyncResponse = _client.GetAsync(callbackLocation).Result;
+
+                    // If the async response has not been sent, we'll continue to get a HTTP 202 (Accepted) status code
+                    if (latestAsyncResponse.StatusCode != HttpStatusCode.Accepted)
+                    {
+                        stopwatchAsyncResponse.Stop();
+                        asyncWorkflowResponse = latestAsyncResponse;
+                        break;
+                    }
+                    Thread.Sleep(retryAfterSeconds);
+                }
+
+                if (asyncWorkflowResponse == null)
+                {
+                    throw new TestException($"Workflow is taking more than {_asyncResponseTimeout.TotalSeconds} seconds to return the final async response.");
+                }
             }
 
+            // Wait till the workflow ends, i.e. workflow status is not "Running".
+            // This should be checked in case of HTTP trigger workflows to make sure that any actions after the Response action have completed before testing their outputs.
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -433,16 +515,24 @@ namespace LogicAppUnit
                 {
                     var latestWorkflowHttpResponseContent = latestWorkflowHttpResponse.Content.ReadAsAsync<JToken>().Result;
                     var runStatusOfWorkflow = latestWorkflowHttpResponseContent["value"][0]["properties"]["status"].ToString();
-                    // If we got status code other than Accepted then return the response
+
+                    // If we got status code other than Accepted then return the appropriate response
                     if (latestWorkflowHttpResponse.StatusCode != HttpStatusCode.Accepted && runStatusOfWorkflow != ActionStatus.Running.ToString())
                     {
-                        return latestWorkflowHttpResponse;
+                        // If there is an asynchronous response, return it
+                        if (asyncWorkflowResponse != null)
+                            return asyncWorkflowResponse;
+
+                        // Otherwise return the initial response from the HTTP trigger
+                        // For a workflow with a HTTP trigger that replaces a non-HTTP trigger, the response will have a HTTP 202 (Accepted) status
+                        return initialWorkflowResponse;
                     }
+
                     Thread.Sleep(1000);
                 }
             }
 
-            throw new TestException($"Workflow is taking more than {Constants.MAX_TIME_MINUTES_WHILE_POLLING_WORKFLOW_RESULT} minutes for its execution.");
+            throw new TestException($"Workflow is taking more than {Constants.MAX_TIME_MINUTES_WHILE_POLLING_WORKFLOW_RESULT} minutes to complete its execution.");
         }
 
         #endregion // Private methods

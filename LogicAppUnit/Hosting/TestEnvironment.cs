@@ -1,73 +1,70 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the MIT License. See License.txt in the project root for license information.
+﻿using System;
+using System.Globalization;
 
 namespace LogicAppUnit.Hosting
 {
-    using System;
-    using System.Globalization;
-
     /// <summary>
-    /// The test setup class.
+    /// Defines the URLs for the workflow management API operations.
     /// </summary>
     internal class TestEnvironment
     {
         /// <summary>
-        /// Flow runtime webhook extension uri base path.
-        /// </summary>
-        public const string WorkflowExtensionBasePath = "/runtime/webhooks/workflow";
-
-        /// <summary>
-        /// Flow runtime webhook extension uri management base path.
-        /// </summary>
-        public static readonly string FlowExtensionManagementBasePath = $"{WorkflowExtensionBasePath}/api/management";
-
-        /// <summary>
-        /// Flow runtime webhook extension uri workflow management base path.
-        /// </summary>
-        public static readonly string FlowExtensionWorkflowManagementBasePath = $"{FlowExtensionManagementBasePath}/workflows";
-
-        /// <summary>
-        /// The edge api version.
+        /// The Edge Preview API version (2019-10-01-edge-preview).
         /// </summary>
         public static readonly string EdgePreview20191001ApiVersion = "2019-10-01-edge-preview";
 
         /// <summary>
-        /// The API version 2020-05-01.
+        /// The Preview API version (2020-05-01-preview).
         /// </summary>
         public static readonly string EdgePreview20200501ApiVersion = "2020-05-01-preview";
 
         /// <summary>
-        /// The management host name.
+        /// The local machine name.
         /// </summary>
-        public static readonly string ManagementHostName = $"{Environment.MachineName}";
+        public static readonly string MachineHostName = OperatingSystem.IsWindows() ? Environment.MachineName : "localhost";
 
         /// <summary>
-        /// The test host uri.
+        /// Flow runtime webhook extension URI base path.
         /// </summary>
-        public static readonly string FlowV2TestHostUri = (new UriBuilder(Uri.UriSchemeHttp, Environment.MachineName, 7071).Uri.ToString()).TrimEnd('/');
+        public static readonly string WorkflowExtensionBasePath = "/runtime/webhooks/workflow";
 
         /// <summary>
-        /// The mock test host uri.
+        /// Flow runtime webhook extension URI management base path.
         /// </summary>
-        public static readonly string FlowV2MockTestHostUri = (new UriBuilder(Uri.UriSchemeHttp, Environment.MachineName, 7075).Uri.ToString()).TrimEnd('/');
+        public static readonly string FlowExtensionManagementBasePath = $"{TestEnvironment.WorkflowExtensionBasePath}/api/management";
 
         /// <summary>
-        /// The test host uri.
+        /// Flow runtime webhook extension URI workflow management base path.
         /// </summary>
-        public static readonly string FlowV2TestManagementHostUri = (new UriBuilder(Uri.UriSchemeHttp, TestEnvironment.ManagementHostName, 7071).Uri.ToString()).TrimEnd('/');
+        public static readonly string FlowExtensionWorkflowManagementBasePath = $"{TestEnvironment.FlowExtensionManagementBasePath}/workflows";
 
         /// <summary>
-        /// Flow runtime webhook extension uri management base path.
+        /// The test host URI.
+        /// </summary>
+        public static readonly string FlowV2TestHostUri = (new UriBuilder(Uri.UriSchemeHttp, TestEnvironment.MachineHostName, 7071).Uri.ToString()).TrimEnd('/');
+
+        /// <summary>
+        /// The mock test host URI.
+        /// </summary>
+        public static readonly string FlowV2MockTestHostUri = (new UriBuilder(Uri.UriSchemeHttp, TestEnvironment.MachineHostName, 7075).Uri.ToString()).TrimEnd('/');
+
+        /// <summary>
+        /// The test host URI.
+        /// </summary>
+        public static readonly string FlowV2TestManagementHostUri = (new UriBuilder(Uri.UriSchemeHttp, TestEnvironment.MachineHostName, 7071).Uri.ToString()).TrimEnd('/');
+
+        /// <summary>
+        /// Flow runtime webhook extension URI management base path.
         /// </summary>
         public static readonly string ManagementBaseUrl = TestEnvironment.FlowV2TestHostUri + FlowExtensionManagementBasePath;
 
         /// <summary>
-        /// Flow runtime webhook extension uri workflow management base path.
+        /// Flow runtime webhook extension URI workflow management base path.
         /// </summary>
         public static readonly string ManagementWorkflowBaseUrl = TestEnvironment.FlowV2TestHostUri + FlowExtensionWorkflowManagementBasePath;
 
         /// <summary>
-        /// Flow runtime webhook extension uri workflow management base path with management host.
+        /// Flow runtime webhook extension URI workflow management base path with management host.
         /// </summary>
         public static readonly string ManagementWorkflowBaseUrlWithManagementHost = TestEnvironment.FlowV2TestManagementHostUri + FlowExtensionWorkflowManagementBasePath;
 

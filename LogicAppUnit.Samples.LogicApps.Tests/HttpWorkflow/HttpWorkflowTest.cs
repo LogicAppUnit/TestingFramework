@@ -11,7 +11,7 @@ using System.Net.Http;
 namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflow
 {
     /// <summary>
-    /// Test cases for the <i>http-workflow</i> workflow.
+    /// Test cases for the <i>http-workflow</i> workflow which uses a synchronous response for the HTTP trigger.
     /// </summary>
     [TestClass]
     public class HttpWorkflowTest : WorkflowTestBase
