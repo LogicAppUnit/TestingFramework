@@ -208,32 +208,36 @@ namespace LogicAppUnit.Hosting
         }
 
         /// <summary>
-        /// Retrieve the exact path of func executable (Azure Function core tools). 
+        /// Retrieve the path of the 'func' executable (Azure Function core tools). 
         /// </summary>
-        /// <returns>The path to the func executable.</returns>
-        /// <exception cref="Exception">Thrown when the location of func executable could not be found.</exception>
+        /// <returns>The path to the 'func' executable.</returns>
+        /// <exception cref="Exception">Thrown when the location of the 'func' executable could not be found.</exception>
         private static string GetEnvPathForFunctionTools()
         {
-            string exePath;
+            string enviromentPath;
+            string exeName;
+
+            // Handle the differences between platforms
             if (OperatingSystem.IsWindows())
             {
-                var enviromentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine);
-                exePath = enviromentPath.Split(Path.PathSeparator).Select(x => Path.Combine(x, "func.exe")).Where(x => File.Exists(x)).FirstOrDefault();
+                enviromentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine);
+                exeName = "func.exe";
             }
             else
             {
-                var enviromentPath = Environment.GetEnvironmentVariable("PATH");
-                exePath = enviromentPath.Split(Path.PathSeparator).Select(x => Path.Combine(x, "func")).Where(x => File.Exists(x)).FirstOrDefault();
+                enviromentPath = Environment.GetEnvironmentVariable("PATH");
+                exeName = "func";
             }
 
-            if (!string.IsNullOrWhiteSpace(exePathWithExtension))
+            string exePath = enviromentPath.Split(Path.PathSeparator).Select(x => Path.Combine(x, exeName)).Where(x => File.Exists(x)).FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(exePath))
             {
-                Console.WriteLine($"Path for Azure Function Core tools: {exePathWithExtension}");
-                return exePathWithExtension;
+                Console.WriteLine($"Path for Azure Function Core tools: {exePath}");
+                return exePath;
             }
             else
             {
-                throw new Exception("Enviroment variables do not have func executable path added.");
+                throw new Exception("The enviroment variable PATH does not include the path for the 'func' executable.");
             }
         }
 

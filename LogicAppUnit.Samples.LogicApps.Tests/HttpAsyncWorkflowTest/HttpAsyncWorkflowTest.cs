@@ -1,25 +1,21 @@
 ﻿using LogicAppUnit.Helper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 
-namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
+namespace LogicAppUnit.Samples.LogicApps.Tests.HttpAsyncTriggerWorkflowTest
 {
     /// <summary>
-    /// Test cases for the <i>http-test-workflow</i> workflow which uses a synchronous response for the HTTP trigger.
+    /// Test cases for the <i>http-async-test-workflow</i> workflow which uses an asynchronous response for the HTTP trigger.
     /// </summary>
     [TestClass]
-    public class HttpWorkflowTest : WorkflowTestBase
+    public class HttpAsyncWorkflowTest : WorkflowTestBase
     {
-        private const string _WebHookRequestApiKey = "serviceone-auth-webhook-apikey";
-
         [TestInitialize]
         public void TestInitialize()
         {
-            Initialize(Constants.LOGIC_APP_TEST_EXAMPLE_BASE_PATH, Constants.HTTP_WORKFLOW);
+            Initialize(Constants.LOGIC_APP_TEST_EXAMPLE_BASE_PATH, Constants.HTTP_ASYNC_WORKFLOW);
         }
 
         [ClassCleanup]
@@ -29,59 +25,35 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
         }
 
         /// <summary>
-        /// Tests that the correct response is returned when an incorrect value for the 'X-API-Key header' is used with the webhook request.
-        /// </summary>
-        [TestMethod]
-        public void HttpWorkflowTest_When_Wrong_API_Key_In_Request()
-        {
-            using (ITestRunner testRunner = CreateTestRunner())
-            {
-                // Run the workflow
-                var workflowResponse = testRunner.TriggerWorkflow(
-                    GetWebhookRequest(),
-                    HttpMethod.Post,
-                    new Dictionary<string, string> { { "x-api-key", "wrong-key" } });
-
-                // Check workflow run status
-                Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
-
-                // Check workflow response
-                testRunner.ExceptionWrapper(() => Assert.AreEqual(HttpStatusCode.Unauthorized, workflowResponse.StatusCode));
-                Assert.AreEqual("Invalid/No authorization header passed", workflowResponse.Content.ReadAsStringAsync().Result);
-                Assert.AreEqual("text/plain; charset=utf-8", workflowResponse.Content.Headers.ContentType.ToString());
-
-                // Check action result
-                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Unauthorized_Response"));
-                Assert.AreEqual(ActionStatus.Skipped, testRunner.GetWorkflowActionStatus("Get_Customer_Details_from_Service_One"));
-            }
-        }
-
-        /// <summary>
         /// Tests that the correct response is returned when the HTTP call to the Service One API to get the customer details fails.
         /// </summary>
         [TestMethod]
-        public void HttpWorkflowTest_When_Get_Customer_Details_Fails()
+        public void HttpAsyncWorkflowTest_When_Get_Customer_Details_Fails()
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
+                // Configure async response handling
+                testRunner.WaitForAsynchronousResponse(30);
+
                 // Mock the HTTP calls and customize responses
                 testRunner.AddApiMocks = (request) =>
                 {
                     HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    if (request.RequestUri.AbsolutePath == "/api/v1/customers/54617" && request.Method == HttpMethod.Get)
+                    if (request.RequestUri.AbsolutePath == "/api/v1/customers/12345" && request.Method == HttpMethod.Get)
                     {
                         mockedResponse.RequestMessage = request;
                         mockedResponse.StatusCode = HttpStatusCode.InternalServerError;
                         mockedResponse.Content = ContentHelper.CreatePlainStringContent("Internal server error detected in System One");
                     }
+
+                    Thread.Sleep(5000);         // wait for 5 seconds to give a gap between (i) the trigger's sync response and (ii) the workflow's async response
                     return mockedResponse;
                 };
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
                     GetWebhookRequest(),
-                    HttpMethod.Post,
-                    new Dictionary<string, string> { { "x-api-key", _WebHookRequestApiKey } });
+                    HttpMethod.Post);
 
                 // Check workflow run status
                 Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
@@ -92,9 +64,9 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
                 Assert.AreEqual("text/plain; charset=utf-8", workflowResponse.Content.Headers.ContentType.ToString());
 
                 // Check action result
-                Assert.AreEqual(ActionStatus.Skipped, testRunner.GetWorkflowActionStatus("Unauthorized_Response"));
                 Assert.AreEqual(ActionStatus.Failed, testRunner.GetWorkflowActionStatus("Get_Customer_Details_from_Service_One"));
-                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Failed_Get_Response"));
+                Assert.AreEqual(ActionStatus.Skipped, testRunner.GetWorkflowActionStatus("Success_Response_(Async)"));
+                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Failed_Get_Response_(Async)"));
                 Assert.AreEqual(ActionStatus.Skipped, testRunner.GetWorkflowActionStatus("Update_Customer_Details_in_Service_Two"));
             }
         }
@@ -103,65 +75,54 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
         /// Tests that the correct response is returned when the HTTP call to the Service Two API to update the customer details fails.
         /// </summary>
         [TestMethod]
-        public void HttpWorkflowTest_When_Update_Customer_Fails()
+        public void HttpAsyncWorkflowTest_When_Update_Customer_Fails()
         {
-            // Override one of the settings in the local settings file
-            var settingsToOverride = new Dictionary<string, string>() { { "ServiceTwo-DefaultAddressType", "physical" } };
-
-            using (ITestRunner testRunner = CreateTestRunner(settingsToOverride))
+            using (ITestRunner testRunner = CreateTestRunner())
             {
+                // Configure async response handling
+                testRunner.WaitForAsynchronousResponse(30);
+
                 // Mock the HTTP calls and customize responses
                 testRunner.AddApiMocks = (request) =>
                 {
                     HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    if (request.RequestUri.AbsolutePath == "/api/v1/customers/54617" && request.Method == HttpMethod.Get)
+                    if (request.RequestUri.AbsolutePath == "/api/v1/customers/12345" && request.Method == HttpMethod.Get)
                     {
                         mockedResponse.RequestMessage = request;
                         mockedResponse.StatusCode = HttpStatusCode.OK;
                         mockedResponse.Content = GetCustomerResponse();
                     }
-                    else if (request.RequestUri.AbsolutePath == "/api/v1.1/membership/customers/54617" && request.Method == HttpMethod.Put)
+                    else if (request.RequestUri.AbsolutePath == "/api/v1.1/membership/customers/12345" && request.Method == HttpMethod.Put)
                     {
                         mockedResponse.RequestMessage = request;
                         mockedResponse.StatusCode = HttpStatusCode.InternalServerError;
-                        mockedResponse.Content = ContentHelper.CreatePlainStringContent("System Two has died");
+                        mockedResponse.Content = ContentHelper.CreatePlainStringContent("System Two is not feeling well today");
                     }
+
+                    Thread.Sleep(5000);         // wait for 5 seconds to give a gap between (i) the trigger's sync response and (ii) the workflow's async response
                     return mockedResponse;
                 };
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
                     GetWebhookRequest(),
-                    HttpMethod.Post,
-                    new Dictionary<string, string> { { "x-api-key", _WebHookRequestApiKey } });
+                    HttpMethod.Post);
 
                 // Check workflow run status
-                Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
+                // Workflow has failed because the last action (Update Customer) has failed
+                Assert.AreEqual(WorkflowRunStatus.Failed, testRunner.WorkflowRunStatus);
 
                 // Check workflow response
-                testRunner.ExceptionWrapper(() => Assert.AreEqual(HttpStatusCode.InternalServerError, workflowResponse.StatusCode));
-                Assert.AreEqual("Unable to update customer details: System Two has died", workflowResponse.Content.ReadAsStringAsync().Result);
+                // The response is OK because this is an asynchronus response that is sent before the last action (Update Customer) fails
+                testRunner.ExceptionWrapper(() => Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode));
+                Assert.AreEqual("Webhook processed successfully", workflowResponse.Content.ReadAsStringAsync().Result);
                 Assert.AreEqual("text/plain; charset=utf-8", workflowResponse.Content.Headers.ContentType.ToString());
 
                 // Check action result
-                Assert.AreEqual(ActionStatus.Skipped, testRunner.GetWorkflowActionStatus("Unauthorized_Response"));
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Get_Customer_Details_from_Service_One"));
+                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Success_Response_(Async)"));
+                Assert.AreEqual(ActionStatus.Skipped, testRunner.GetWorkflowActionStatus("Failed_Get_Response_(Async)"));
                 Assert.AreEqual(ActionStatus.Failed, testRunner.GetWorkflowActionStatus("Update_Customer_Details_in_Service_Two"));
-                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Failed_Update_Response"));
-
-                // Check request to System Two Membership API
-                var systemTwoRequest = testRunner.MockRequests.First(r => r.RequestUri.AbsolutePath == "/api/v1.1/membership/customers/54617");
-                Assert.AreEqual(HttpMethod.Put, systemTwoRequest.Method);
-                Assert.AreEqual("application/json", systemTwoRequest.ContentHeaders["Content-Type"].First());
-                Assert.AreEqual("ApiKey servicetwo-auth-apikey", systemTwoRequest.Headers["x-api-key"].First());
-                Assert.AreEqual(
-                    ContentHelper.FormatJson(ResourceHelper.GetAssemblyResourceAsString($"{GetType().Namespace}.MockData.SystemTwo_Request.json")),
-                    ContentHelper.FormatJson(systemTwoRequest.Content));
-
-                JToken parseCustomerInput = testRunner.GetWorkflowActionInput("Parse_Customer");
-                JToken parseCustomerOutput = testRunner.GetWorkflowActionOutput("Parse_Customer");
-                Assert.IsNotNull(parseCustomerInput.ToString());
-                Assert.IsNotNull(parseCustomerOutput.ToString());
             }
         }
 
@@ -169,37 +130,38 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
         /// Tests that the correct response is returned when the HTTP call to the Service Two API to update the customer details is successful.
         /// </summary>
         [TestMethod]
-        public void HttpWorkflowTest_When_Successful()
+        public void HttpAsyncWorkflowTest_When_Successful_WaitForAsyncResponse()
         {
-            // Override one of the settings in the local settings file
-            var settingsToOverride = new Dictionary<string, string>() { { "ServiceTwo-DefaultAddressType", "physical" } };
-
-            using (ITestRunner testRunner = CreateTestRunner(settingsToOverride))
+            using (ITestRunner testRunner = CreateTestRunner())
             {
+                // Configure async response handling
+                testRunner.WaitForAsynchronousResponse(30);
+
                 // Mock the HTTP calls and customize responses
                 testRunner.AddApiMocks = (request) =>
                 {
                     HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    if (request.RequestUri.AbsolutePath == "/api/v1/customers/54617" && request.Method == HttpMethod.Get)
+                    if (request.RequestUri.AbsolutePath == "/api/v1/customers/12345" && request.Method == HttpMethod.Get)
                     {
                         mockedResponse.RequestMessage = request;
                         mockedResponse.StatusCode = HttpStatusCode.OK;
                         mockedResponse.Content = GetCustomerResponse();
                     }
-                    else if (request.RequestUri.AbsolutePath == "/api/v1.1/membership/customers/54617" && request.Method == HttpMethod.Put)
+                    else if (request.RequestUri.AbsolutePath == "/api/v1.1/membership/customers/12345" && request.Method == HttpMethod.Put)
                     {
                         mockedResponse.RequestMessage = request;
                         mockedResponse.StatusCode = HttpStatusCode.OK;
                         mockedResponse.Content = ContentHelper.CreatePlainStringContent("success");
                     }
+
+                    Thread.Sleep(5000);         // wait for 5 seconds to give a gap between (i) the trigger's sync response and (ii) the workflow's async response and then (iii) the completion of the workflow
                     return mockedResponse;
                 };
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
                     GetWebhookRequest(),
-                    HttpMethod.Post,
-                    new Dictionary<string, string> { { "x-api-key", _WebHookRequestApiKey } });
+                    HttpMethod.Post);
 
                 // Check workflow run status
                 Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
@@ -210,25 +172,15 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
                 Assert.AreEqual("text/plain; charset=utf-8", workflowResponse.Content.Headers.ContentType.ToString());
 
                 // Check action result
-                Assert.AreEqual(ActionStatus.Skipped, testRunner.GetWorkflowActionStatus("Unauthorized_Response"));
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Get_Customer_Details_from_Service_One"));
+                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Success_Response_(Async)"));
+                Assert.AreEqual(ActionStatus.Skipped, testRunner.GetWorkflowActionStatus("Failed_Get_Response_(Async)"));
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Update_Customer_Details_in_Service_Two"));
-                Assert.AreEqual(ActionStatus.Skipped, testRunner.GetWorkflowActionStatus("Failed_Update_Response"));
-                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Success_Response"));
-
-                // Check request to System Two Membership API
-                var systemTwoRequest = testRunner.MockRequests.First(r => r.RequestUri.AbsolutePath == "/api/v1.1/membership/customers/54617");
-                Assert.AreEqual(HttpMethod.Put, systemTwoRequest.Method);
-                Assert.AreEqual("application/json", systemTwoRequest.ContentHeaders["Content-Type"].First());
-                Assert.AreEqual("ApiKey servicetwo-auth-apikey", systemTwoRequest.Headers["x-api-key"].First());
-                Assert.AreEqual(
-                    ContentHelper.FormatJson(ResourceHelper.GetAssemblyResourceAsString($"{GetType().Namespace}.MockData.SystemTwo_Request.json")),
-                    ContentHelper.FormatJson(systemTwoRequest.Content));
 
                 // Check tracked properties
                 var trackedProps = testRunner.GetWorkflowActionTrackedProperties("Get_Customer_Details_from_Service_One");
                 Assert.AreEqual("customer", trackedProps["recordType"]);
-                Assert.AreEqual("54617", trackedProps["recordId"]);
+                Assert.AreEqual("12345", trackedProps["recordId"]);
                 Assert.AreEqual("c2ddb2f2-7bff-4cce-b724-ac2400b12760", trackedProps["correlationId"]);
             }
         }
@@ -242,9 +194,9 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
                 sourceSystem = "SystemOne",
                 timestamp = "2022-08-27T08:45:00.1493711Z",
                 type = "CustomerUpdated",
-                customerId = 54617,
-                resourceId = "54617",
-                resourceURI = "https://external-service-one.testing.net/api/v1/customer/54617"
+                customerId = 12345,
+                resourceId = "12345",
+                resourceURI = "https://external-service-one.testing.net/api/v1/customer/12345"
             });
         }
 
@@ -252,11 +204,11 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflowTest
         {
             return ContentHelper.CreateJsonStringContent(new
             {
-                id = 54624,
-                title = "Mr",
-                firstName = "Peter",
+                id = 12345,
+                title = "Mrs",
+                firstName = "Sarah",
                 lastName = "Smith",
-                dateOfBirth = "1970-04-25",
+                dateOfBirth = "1973-11-01",
                 languageCode = "en-GB",
                 address = new
                 {

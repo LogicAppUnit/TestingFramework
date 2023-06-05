@@ -64,7 +64,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.InvokeWorkflowTest
 
                 // Check workflow response
                 // The workflow does not have a 'Response' action, so no content to validate
-                Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode);
+                Assert.AreEqual(HttpStatusCode.Accepted, workflowResponse.StatusCode);
 
                 // Check action result
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Invoke_a_workflow_(not_Priority)"));
@@ -124,7 +124,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.InvokeWorkflowTest
 
                 // Check workflow response
                 // The workflow does not have a 'Response' action, so no content to validate
-                Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode);
+                Assert.AreEqual(HttpStatusCode.Accepted, workflowResponse.StatusCode);
 
                 // Check action result
                 Assert.AreEqual(ActionStatus.Skipped, testRunner.GetWorkflowActionStatus("Invoke_a_workflow_(not_Priority)"));

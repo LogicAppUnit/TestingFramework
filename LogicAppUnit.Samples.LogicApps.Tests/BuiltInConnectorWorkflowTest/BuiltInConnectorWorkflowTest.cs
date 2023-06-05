@@ -55,7 +55,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflowTest
 
                 // Check workflow response
                 // The workflow does not have a 'Response' action, so no content to validate
-                Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode);
+                Assert.AreEqual(HttpStatusCode.Accepted, workflowResponse.StatusCode);
 
                 // Check action result
                 Assert.AreEqual(ActionStatus.Skipped, testRunner.GetWorkflowActionStatus("Execute_Query_to_get_Language_Name"));
@@ -108,7 +108,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflowTest
 
                 // Check workflow response
                 // The workflow does not have a 'Response' action, so no content to validate
-                Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode);
+                Assert.AreEqual(HttpStatusCode.Accepted, workflowResponse.StatusCode);
 
                 // Check action result
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Execute_Query_to_get_Language_Name"));
@@ -162,7 +162,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflowTest
 
                 // Check workflow response
                 // The workflow does not have a 'Response' action, so no content to validate
-                Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode);
+                Assert.AreEqual(HttpStatusCode.Accepted, workflowResponse.StatusCode);
 
                 // Check action result
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Execute_Query_to_get_Language_Name"));

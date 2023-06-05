@@ -42,6 +42,15 @@ Download the *LogicAppUnit* testing framework package from nuget: https://www.nu
 [![NuGet Badge](https://buildstats.info/nuget/LogicAppUnit)](https://www.nuget.org/packages/LogicAppUnit)
 
 
+## Compatibility
+
+The framework has been tested with these environments:
+
+- Windows
+- Linux (Ubuntu)
+- MacOS
+
+
 ## Contributors
 
 - [Mark Abrams](https://github.com/mark-abrams)

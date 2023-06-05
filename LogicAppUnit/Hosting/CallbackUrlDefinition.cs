@@ -1,16 +1,13 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the MIT License. See License.txt in the project root for license information
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using Newtonsoft.Json;
 
 namespace LogicAppUnit.Hosting
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net;
-    using Newtonsoft.Json;
-
     /// <summary>
-    /// Flow callback URL definition.
+    /// Workflow callback URL definition.
     /// </summary>
     internal class CallbackUrlDefinition
     {
@@ -62,12 +59,16 @@ namespace LogicAppUnit.Hosting
         }
 
         /// <summary>
-        /// Gets the value, with a relative path component.
+        /// Gets the value, with a relative path and any query parameters.
         /// </summary>
-        /// <param name="queryParams">The query parameters to be passed to the workflow.</param>
         /// <param name="relativePath">The relative path to be used in the trigger. The path must already be URL-encoded.</param>
-        public Uri ValueWithQueryAndRelativePath(Dictionary<string, string> queryParams, string relativePath)
+        /// <param name="queryParams">The query parameters to be passed to the workflow.</param>
+        public Uri ValueWithRelativePathAndQueryParams(string relativePath, Dictionary<string, string> queryParams)
         {
+            // If there is no relative path and no query parameters, use the 'Value'
+            if (string.IsNullOrEmpty(relativePath) && queryParams == null)
+                return Value;
+
             // If there is a relative path, remove the preceding "/"
             // Relative path should not have a preceding "/";
             // See Remark under https://learn.microsoft.com/en-us/dotnet/api/system.uri.-ctor?view=net-7.0#system-uri-ctor(system-uri-system-string)
@@ -75,7 +76,7 @@ namespace LogicAppUnit.Hosting
                 relativePath = relativePath.TrimStart('/');
 
             // If there are query parameters, add them to the Queries property
-            if (queryParams is not null)
+            if (queryParams != null)
                 foreach (var pair in queryParams)
                     Queries.Add(pair.Key, pair.Value);
 
