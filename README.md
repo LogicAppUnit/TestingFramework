@@ -15,11 +15,11 @@ The testing framework has been designed to make it easier to perform isolated un
 
 - Replace non-HTTP triggers with HTTP triggers to enable automated testing of every workflow, irrespective of the trigger type.
 - Remove external service dependencies for built-in service provider connectors by replacing these actions with HTTP actions and a mock HTTP server that is managed by the framework.
-- Remove dependencies on invoked workflows by replacing the Invoke Workflow actions with HTTP actions and a mock HTTP server that is managed by the framework.
 - Remove external service dependencies for managed API connectors by automatically re-configuring managed API connections to use a mock HTTP server that is managed by the framework.
+- Remove dependencies on invoked workflows by replacing the Invoke Workflow actions with HTTP actions and a mock HTTP server that is managed by the framework.
 - Remove all retry policies to ensure that tests exercising failure scenarios do not take a long time to execute.
 - A fluent API to configure request matching and the creation of responses for the mock HTTP server.
-- Detailed logging to help with workflow test authoring and debugging.
+- Detailed test execution logging to help with workflow test authoring and debugging.
 - Programmatic access to the workflow run history to enable assertion of workflow run status, response status, action status, input and output messages and more. This includes support for action repetitions inside a loop.
 - Programmatic access to the requests sent to the mock HTTP server to enable assertion of the data sent from the workflow to external services and APIs.
 - Override specific local settings for a test case to enable more testing scenarios (e.g. feature flags).

@@ -4,7 +4,8 @@ LogicAppUnit Testing Framework:
 
 - Mock responses can be configured using a fluent API, this includes the definition of the request matching conditions and the response. 
 - Removed public methods `ContentHelper.SerializeObject()`, `ContentHelper.DeserializeObject()` and `ContentHelper.JClone()`, these were for internal use only and are now obsolete.
-- Include the LogicAppUnit version at the end of a test log.
+- Include the LogicAppUnit version at the end of the test log.
+- The maximum execution time for a workflow can now be set in the `testConfiguration.json` file using the `runner.maxWorkflowExecutionDuration` option. Previously this duration was hard-coded to 5 minutes. The default value for this option is 300 seconds (5 minutes).
 
 LogicAppUnit.Samples.LogicApps.Tests:
 
