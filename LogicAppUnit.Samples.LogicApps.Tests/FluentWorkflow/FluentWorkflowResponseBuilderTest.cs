@@ -2,6 +2,7 @@
 using LogicAppUnit.Mocking;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
@@ -85,6 +86,46 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                 // Check workflow response
                 Assert.AreEqual(HttpStatusCode.ResetContent, workflowResponse.StatusCode);
                 Assert.AreEqual(string.Empty, workflowResponse.Content.ReadAsStringAsync().Result);
+            }
+        }
+
+        /// <summary>
+        /// Tests the response builder with a response that includes headers. The headers are copied to the workflow response so that they can be validated in this test.
+        /// </summary>
+        [TestMethod]
+        public void FluentWorkflowTest_ResponseBuilder_Header()
+        {
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Configure mock responses
+                // The request matcher will match all requests because there are no match criteria
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create())
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess()
+                        .WithHeader("oneHeader", "oneValueThatIsChangedLaterInThisResponseBuilder")
+                        .WithHeader("twoHeader", "twoValue")
+                        .WithHeader("threeHeader", "threeValue")
+                        .WithHeader("oneHeader", "oneValue"));
+
+                // Run the workflow
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    GetRequest(),
+                    HttpMethod.Post);
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
+
+                // Check workflow response
+                Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode);
+                Assert.AreEqual(string.Empty, workflowResponse.Content.ReadAsStringAsync().Result);
+
+                // Check workflow response headers               
+                Assert.AreEqual("oneValue", workflowResponse.Headers.GetValues("oneHeader").FirstOrDefault());
+                Assert.AreEqual("twoValue", workflowResponse.Headers.GetValues("twoHeader").FirstOrDefault());
+                Assert.AreEqual("threeValue", workflowResponse.Headers.GetValues("threeHeader").FirstOrDefault());
             }
         }
 

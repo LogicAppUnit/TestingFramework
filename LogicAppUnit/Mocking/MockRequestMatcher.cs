@@ -131,14 +131,8 @@ namespace LogicAppUnit.Mocking
             if (String.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
 
-            if (_requestHeaders.ContainsKey(name))
-            {
-                _requestHeaders[name] = value;
-            }
-            else
-            {
-                _requestHeaders.Add(name, value);
-            }
+            _requestHeaders[name] = value;
+
             return this;
         }
 
@@ -161,18 +155,11 @@ namespace LogicAppUnit.Mocking
         /// <inheritdoc cref="IMockRequestMatcher.WithQueryParam(string, string)" />
         public IMockRequestMatcher WithQueryParam(string name, string value)
         {
-            // TODO: This is all repetitive, refactor to remove duplicated code
             if (String.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
 
-            if (_requestQueryParams.ContainsKey(name))
-            {
-                _requestQueryParams[name] = value;
-            }
-            else
-            {
-                _requestQueryParams.Add(name, value);
-            }
+            _requestQueryParams[name] = value;
+
             return this;
         }
 

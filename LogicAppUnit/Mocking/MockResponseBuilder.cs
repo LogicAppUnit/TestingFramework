@@ -89,14 +89,8 @@ namespace LogicAppUnit.Mocking
             if (String.IsNullOrEmpty(value))
                 throw new ArgumentNullException(nameof(value));
 
-            if (_responseHeaders.ContainsKey(name))
-            {
-                _responseHeaders[name] = value;
-            }
-            else
-            {
-                _responseHeaders.Add(name, value);
-            }
+            _responseHeaders[name] = value;
+              
             return this;
         }
 

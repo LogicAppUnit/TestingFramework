@@ -258,9 +258,10 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                     .AddMockResponse("MockToTestQueryParameters",
                         MockRequestMatcher.Create()
                         .UsingPost()
-                        .WithQueryParam("one", "oneValue")
+                        .WithQueryParam("one", "oneValueThatIsChangedLaterInThisRequestMatcher")
                         .WithQueryParam("two")
                         .WithQueryParam("three", "")
+                        .WithQueryParam("one", "oneValue")
                         .WithQueryParam("five", "55555"))
                     .RespondWithDefault();
                 testRunner
@@ -330,6 +331,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                     .AddMockResponse(
                         MockRequestMatcher.Create()
                         .UsingPost()
+                        .WithHeader("MyCustomHeader", "MyValueThatIsChangedLaterInThisRequestMatcher")
                         .WithHeader("UserAgent", "LogicAppUnit")
                         .WithHeader("Expect", "application/json")
                         .WithHeader("Accept")

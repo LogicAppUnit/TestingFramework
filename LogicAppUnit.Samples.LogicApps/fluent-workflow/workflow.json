@@ -11,7 +11,7 @@
                         "Accept": "application/json",
                         "Expect": "application/json",
                         "UserAgent": "LogicAppUnit",
-			"MyCustomHeader": "MyValue"
+                        "MyCustomHeader": "MyValue"
                     },
                     "queries": {
                         "one": "oneValue",
@@ -29,6 +29,11 @@
                 "kind": "Http",
                 "inputs": {
                     "statusCode": "@outputs('Call_Service_One')?['statusCode']",
+                    "headers": {
+                        "oneHeader": "@{outputs('Call_Service_One')?['headers']?['oneHeader']}",
+                        "twoHeader": "@{outputs('Call_Service_One')?['headers']?['twoHeader']}",
+                        "threeHeader": "@{outputs('Call_Service_One')?['headers']?['threeHeader']}"
+                    },
                     "body": "@body('Call_Service_One')"
                 },
                 "runAfter": {
