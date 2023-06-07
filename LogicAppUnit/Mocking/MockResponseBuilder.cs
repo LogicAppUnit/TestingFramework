@@ -19,8 +19,6 @@ namespace LogicAppUnit.Mocking
         private Func<TimeSpan> _delayDelegate;
         private Func<HttpContent> _contentDelegate;
 
-        // TODO: (LOW) Allow users to set additional content headers
-
         /// <summary>
         /// Initializes a new instance of the <see cref="MockResponseBuilder"/> class.
         /// </summary>

@@ -12,8 +12,6 @@ namespace LogicAppUnit.Mocking
     /// </summary>
     public class MockRequestMatcher : IMockRequestMatcher
     {
-        // TODO: (LOW) Add a 'WithAction' that matches using a workflow action name that is set using HTTP header?
-
         private readonly List<HttpMethod> _requestMethods;
         private readonly List<MockRequestPath> _requestPaths;
         private readonly Dictionary<string, string> _requestHeaders;
