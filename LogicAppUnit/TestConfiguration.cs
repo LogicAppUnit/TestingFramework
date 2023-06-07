@@ -23,6 +23,11 @@ namespace LogicAppUnit
         public TestConfigurationLogging Logging { get; set; }
 
         /// <summary>
+        /// Test runner configuration for test execution.
+        /// </summary>
+        public TestConfigurationRunner Runner { get; set; }
+
+        /// <summary>
         /// Workflow configuration, controls how the workflow definition is modified to enable mocking.
         /// </summary>
         public TestConfigurationWorkflow Workflow { get; set; }
@@ -34,6 +39,7 @@ namespace LogicAppUnit
         {
             Azurite = new TestConfigurationAzurite();
             Logging = new TestConfigurationLogging();
+            Runner = new TestConfigurationRunner();
             Workflow = new TestConfigurationWorkflow();
         }
     }
@@ -58,6 +64,17 @@ namespace LogicAppUnit
         /// Default value is <c>false</c>.
         /// </remarks>
         public bool WriteMockRequestMatchingLogs { get; set; } = false;
+    }
+
+    /// <summary>
+    /// Configuration for the Test Runner.
+    /// </summary>
+    public class TestConfigurationRunner
+    {
+        /// <summary>
+        /// Maximum time (in seconds) to poll for the workflow result. The Test Runner will fail any test where the workflow execution is longer than this value.
+        /// </summary>
+        public int MaxWorkflowExecutionDuration { get; set; } = 300;
     }
 
     /// <summary>

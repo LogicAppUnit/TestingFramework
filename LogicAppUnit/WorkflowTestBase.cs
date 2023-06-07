@@ -57,10 +57,7 @@ namespace LogicAppUnit
         /// </remarks>
         protected static string MockTestWorkflowHostUri
         {
-            get
-            {
-                return TestEnvironment.FlowV2MockTestHostUri;
-            }
+            get => TestEnvironment.FlowV2MockTestHostUri;
         }
 
         /// <summary>
@@ -179,7 +176,7 @@ namespace LogicAppUnit
             }
 
             return new TestRunner(
-                _testConfig.Logging,
+                _testConfig.Logging, _testConfig.Runner,
                 _client,
                 _workflowDefinition, _localSettings, _host, _parameters, _connections, _artifactDirectory);
         }

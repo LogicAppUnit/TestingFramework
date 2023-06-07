@@ -29,6 +29,8 @@ namespace LogicAppUnit
         private readonly MockDefinition _mockDefinition;
         private readonly MockHttpHost _mockHttpHost;
 
+        private readonly TestConfigurationRunner _runnerConfig;
+
         private string _runId;
         private string _clientTrackingId;
 
@@ -111,6 +113,7 @@ namespace LogicAppUnit
         /// Initializes a new instance of the <see cref="TestRunner"/> class.
         /// </summary>
         /// <param name="loggingConfig">The logging configuration for the test execution.</param>
+        /// <param name="runnerConfig">The test runner configuration for the test execution.</param>
         /// <param name="client">The HTTP client.</param>
         /// <param name="workflowDefinition">The workflow definition file.</param>
         /// <param name="localSettings">The local settings file.</param>
@@ -120,12 +123,15 @@ namespace LogicAppUnit
         /// <param name="artifactsDirectory">The (optional) artifacts directory containing maps and schemas that are used by the workflow being tested.</param>
         internal TestRunner(
             TestConfigurationLogging loggingConfig,
+            TestConfigurationRunner runnerConfig,
             HttpClient client,
             WorkflowHelper workflowDefinition,
             SettingsHelper localSettings, string host, string parameters = null, ConnectionHelper connections = null, DirectoryInfo artifactsDirectory = null)
         {
             if (loggingConfig == null)
                 throw new ArgumentNullException(nameof(loggingConfig));
+            if (runnerConfig == null)
+                throw new ArgumentNullException(nameof(runnerConfig));
             if (client == null)
                 throw new ArgumentNullException(nameof(client));
             if (workflowDefinition == null)
@@ -134,12 +140,14 @@ namespace LogicAppUnit
                 throw new ArgumentNullException(nameof(localSettings));
 
             LoggingHelper.LogBanner("Starting test runner");
+            //Console.WriteLine($"Max workflow duration: {runnerConfig.MaxWorkflowExecutionDuration} seconds");
 
             if (!loggingConfig.WriteFunctionRuntineStartupLogs)
                 Console.WriteLine("Logging of the Function runtime startup logs is disabled. This can be enabled using the 'logging.writeFunctionRuntineStartupLogs' option in 'testConfiguration.json'.");
 
             _client = client;
             _workflowDefinition = workflowDefinition;
+            _runnerConfig = runnerConfig;
 
             var workflowTestInput = new WorkflowTestInput[] { new WorkflowTestInput(workflowDefinition.WorkflowName, workflowDefinition.ToString()) };
             _workflowTestHost = new WorkflowTestHost(workflowTestInput, localSettings.ToString(), parameters, connections.ToString(), host, artifactsDirectory, loggingConfig.WriteFunctionRuntineStartupLogs);
@@ -509,7 +517,7 @@ namespace LogicAppUnit
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            while (stopwatch.Elapsed < TimeSpan.FromMinutes(Constants.MAX_TIME_MINUTES_WHILE_POLLING_WORKFLOW_RESULT))
+            while (stopwatch.Elapsed < TimeSpan.FromSeconds(_runnerConfig.MaxWorkflowExecutionDuration))
             {
                 using (var latestWorkflowHttpResponse = _client.GetAsync(TestEnvironment.GetRunsRequestUriWithManagementHost(flowName: _workflowDefinition.WorkflowName)).Result)
                 {
@@ -532,7 +540,7 @@ namespace LogicAppUnit
                 }
             }
 
-            throw new TestException($"Workflow is taking more than {Constants.MAX_TIME_MINUTES_WHILE_POLLING_WORKFLOW_RESULT} minutes to complete its execution.");
+            throw new TestException($"Workflow is taking more than {_runnerConfig.MaxWorkflowExecutionDuration} seconds to complete its execution.");
         }
 
         #endregion // Private methods
