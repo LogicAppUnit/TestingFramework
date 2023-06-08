@@ -43,14 +43,16 @@ jobs:
     - name: Install Functions Core tools
       run: 'npm install -g azure-functions-core-tools@4 --unsafe-perm true'
 
+    - name: Check Functions Core tools installation
+      run: 'func'
+
     - name: Install Azurite
       run: 'npm install -g azurite@3.24.0'
-  
-    #- name: List installed NPM packages
-    #  run: 'npm list -g'
-
-    - name: Check Functions runtime installation
-      run: 'func'
 
     - name: Start Azurite services
       run: 'azurite &'
+
+    # Run tests
+
+    - name: Run tests
+      run: dotnet test --no-restore  --verbosity normal --logger "TRX"
