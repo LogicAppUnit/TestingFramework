@@ -53,4 +53,4 @@ jobs:
       run: 'func'
 
     - name: Start Azurite services
-      run: 'start /b azurite'
+      run: 'azurite &'
