@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
-namespace LogicAppUnit.InternalHelper
+namespace LogicAppUnit.Wrapper
 {
     /// <summary>
-    /// Helper class to manage the workflow file.
+    /// Wrapper class to manage the workflow definition file.
     /// </summary>
-    internal class WorkflowHelper
+    internal class WorkflowDefinitionWrapper
     {
         // The HTTP trigger has a trigger type of 'Request'
         private const string HttpTriggerType = "Request";
@@ -19,11 +19,11 @@ namespace LogicAppUnit.InternalHelper
         private readonly JObject _jObjectWorkflow;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="WorkflowHelper"/> class.
+        /// Initializes a new instance of the <see cref="WorkflowDefinitionWrapper"/> class.
         /// </summary>
         /// <param name="workflowName">Name of the workflow.</param>
         /// <param name="workflowContent">The contents of the workflow definition file.</param>
-        public WorkflowHelper(string workflowName, string workflowContent)
+        public WorkflowDefinitionWrapper(string workflowName, string workflowContent)
         {
             if (string.IsNullOrEmpty(workflowName))
                 throw new ArgumentNullException(nameof(workflowName));
@@ -50,7 +50,7 @@ namespace LogicAppUnit.InternalHelper
         {
             get
             {
-                return _workflowName; 
+                return _workflowName;
             }
         }
 
@@ -95,7 +95,8 @@ namespace LogicAppUnit.InternalHelper
                 Console.WriteLine("Updating workflow HTTP actions to remove any existing Retry policies and replace with a 'none' policy:");
                 var retryObj = new { type = "none" };
 
-                httpActions.ForEach(x => {
+                httpActions.ForEach(x =>
+                {
                     // Remove any retryPolicy block in case it is there already
                     x.Remove("retryPolicy");
                     // Now add our retryPolicy block
@@ -144,8 +145,8 @@ namespace LogicAppUnit.InternalHelper
             {
                 Console.WriteLine("Updating Workflow Invoke actions to replace call to child workflow with a HTTP action for the mock test server:");
 
-                invokeActions.ForEach(currentAction => {
-
+                invokeActions.ForEach(currentAction =>
+                {
                     // Copy the 'inputs' object into the HTTP request, this includes the name of the invoked workflow and the JSON body and headers that are passed to the HTTP trigger of the called workflow
                     var newAction = JObject.FromObject(new
                     {
@@ -188,8 +189,8 @@ namespace LogicAppUnit.InternalHelper
             {
                 Console.WriteLine("Replacing workflow actions using a built-in connector with a HTTP action for the mock test server:");
 
-                invokeActions.ForEach(currentAction => {
-
+                invokeActions.ForEach(currentAction =>
+                {
                     var newAction = JObject.FromObject(new
                     {
                         type = "Http",

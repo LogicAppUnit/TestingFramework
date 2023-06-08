@@ -1,6 +1,7 @@
 ﻿using LogicAppUnit.Hosting;
 using LogicAppUnit.InternalHelper;
 using LogicAppUnit.Mocking;
+using LogicAppUnit.Wrapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using System;
@@ -22,7 +23,7 @@ namespace LogicAppUnit
     {
         private readonly HttpClient _client;
 
-        private readonly WorkflowHelper _workflowDefinition;
+        private readonly WorkflowDefinitionWrapper _workflowDefinition;
         private readonly WorkflowTestHost _workflowTestHost;
         private readonly WorkflowApiHelper _apiHelper;
 
@@ -125,8 +126,8 @@ namespace LogicAppUnit
             TestConfigurationLogging loggingConfig,
             TestConfigurationRunner runnerConfig,
             HttpClient client,
-            WorkflowHelper workflowDefinition,
-            SettingsHelper localSettings, string host, string parameters = null, ConnectionHelper connections = null, DirectoryInfo artifactsDirectory = null)
+            WorkflowDefinitionWrapper workflowDefinition,
+            LocalSettingsWrapper localSettings, string host, string parameters = null, ConnectionsWrapper connections = null, DirectoryInfo artifactsDirectory = null)
         {
             if (loggingConfig == null)
                 throw new ArgumentNullException(nameof(loggingConfig));

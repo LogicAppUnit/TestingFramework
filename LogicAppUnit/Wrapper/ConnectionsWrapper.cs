@@ -3,22 +3,22 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
 
-namespace LogicAppUnit.InternalHelper
+namespace LogicAppUnit.Wrapper
 {
     /// <summary>
-    /// Helper class to manage the <i>connections.json</i> file.
+    /// Wrapper class to manage the <i>connections.json</i> file.
     /// </summary>
-    internal class ConnectionHelper
+    internal class ConnectionsWrapper
     {
         private readonly JObject _jObjectConnection;
-        private readonly SettingsHelper _localSettings;
+        private readonly LocalSettingsWrapper _localSettings;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConnectionHelper"/> class.
+        /// Initializes a new instance of the <see cref="ConnectionsWrapper"/> class.
         /// </summary>
         /// <param name="connectionsContent">The contents of the connections file, or <c>null</c> if the file does not exist.</param>
         /// <param name="localSettings">The settings helper that is used to manage the local application settings.</param>
-        public ConnectionHelper(string connectionsContent, SettingsHelper localSettings)
+        public ConnectionsWrapper(string connectionsContent, LocalSettingsWrapper localSettings)
         {
             if (localSettings == null)
                 throw new ArgumentNullException(nameof(localSettings));
@@ -56,7 +56,8 @@ namespace LogicAppUnit.InternalHelper
             {
                 Console.WriteLine("Updating connections file for managed API connectors:");
 
-                managedApiConnections.ForEach((connection) => {
+                managedApiConnections.ForEach((connection) =>
+                {
                     // Get the original connection URL that points to the Microsoft-hosted API connection
                     string connectionUrl = connection.Value["connectionRuntimeUrl"].Value<string>();
 
