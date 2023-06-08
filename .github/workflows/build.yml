@@ -46,8 +46,11 @@ jobs:
     - name: Install Azurite
       run: 'npm install -g azurite@3.24.0'
   
-    - name: List installed NPM packages
-      run: 'npm list -g'
+    #- name: List installed NPM packages
+    #  run: 'npm list -g'
 
     - name: Check Functions runtime installation
       run: 'func'
+
+    - name: Start Azurite services
+      run: 'azurite'
