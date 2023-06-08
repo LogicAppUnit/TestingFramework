@@ -12,8 +12,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
 
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -55,7 +55,7 @@ jobs:
     # Run tests
 
     - name: Run tests
-      run: dotnet test --no-restore  --verbosity normal --logger "TRX"
+      run: dotnet test --no-restore --verbosity normal --logger "TRX"
 
     # Publish artefacts
     - name: Publish test results
