@@ -33,7 +33,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
 
-    # Install and configure Functions runtime tools
+    # Install and configure Logic Apps runtime environment
 
     - name: Setup node
       uses: actions/setup-node@v3
@@ -43,3 +43,8 @@ jobs:
     - name: Install Functions Core tools
       run: 'npm install -g azure-functions-core-tools@4 --unsafe-perm true'
 
+    - name: Install Azurite
+      run: 'npm install -g azurite@3.24.0'
+  
+    - name: List installed NPM packages
+      run: 'npm list'
