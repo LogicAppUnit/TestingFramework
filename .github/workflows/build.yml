@@ -1,12 +1,11 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: .NET
+name: LogicAppUnit-Build
 
 on:
   push:
     branches:
     - main
+    - automated_build
+    - 'features/**'
   pull_request:
     branches:
     - main
@@ -21,13 +20,26 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
   
+    # Build .NET solution
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
-    
+  
     - name: Restore dependencies
       run: dotnet restore
   
     - name: Build
       run: dotnet build --no-restore
+
+    # Install and configure Functions runtime tools
+
+    - name: Setup node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install Functions Core tools
+      run: 'npm install -g azure-functions-core-tools@4 --unsafe-perm true'
+
