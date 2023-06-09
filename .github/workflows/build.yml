@@ -57,9 +57,16 @@ jobs:
     - name: Run tests
       run: dotnet test --no-restore --verbosity normal --logger "TRX"
 
-    # Publish artefacts
-    - name: Publish test results
+    # Publish artefacts and test results
+
+    - name: Publish test log
       uses: actions/upload-artifact@v3
       with:
         name: test-results
         path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/**.trx
+
+    - name: Publish test results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/**.trx
