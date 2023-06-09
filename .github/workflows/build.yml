@@ -66,7 +66,9 @@ jobs:
         path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/**.trx
 
     - name: Publish test results
-      uses: EnricoMi/publish-unit-test-result-action@v2
+      uses: dorny/test-reporter@v1
       if: always()
       with:
-        files: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/**.trx
+        name: Tests
+        path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/**.trx
+        reporter: dotnet-trx
