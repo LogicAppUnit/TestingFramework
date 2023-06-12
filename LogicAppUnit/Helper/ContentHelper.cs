@@ -61,6 +61,18 @@ namespace LogicAppUnit.Helper
         }
 
         /// <summary>
+        /// Create HTTP plain-text content from the given <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="stream">The stream to be used for the HTTP content.</param>
+        /// <returns>The HTTP content.</returns>
+        public static StreamContent CreatePlainStreamContent(Stream stream)
+        {
+            StreamContent content = new StreamContent(stream);
+            content.Headers.ContentType = new MediaTypeHeaderValue(PlainTextContentType);
+            return content;
+        }
+
+        /// <summary>
         /// Create HTTP plain-text content from the given string value.
         /// </summary>
         /// <param name="value">String to be converted to HTTP content.</param>

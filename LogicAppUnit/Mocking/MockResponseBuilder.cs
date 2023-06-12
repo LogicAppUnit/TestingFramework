@@ -168,6 +168,18 @@ namespace LogicAppUnit.Mocking
             return WithContent(() => ContentHelper.CreatePlainStringContent(value));
         }
 
+        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsPlainTextStream(Stream)" />
+        public IMockResponseBuilder WithContentAsPlainTextStream(Stream stream)
+        {
+            return WithContent(() => ContentHelper.CreatePlainStreamContent(stream));
+        }
+
+        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsPlainTextResource(string, Assembly)" />
+        public IMockResponseBuilder WithContentAsPlainTextResource(string resourceName, Assembly containingAssembly)
+        {
+            return WithContent(() => ContentHelper.CreatePlainStreamContent(ResourceHelper.GetAssemblyResourceAsStream(resourceName, containingAssembly)));
+        }
+
         #endregion // IMockResponseBuilder implementation
 
         #region Internal methods

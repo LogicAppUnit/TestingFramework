@@ -128,5 +128,20 @@ namespace LogicAppUnit.Mocking
         /// <param name="value">String to be used for HTTP content.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
         IMockResponseBuilder WithContentAsPlainTextString(string value);
+
+        /// <summary>
+        /// Configures plain-text response content using a <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="stream">The stream to be used for HTTP content.</param>
+        /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
+        IMockResponseBuilder WithContentAsPlainTextStream(Stream stream);
+
+        /// <summary>
+        /// Configures plain-text response content using an embedded assembly resource.
+        /// </summary>
+        /// <param name="resourceName">The fully-qualified name of the resource.</param>
+        /// <param name="containingAssembly">The assembly containing the embedded resource.</param>
+        /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
+        IMockResponseBuilder WithContentAsPlainTextResource(string resourceName, Assembly containingAssembly);
     }
 }

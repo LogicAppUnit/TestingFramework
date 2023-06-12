@@ -15,6 +15,9 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
     [TestClass]
     public class FluentWorkflowResponseBuilderTest : WorkflowTestBase
     {
+        private const string JsonContentType = "application/json";
+        private const string PlainTextContentType = "text/plain";
+
         [TestInitialize]
         public void TestInitialize()
         {
@@ -54,6 +57,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
 
                 // Check workflow response
                 Assert.AreEqual(HttpStatusCode.NoContent, workflowResponse.StatusCode);
+                Assert.IsNull(workflowResponse.Content.Headers.ContentType?.MediaType);
                 Assert.AreEqual(string.Empty, workflowResponse.Content.ReadAsStringAsync().Result);
             }
         }
@@ -85,6 +89,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
 
                 // Check workflow response
                 Assert.AreEqual(HttpStatusCode.ResetContent, workflowResponse.StatusCode);
+                Assert.IsNull(workflowResponse.Content.Headers.ContentType?.MediaType);
                 Assert.AreEqual(string.Empty, workflowResponse.Content.ReadAsStringAsync().Result);
             }
         }
@@ -120,6 +125,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
 
                 // Check workflow response
                 Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode);
+                Assert.IsNull(workflowResponse.Content.Headers.ContentType?.MediaType);
                 Assert.AreEqual(string.Empty, workflowResponse.Content.ReadAsStringAsync().Result);
 
                 // Check workflow response headers               
@@ -159,7 +165,10 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
 
                 // Check workflow response
                 Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode);
-                Assert.AreEqual(JsonConvert.SerializeObject(responseAsDynamicObject), workflowResponse.Content.ReadAsStringAsync().Result);
+                Assert.AreEqual(JsonContentType, workflowResponse.Content.Headers.ContentType.MediaType);
+                Assert.AreEqual(
+                    JsonConvert.SerializeObject(responseAsDynamicObject),
+                    workflowResponse.Content.ReadAsStringAsync().Result);
             }
         }
 
@@ -169,7 +178,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         [TestMethod]
         public void FluentWorkflowTest_ResponseBuilder_ContentAsJsonClass()
         {
-            Rocket responseAsClass = new (){  Name = "Starship", Manufacturer = "SpaceX", Diameter = 9, Height = 120, MassToLeo = 150, VolumeToLeo = 1000 };
+            Rocket responseAsClass = new() { Name = "Starship", Manufacturer = "SpaceX", Diameter = 9, Height = 120, MassToLeo = 150, VolumeToLeo = 1000 };
 
             using (ITestRunner testRunner = CreateTestRunner())
             {
@@ -193,7 +202,10 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
 
                 // Check workflow response
                 Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode);
-                Assert.AreEqual(JsonConvert.SerializeObject(responseAsClass), workflowResponse.Content.ReadAsStringAsync().Result);
+                Assert.AreEqual(JsonContentType, workflowResponse.Content.Headers.ContentType.MediaType);
+                Assert.AreEqual(
+                    JsonConvert.SerializeObject(responseAsClass),
+                    workflowResponse.Content.ReadAsStringAsync().Result);
             }
         }
 
@@ -225,9 +237,82 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
 
                 // Check workflow response
                 Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode);
+                Assert.AreEqual(JsonContentType, workflowResponse.Content.Headers.ContentType.MediaType);
                 Assert.AreEqual(
                     ContentHelper.FormatJson(ResourceHelper.GetAssemblyResourceAsString($"{GetType().Namespace}.MockData.Response.json")),
                     ContentHelper.FormatJson(workflowResponse.Content.ReadAsStringAsync().Result));
+            }
+        }
+
+        /// <summary>
+        /// Tests the response builder using plain text content.
+        /// </summary>
+        [TestMethod]
+        public void FluentWorkflowTest_ResponseBuilder_ContentAsPlainTextString()
+        {
+            string textMsg = "This is some plain text that we can use as a text. It is not very interesting. But it doesn't have to be interested to prove that this test works as expected.";
+
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Configure mock responses
+                // The request matcher will match all requests because there are no match criteria
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create())
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess()
+                        .WithContentAsPlainTextString(textMsg));
+
+                // Run the workflow
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    GetRequest(),
+                    HttpMethod.Post);
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
+
+                // Check workflow response
+                Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode);
+                Assert.AreEqual(PlainTextContentType, workflowResponse.Content.Headers.ContentType.MediaType);
+                Assert.AreEqual(
+                    textMsg,
+                    workflowResponse.Content.ReadAsStringAsync().Result);
+            }
+        }
+
+        /// <summary>
+        /// Tests the response builder using plain text content from an embedded resource.
+        /// </summary>
+        [TestMethod]
+        public void FluentWorkflowTest_ResponseBuilder_ContentAsPlainTextResource()
+        {
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Configure mock responses
+                // The request matcher will match all requests because there are no match criteria
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create())
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess()
+                        .WithContentAsPlainTextResource($"{GetType().Namespace}.MockData.Response.txt", Assembly.GetExecutingAssembly()));
+
+                // Run the workflow
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    GetRequest(),
+                    HttpMethod.Post);
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
+
+                // Check workflow response
+                Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode);
+                Assert.AreEqual(PlainTextContentType, workflowResponse.Content.Headers.ContentType.MediaType);
+                Assert.AreEqual(
+                    ResourceHelper.GetAssemblyResourceAsString($"{GetType().Namespace}.MockData.Response.txt"),
+                    workflowResponse.Content.ReadAsStringAsync().Result);
             }
         }
 

@@ -24,6 +24,7 @@
     <None Remove="BuiltInConnectorWorkflow\MockData\SQL_Request_en_GB.json" />
     <None Remove="BuiltInConnectorWorkflow\MockData\SQL_Request_xx_GB.json" />
     <None Remove="FluentWorkflow\MockData\Response.json" />
+    <None Remove="FluentWorkflow\MockData\Response.txt" />
     <None Remove="HttpWorkflow\MockData\SystemTwo_Request.json" />
     <None Remove="InvokeWorkflow\MockData\AddToPriorityQueueRequest.json" />
     <None Remove="InvokeWorkflow\MockData\InvokeWorkflowNotPriorityRequest.json" />
@@ -43,6 +44,7 @@
     <EmbeddedResource Include="BuiltInConnectorWorkflow\MockData\SQL_Request_xx_GB.json" />
     <EmbeddedResource Include="BuiltInConnectorWorkflow\MockData\SQL_Request_en_GB.json" />
     <EmbeddedResource Include="FluentWorkflow\MockData\Response.json" />
+    <EmbeddedResource Include="FluentWorkflow\MockData\Response.txt" />
     <EmbeddedResource Include="HttpWorkflow\MockData\SystemTwo_Request.json" />
     <EmbeddedResource Include="InvokeWorkflow\MockData\AddToPriorityQueueRequest.json" />
     <EmbeddedResource Include="InvokeWorkflow\MockData\InvokeWorkflowNotPriorityRequest.json" />
