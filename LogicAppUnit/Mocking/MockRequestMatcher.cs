@@ -42,6 +42,14 @@ namespace LogicAppUnit.Mocking
         }
 
         /// <summary>
+        /// Gets the number of times that the request matcher has been matched.
+        /// </summary>
+        internal int MatchCount
+        {
+            get => _requestMatchCounter;
+        }
+
+        /// <summary>
         /// Creates this instance.
         /// </summary>
         /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
