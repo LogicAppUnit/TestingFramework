@@ -98,21 +98,21 @@ namespace LogicAppUnit.Mocking
         /// </summary>
         /// <param name="jsonStream">The stream to be used for HTTP content.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
-        IMockResponseBuilder WithContentAsJsonStream(Stream jsonStream);
+        IMockResponseBuilder WithContentAsJson(Stream jsonStream);
 
         /// <summary>
         /// Configures JSON response content using a string value.
         /// </summary>
         /// <param name="jsonString">JSON string to be used for HTTP content.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
-        IMockResponseBuilder WithContentAsJsonString(string jsonString);
+        IMockResponseBuilder WithContentAsJson(string jsonString);
 
         /// <summary>
         /// Configures JSON response content using an object that is serialised into JSON.
         /// </summary>
         /// <param name="body">Object to be used for HTTP content.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
-        IMockResponseBuilder WithContentAsJsonObject(object body);
+        IMockResponseBuilder WithContentAsJson(object body);
 
         /// <summary>
         /// Configures JSON response content using an embedded assembly resource that is serialised into JSON.
@@ -120,21 +120,21 @@ namespace LogicAppUnit.Mocking
         /// <param name="resourceName">The fully-qualified name of the resource.</param>
         /// <param name="containingAssembly">The assembly containing the embedded resource.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
-        IMockResponseBuilder WithContentAsJsonResource(string resourceName, Assembly containingAssembly);
+        IMockResponseBuilder WithContentAsJson(string resourceName, Assembly containingAssembly);
 
         /// <summary>
         /// Configures plain-text response content using a string value.
         /// </summary>
         /// <param name="value">String to be used for HTTP content.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
-        IMockResponseBuilder WithContentAsPlainTextString(string value);
+        IMockResponseBuilder WithContentAsPlainText(string value);
 
         /// <summary>
         /// Configures plain-text response content using a <see cref="Stream"/>.
         /// </summary>
         /// <param name="stream">The stream to be used for HTTP content.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
-        IMockResponseBuilder WithContentAsPlainTextStream(Stream stream);
+        IMockResponseBuilder WithContentAsPlainText(Stream stream);
 
         /// <summary>
         /// Configures plain-text response content using an embedded assembly resource.
@@ -142,6 +142,6 @@ namespace LogicAppUnit.Mocking
         /// <param name="resourceName">The fully-qualified name of the resource.</param>
         /// <param name="containingAssembly">The assembly containing the embedded resource.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
-        IMockResponseBuilder WithContentAsPlainTextResource(string resourceName, Assembly containingAssembly);
+        IMockResponseBuilder WithContentAsPlainText(string resourceName, Assembly containingAssembly);
     }
 }

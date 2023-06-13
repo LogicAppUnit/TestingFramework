@@ -153,7 +153,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithSuccess()
-                        .WithContentAsJsonObject(responseAsDynamicObject));
+                        .WithContentAsJson(responseAsDynamicObject));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
@@ -190,7 +190,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithSuccess()
-                        .WithContentAsJsonObject(responseAsClass));
+                        .WithContentAsJson(responseAsClass));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
@@ -225,7 +225,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithSuccess()
-                        .WithContentAsJsonResource($"{GetType().Namespace}.MockData.Response.json", Assembly.GetExecutingAssembly()));
+                        .WithContentAsJson($"{GetType().Namespace}.MockData.Response.json", Assembly.GetExecutingAssembly()));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
@@ -262,7 +262,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithSuccess()
-                        .WithContentAsPlainTextString(textMsg));
+                        .WithContentAsPlainText(textMsg));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
@@ -297,7 +297,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithSuccess()
-                        .WithContentAsPlainTextResource($"{GetType().Namespace}.MockData.Response.txt", Assembly.GetExecutingAssembly()));
+                        .WithContentAsPlainText($"{GetType().Namespace}.MockData.Response.txt", Assembly.GetExecutingAssembly()));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(

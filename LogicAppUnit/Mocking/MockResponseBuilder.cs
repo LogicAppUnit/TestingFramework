@@ -134,48 +134,46 @@ namespace LogicAppUnit.Mocking
             return this;
         }
 
-        // TODO: Should this be an overload of 'WithContentAsJson()'? We seem to include the data type in the name which defeats the point of overloads
-        // TODO: Rename to be "UsingContent..."?
         // TODO: There is no way to set the Content Type!
 
-        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsJsonString(string)" />
-        public IMockResponseBuilder WithContentAsJsonString(string jsonString)
+        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsJson(string)" />
+        public IMockResponseBuilder WithContentAsJson(string jsonString)
         {
             return WithContent(() => ContentHelper.CreateJsonStringContent(jsonString));
         }
 
-        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsJsonStream(Stream)" />
-        public IMockResponseBuilder WithContentAsJsonStream(Stream jsonStream)
+        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsJson(Stream)" />
+        public IMockResponseBuilder WithContentAsJson(Stream jsonStream)
         {
             return WithContent(() => ContentHelper.CreateJsonStreamContent(jsonStream));
         }
 
-        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsJsonObject(object)" />
-        public IMockResponseBuilder WithContentAsJsonObject(object body)
+        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsJson(object)" />
+        public IMockResponseBuilder WithContentAsJson(object body)
         {
             return WithContent(() => ContentHelper.CreateJsonStringContent(body));
         }
 
-        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsJsonResource(string, Assembly)" />
-        public IMockResponseBuilder WithContentAsJsonResource(string resourceName, Assembly containingAssembly)
+        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsJson(string, Assembly)" />
+        public IMockResponseBuilder WithContentAsJson(string resourceName, Assembly containingAssembly)
         {
             return WithContent(() => ContentHelper.CreateJsonStreamContent(ResourceHelper.GetAssemblyResourceAsStream(resourceName, containingAssembly)));
         }
 
-        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsPlainTextString(string)" />
-        public IMockResponseBuilder WithContentAsPlainTextString(string value)
+        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsPlainText(string)" />
+        public IMockResponseBuilder WithContentAsPlainText(string value)
         {
             return WithContent(() => ContentHelper.CreatePlainStringContent(value));
         }
 
-        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsPlainTextStream(Stream)" />
-        public IMockResponseBuilder WithContentAsPlainTextStream(Stream stream)
+        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsPlainText(Stream)" />
+        public IMockResponseBuilder WithContentAsPlainText(Stream stream)
         {
             return WithContent(() => ContentHelper.CreatePlainStreamContent(stream));
         }
 
-        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsPlainTextResource(string, Assembly)" />
-        public IMockResponseBuilder WithContentAsPlainTextResource(string resourceName, Assembly containingAssembly)
+        /// <inheritdoc cref="IMockResponseBuilder.WithContentAsPlainText(string, Assembly)" />
+        public IMockResponseBuilder WithContentAsPlainText(string resourceName, Assembly containingAssembly)
         {
             return WithContent(() => ContentHelper.CreatePlainStreamContent(ResourceHelper.GetAssemblyResourceAsStream(resourceName, containingAssembly)));
         }

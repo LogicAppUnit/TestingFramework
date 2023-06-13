@@ -75,7 +75,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflow
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithInternalServerError()
-                        .WithContentAsPlainTextString("Internal server error detected in System One"));
+                        .WithContentAsPlainText("Internal server error detected in System One"));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
@@ -128,7 +128,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflow
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithInternalServerError()
-                        .WithContentAsPlainTextString("System Two has died"));
+                        .WithContentAsPlainText("System Two has died"));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
@@ -195,7 +195,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflow
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithSuccess()
-                        .WithContentAsPlainTextString("success"));
+                        .WithContentAsPlainText("success"));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(

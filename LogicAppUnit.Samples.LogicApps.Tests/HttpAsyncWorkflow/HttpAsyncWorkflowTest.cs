@@ -46,7 +46,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpAsyncWorkflow
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithInternalServerError()
-                        .WithContentAsPlainTextString("Internal server error detected in System One")
+                        .WithContentAsPlainText("Internal server error detected in System One")
                         .AfterDelay(5));
 
                 // Run the workflow
@@ -101,7 +101,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpAsyncWorkflow
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithInternalServerError()
-                        .WithContentAsPlainTextString("System Two is not feeling well today")
+                        .WithContentAsPlainText("System Two is not feeling well today")
                         .AfterDelay(5));
 
                 // Run the workflow
@@ -158,7 +158,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpAsyncWorkflow
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithSuccess()
-                        .WithContentAsPlainTextString("success")
+                        .WithContentAsPlainText("success")
                         .AfterDelay(5));
 
                 // Run the workflow
