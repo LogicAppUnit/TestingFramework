@@ -282,7 +282,7 @@ namespace LogicAppUnit.Hosting
 
             // Log the version number
             var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-            Console.WriteLine($"LogicAppUnit version {version.Major}.{version.Minor}.{version.Build}");
+            Console.WriteLine($"LogicAppUnit v{version.Major}.{version.Minor}.{version.Build}");
 
             try
             {
