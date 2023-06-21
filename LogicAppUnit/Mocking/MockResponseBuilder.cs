@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace LogicAppUnit.Mocking
@@ -134,8 +135,6 @@ namespace LogicAppUnit.Mocking
             return this;
         }
 
-        // TODO: There is no way to set the Content Type!
-
         /// <inheritdoc cref="IMockResponseBuilder.WithContentAsJson(string)" />
         public IMockResponseBuilder WithContentAsJson(string jsonString)
         {
@@ -176,6 +175,24 @@ namespace LogicAppUnit.Mocking
         public IMockResponseBuilder WithContentAsPlainText(string resourceName, Assembly containingAssembly)
         {
             return WithContent(() => ContentHelper.CreatePlainStreamContent(ResourceHelper.GetAssemblyResourceAsStream(resourceName, containingAssembly)));
+        }
+
+        /// <inheritdoc cref="IMockResponseBuilder.WithContent(string, string, Encoding)" />
+        public IMockResponseBuilder WithContent(string value, string contentType, Encoding encoding = null)
+        {
+            return WithContent(() => ContentHelper.CreateStringContent(value, contentType, encoding));
+        }
+
+        /// <inheritdoc cref="IMockResponseBuilder.WithContent(Stream, string)" />
+        public IMockResponseBuilder WithContent(Stream stream, string contentType)
+        {
+            return WithContent(() => ContentHelper.CreateStreamContent(stream, contentType));
+        }
+
+        /// <inheritdoc cref="IMockResponseBuilder.WithContent(string, Assembly, string)" />
+        public IMockResponseBuilder WithContent(string resourceName, Assembly containingAssembly, string contentType)
+        {
+            return WithContent(() => ContentHelper.CreateStreamContent(ResourceHelper.GetAssemblyResourceAsStream(resourceName, containingAssembly), contentType));
         }
 
         #endregion // IMockResponseBuilder implementation

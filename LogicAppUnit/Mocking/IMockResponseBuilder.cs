@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 
 namespace LogicAppUnit.Mocking
 {
@@ -143,5 +144,31 @@ namespace LogicAppUnit.Mocking
         /// <param name="containingAssembly">The assembly containing the embedded resource.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
         IMockResponseBuilder WithContentAsPlainText(string resourceName, Assembly containingAssembly);
+
+        /// <summary>
+        /// Configures response content using a string value, a content type and an optional encoding.
+        /// </summary>
+        /// <param name="value">String to be used for HTTP content.</param>
+        /// <param name="contentType">The content type.</param>
+        /// <param name="encoding">The encoding for the string value. If an encoding is not provided, the default is <see cref="Encoding.UTF8"/>.</param>
+        /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
+        IMockResponseBuilder WithContent(string value, string contentType, Encoding encoding);
+
+        /// <summary>
+        /// Configures response content using a <see cref="Stream"/> and a content type.
+        /// </summary>
+        /// <param name="stream">The stream to be used for HTTP content.</param>
+        /// <param name="contentType">The content type.</param>
+        /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
+        IMockResponseBuilder WithContent(Stream stream, string contentType);
+
+        /// <summary>
+        /// Configures response content using an embedded assembly resource and a content type.
+        /// </summary>
+        /// <param name="resourceName">The fully-qualified name of the resource.</param>
+        /// <param name="containingAssembly">The assembly containing the embedded resource.</param>
+        /// <param name="contentType">The content type.</param>
+        /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
+        IMockResponseBuilder WithContent(string resourceName, Assembly containingAssembly, string contentType);
     }
 }

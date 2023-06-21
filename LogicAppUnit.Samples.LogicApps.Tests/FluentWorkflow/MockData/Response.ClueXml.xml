@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<clueInfo xmlns="urn:ietf:params:xml:ns:clue-info"
+          xmlns:ns2="urn:ietf:params:xml:ns:vcard-4.0"
+          clueInfoID="NapoliRoom">
+    <mediaCaptures>
+        <mediaCapture
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:type="audioCaptureType" captureID="AC0"
+              mediaType="audio">
+            <captureSceneIDREF>CS1</captureSceneIDREF>
+            <spatialInformation>
+                <captureOrigin>
+                        <capturePoint>
+                        <x>0.0</x>
+                        <y>0.0</y>
+                        <z>10.0</z>
+                    </capturePoint>
+                    <lineOfCapturePoint>
+                        <x>0.0</x>
+                        <y>1.0</y>
+                        <z>10.0</z>
+                    </lineOfCapturePoint>
+                </captureOrigin>
+            </spatialInformation>
+            <individual>true</individual>
+            <encGroupIDREF>EG1</encGroupIDREF>
+            <description lang="en">main audio from the room
+            </description>
+            <priority>1</priority>
+            <lang>it</lang>
+            <mobility>static</mobility>
+            <view>room</view>
+            <capturedPeople>
+                <personIDREF>alice</personIDREF>
+                <personIDREF>bob</personIDREF>
+                <personIDREF>ciccio</personIDREF>
+            </capturedPeople>
+        </mediaCapture>
+        <mediaCapture
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:type="videoCaptureType" captureID="VC0"
+              mediaType="video">
+            <captureSceneIDREF>CS1</captureSceneIDREF>
+            <spatialInformation>
+                <captureOrigin>
+                        <capturePoint>
+                        <x>-2.0</x>
+                        <y>0.0</y>
+                        <z>10.0</z>
+                    </capturePoint>
+                </captureOrigin>
+                <captureArea>
+                        <bottomLeft>
+                                <x>-3.0</x>
+                        <y>20.0</y>
+                        <z>9.0</z>
+                        </bottomLeft>
+                        <bottomRight>
+                                <x>-1.0</x>
+                        <y>20.0</y>
+                        <z>9.0</z>
+                        </bottomRight>
+                        <topLeft>
+                                <x>-3.0</x>
+                        <y>20.0</y>
+                        <z>11.0</z>
+                        </topLeft>
+                        <topRight>
+                                <x>-1.0</x>
+                        <y>20.0</y>
+                        <z>11.0</z>
+                        </topRight>
+                </captureArea>
+            </spatialInformation>
+            <individual>true</individual>
+            <encGroupIDREF>EG0</encGroupIDREF>
+            <description lang="en">left camera video capture
+            </description>
+            <priority>1</priority>
+            <lang>it</lang>
+            <mobility>static</mobility>
+            <view>individual</view>
+            <capturedPeople>
+                <personIDREF>ciccio</personIDREF>
+            </capturedPeople>
+        </mediaCapture>
+    </mediaCaptures>
+    <encodingGroups>
+        <encodingGroup encodingGroupID="EG0">
+            <maxGroupBandwidth>600000</maxGroupBandwidth>
+            <encodingIDList>
+                <encodingID>ENC1</encodingID>
+                <encodingID>ENC2</encodingID>
+                <encodingID>ENC3</encodingID>
+            </encodingIDList>
+        </encodingGroup>
+        <encodingGroup encodingGroupID="EG1">
+            <maxGroupBandwidth>300000</maxGroupBandwidth>
+            <encodingIDList>
+                <encodingID>ENC4</encodingID>
+                <encodingID>ENC5</encodingID>
+            </encodingIDList>
+        </encodingGroup>
+    </encodingGroups>
+    <captureScenes>
+        <captureScene scale="unknown" sceneID="CS1">
+            <sceneViews>
+                <sceneView sceneViewID="SE1">
+                    <mediaCaptureIDs>
+                        <mediaCaptureIDREF>VC0</mediaCaptureIDREF>
+                        <mediaCaptureIDREF>VC1</mediaCaptureIDREF>
+                        <mediaCaptureIDREF>VC2</mediaCaptureIDREF>
+                    </mediaCaptureIDs>
+                </sceneView>
+                <sceneView sceneViewID="SE2">
+                    <mediaCaptureIDs>
+                        <mediaCaptureIDREF>VC3</mediaCaptureIDREF>
+                    </mediaCaptureIDs>
+                </sceneView>
+                <sceneView sceneViewID="SE3">
+                    <mediaCaptureIDs>
+                        <mediaCaptureIDREF>VC4</mediaCaptureIDREF>
+                    </mediaCaptureIDs>
+                </sceneView>
+                <sceneView sceneViewID="SE4">
+                    <mediaCaptureIDs>
+                        <mediaCaptureIDREF>AC0</mediaCaptureIDREF>
+                    </mediaCaptureIDs>
+                </sceneView>
+            </sceneViews>
+        </captureScene>
+    </captureScenes>
+    <simultaneousSets>
+        <simultaneousSet setID="SS1">
+            <mediaCaptureIDREF>VC3</mediaCaptureIDREF>
+            <sceneViewIDREF>SE1</sceneViewIDREF>
+        </simultaneousSet>
+        <simultaneousSet setID="SS2">
+            <mediaCaptureIDREF>VC0</mediaCaptureIDREF>
+            <mediaCaptureIDREF>VC2</mediaCaptureIDREF>
+            <mediaCaptureIDREF>VC4</mediaCaptureIDREF>
+        </simultaneousSet>
+    </simultaneousSets>
+    <people>
+        <person personID="bob">
+            <personInfo>
+                <ns2:fn>
+                    <ns2:text>Bob</ns2:text>
+                </ns2:fn>
+            </personInfo>
+            <personType>minute taker</personType>
+        </person>
+        <person personID="alice">
+            <personInfo>
+                <ns2:fn>
+                    <ns2:text>Alice</ns2:text>
+                </ns2:fn>
+            </personInfo>
+            <personType>presenter</personType>
+        </person>
+        <person personID="ciccio">
+            <personInfo>
+                <ns2:fn>
+                    <ns2:text>Ciccio</ns2:text>
+                </ns2:fn>
+            </personInfo>
+            <personType>chairman</personType>
+            <personType>timekeeper</personType>
+        </person>
+    </people>
+</clueInfo>
