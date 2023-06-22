@@ -13,8 +13,6 @@ namespace LogicAppUnit.Mocking
         private string _contentAsString;
         private JToken _contentAsJson;
 
-        // TODO: Could integrate this more, by using it as a wrapper for all access to the request?
-
         /// <summary>
         /// Get the cached context as <see cref="string"/>.
         /// </summary>

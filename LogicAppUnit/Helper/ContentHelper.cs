@@ -122,7 +122,7 @@ namespace LogicAppUnit.Helper
         /// <returns>The HTTP content.</returns>
         public static StringContent CreateJsonStringContent(object jsonObject)
         {
-            // TODO: The name of this method is inconsistent
+            // The name of this method is inconsistent
             if (jsonObject == null)
                 throw new ArgumentNullException(nameof(jsonObject));
 
@@ -137,7 +137,7 @@ namespace LogicAppUnit.Helper
         /// <returns>The HTTP content.</returns>
         public static StringContent CreateXmlStringContent(XmlDocument xmlDoc)
         {
-            // TODO: The name of this method is inconsistent
+            // The name of this method is inconsistent
             if (xmlDoc == null)
                 throw new ArgumentNullException(nameof(xmlDoc));
 
