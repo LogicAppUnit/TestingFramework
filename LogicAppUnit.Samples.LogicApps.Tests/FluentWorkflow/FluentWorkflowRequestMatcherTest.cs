@@ -505,8 +505,10 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                 // Configure mock response delegate that runs if no mock responses are matched
                 testRunner.AddApiMocks = (request) =>
                 {
-                    HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    mockedResponse.RequestMessage = request;
+                    HttpResponseMessage mockedResponse = new HttpResponseMessage
+                    {
+                        RequestMessage = request
+                    };
 
                     JToken requestAsJson = request.Content.ReadAsAsync<JToken>().Result;
                     if (request.Method == HttpMethod.Post && (string)requestAsJson.SelectToken("manufacturer") == "SpaceX")

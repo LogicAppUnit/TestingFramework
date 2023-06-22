@@ -9,7 +9,7 @@ namespace LogicAppUnit.Mocking
     /// </summary>
     internal class MockRequestCache
     {
-        private HttpRequestMessage _request;
+        private readonly HttpRequestMessage _request;
         private string _contentAsString;
         private JToken _contentAsJson;
 
@@ -31,10 +31,7 @@ namespace LogicAppUnit.Mocking
         /// </summary>
         public async Task<JToken> ContentAsJsonAsync()
         {
-            if (_contentAsJson == null)
-            {
-                _contentAsJson = await _request.Content.ReadAsAsync<JToken>();
-            }
+            _contentAsJson ??= await _request.Content.ReadAsAsync<JToken>();
 
             return _contentAsJson;
         }
