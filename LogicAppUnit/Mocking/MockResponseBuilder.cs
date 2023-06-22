@@ -34,7 +34,7 @@ namespace LogicAppUnit.Mocking
         }
 
         /// <summary>
-        /// Creates this instance.
+        /// Creates a default instance of <see cref="IMockResponseBuilder"/> which creates a response with a status code of 200 (OK), no response content and no additional response headers.
         /// </summary>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
         public static IMockResponseBuilder Create()

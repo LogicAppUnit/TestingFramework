@@ -50,12 +50,11 @@ namespace LogicAppUnit.Mocking
         }
 
         /// <summary>
-        /// Creates this instance.
+        /// Creates a default instance of <see cref="IMockRequestMatcher"/> which matches all requests.
         /// </summary>
         /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
         public static IMockRequestMatcher Create()
         {
-            // TODO: Could replace this with a static version of Using()?????
             return new MockRequestMatcher();
         }
 
