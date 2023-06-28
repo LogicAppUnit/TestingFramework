@@ -75,7 +75,10 @@ namespace LogicAppUnit.Mocking
         /// <returns>The mocked response.</returns>
         public IMockResponse AddMockResponse(string name, IMockRequestMatcher mockRequestMatcher)
         {
-            MockResponse mockResponse = new MockResponse(name, mockRequestMatcher);
+            if (!string.IsNullOrEmpty(name) && _mockResponses.Where(x => x.MockName == name).Any())
+                throw new ArgumentException($"A mock response with the name '{name}' already exists.");
+
+            var mockResponse = new MockResponse(name, mockRequestMatcher);
             _mockResponses.Add(mockResponse);
             return mockResponse;
         }
@@ -173,7 +176,7 @@ namespace LogicAppUnit.Mocking
         /// <returns>The HTTP response message.</returns>
         private async Task<HttpResponseMessage> GetResponseUsingFluentMocksAsync(HttpRequestMessage request, List<string> requestMatchingLog)
         {
-            MockRequestCache mockRequestCache = new MockRequestCache(request);
+            var mockRequestCache = new MockRequestCache(request);
             HttpResponseMessage matchedResponse = null;
             int count = 0;
 
@@ -271,7 +274,7 @@ namespace LogicAppUnit.Mocking
             if (httpRequestMessage == null)
                 throw new ArgumentNullException(nameof(httpRequestMessage));
 
-            HttpResponseMessage mockedResponse = new HttpResponseMessage
+            var mockedResponse = new HttpResponseMessage
             {
                 RequestMessage = httpRequestMessage,
                 StatusCode = HttpStatusCode.OK,
