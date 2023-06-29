@@ -58,8 +58,8 @@ jobs:
       shell: bash
 
     - name: List NPM
-      run: 'npm list -g'
-      shell: bash
+      run: 'dir c:\npm'
+      shell: cmd
 
     # Run tests
 
