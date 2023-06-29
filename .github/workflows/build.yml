@@ -59,7 +59,7 @@ jobs:
 
     - name: Start Azurite services (Windows)
       if: matrix.os == 'windows-latest'
-      run: 'start /b azurite'
+      run: 'azurite'
       shell: cmd
 
     # Run tests
@@ -84,4 +84,3 @@ jobs:
         path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
         path-replace-backslashes: true
         reporter: dotnet-trx
-        fail-on-error: false
