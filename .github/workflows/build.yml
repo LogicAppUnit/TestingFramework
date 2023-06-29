@@ -57,8 +57,12 @@ jobs:
       run: 'azurite &'
       shell: bash
 
+    - name: List Path
+      run: 'path'
+      shell: cmd
+
     - name: List NPM
-      run: 'dir c:\npm'
+      run: 'dir c:\npm\prefix\node_modules'
       shell: cmd
 
     # Run tests
