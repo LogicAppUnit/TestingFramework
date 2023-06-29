@@ -90,4 +90,5 @@ jobs:
       with:
         name: Tests (${{ matrix.os }})
         path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
+        path-replace-backslashes: true
         reporter: dotnet-trx
