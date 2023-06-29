@@ -89,5 +89,5 @@ jobs:
       uses: dorny/test-reporter@v1
       with:
         name: Tests (${{ matrix.os }})
-        path: ${{ github.workspace }}\LogicAppUnit.Samples.LogicApps.Tests\TestResults\*.trx
+        path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
         reporter: dotnet-trx
