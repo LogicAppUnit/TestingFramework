@@ -53,13 +53,14 @@ jobs:
     - name: Install Azurite
       run: 'npm install -g azurite@3.24.0'
 
-    - name: Start Azurite services (not windows)
+    - name: Start Azurite services (not Windows)
       if: matrix.os != 'windows-latest'
       run: 'azurite &'
 
     - name: Start Azurite services (Windows)
       if: matrix.os == 'windows-latest'
       run: 'start /b azurite'
+      shell: cmd
 
     # Run tests
 
