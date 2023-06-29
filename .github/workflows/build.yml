@@ -77,7 +77,7 @@ jobs:
         path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
 
     - name: Publish test results
-      if: success() || failure())
+      if: success() || failure()
       uses: dorny/test-reporter@v1
       with:
         name: Tests (${{ matrix.os }})
