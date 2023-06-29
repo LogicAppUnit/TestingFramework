@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace LogicAppUnit.Mocking
         private readonly List<MockRequestPath> _requestPaths;
         private readonly Dictionary<string, string> _requestHeaders;
         private readonly Dictionary<string, string> _requestQueryParams;
-        private string _requestContentType;
+        private readonly List<string> _requestContentTypes;
         private readonly List<int> _requestMatchCounts;
         private readonly List<int> _requestMatchCountsNot;
 
@@ -37,6 +38,7 @@ namespace LogicAppUnit.Mocking
             _requestPaths = new List<MockRequestPath>();
             _requestHeaders = new Dictionary<string, string>();
             _requestQueryParams = new Dictionary<string, string>();
+            _requestContentTypes = new List<string>();
             _requestMatchCounts = new List<int>();
             _requestMatchCountsNot = new List<int>();
         }
@@ -143,13 +145,19 @@ namespace LogicAppUnit.Mocking
             return this;
         }
 
-        /// <inheritdoc cref="IMockRequestMatcher.WithContentType(string)" />
-        public IMockRequestMatcher WithContentType(string contentType)
+        /// <inheritdoc cref="IMockRequestMatcher.WithContentType(string[])" />
+        public IMockRequestMatcher WithContentType(params string[] contentTypes)
         {
-            if (String.IsNullOrEmpty(contentType))
-                throw new ArgumentNullException(nameof(contentType));
+            if (contentTypes == null || contentTypes.Length == 0)
+                throw new ArgumentNullException(nameof(contentTypes));
 
-            _requestContentType = contentType;
+            foreach (string contentType in contentTypes)
+            {
+                if (!_requestContentTypes.Contains(contentType))
+                {
+                    _requestContentTypes.Add(contentType);
+                }
+            }
             return this;
         }
 
@@ -295,14 +303,13 @@ namespace LogicAppUnit.Mocking
                 }
             }
 
-            // Content Type
-            if (!String.IsNullOrEmpty(_requestContentType))
-            {
-                if (request.Content.Headers.ContentType.ToString() != _requestContentType)
-                    return new MockRequestMatchResult(false, $"The request content type '{request.Content.Headers.ContentType}' is not matched with '{_requestContentType}'");
-            }
+            // Content Types
+            // This is OR logic when multiple content types are specified in the match
+            if (_requestContentTypes.Count > 0 && !_requestContentTypes.Contains(request.Content.Headers.ContentType.ToString()))
+                return new MockRequestMatchResult(false, $"The request content type '{request.Content.Headers.ContentType}' is not matched with {string.Join(", ", _requestContentTypes.Select(x => $"'{x}'"))}");
 
             // Content
+            // This is AND logic when multiple delegate functions are specified in the match
             if (_requestContentStringMatcherDelegate != null && !_requestContentStringMatcherDelegate(await requestCache.ContentAsStringAsync()))
             {
                 return new MockRequestMatchResult(false, $"The request content is not matched");

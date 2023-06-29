@@ -76,11 +76,11 @@ namespace LogicAppUnit.Mocking
         IMockRequestMatcher WithHeader(string name, string value);
 
         /// <summary>
-        /// Configure request matching using a content type, for example <c>application/json</c>.
+        /// Configure request matching using one or more content types, for example <c>application/json</c> or <c>application/xml; charset=utf-8</c>.
         /// </summary>
-        /// <param name="contentType">The content type. This must be an exact match.</param>
+        /// <param name="contentTypes">The content types to match. This must be an exact match, including any media type and encoding.</param>
         /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
-        IMockRequestMatcher WithContentType(string contentType);
+        IMockRequestMatcher WithContentType(params string[] contentTypes);
 
         /// <summary>
         /// Configure request matching based on the existance of a query parameter. The value of the parameter is not considered in the match.
@@ -100,7 +100,7 @@ namespace LogicAppUnit.Mocking
         /// <summary>
         /// Configure request matching using the request match count number, where the number of times that the request has been matched during the test execution matches <paramref name="matchCounts"/>).
         /// </summary>
-        /// <param name="matchCounts">The match count number.</param>
+        /// <param name="matchCounts">The match count numbers.</param>
         /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
         /// <remarks>This match is the logical inverse of <see cref="M:IMockRequestMatcher.WithNotMatchCount()"/>.</remarks>
         IMockRequestMatcher WithMatchCount(params int[] matchCounts);
@@ -108,7 +108,7 @@ namespace LogicAppUnit.Mocking
         /// <summary>
         /// Configure request matching using the request match count number, where the number of times that the request has been matched during the test execution does not match <paramref name="matchCounts"/>).
         /// </summary>
-        /// <param name="matchCounts">The match count number.</param>
+        /// <param name="matchCounts">The match count numbers.</param>
         /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
         /// <remarks>This match is the logical inverse of <see cref="M:IMockRequestMatcher.WithMatchCount()"/>.</remarks>
         IMockRequestMatcher WithNotMatchCount(params int[] matchCounts);
