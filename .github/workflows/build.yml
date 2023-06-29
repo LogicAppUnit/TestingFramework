@@ -74,20 +74,20 @@ jobs:
       if: success() || failure()
       with:
         name: test-results.${{ matrix.os }}
-        path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/**.trx
+        path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
 
     - name: Publish test results (not Windows)
       if: matrix.os != 'windows-latest' && (success() || failure())
       uses: dorny/test-reporter@v1
       with:
-        name: Tests
-        path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/**.trx
+        name: Tests (${{ matrix.os }})
+        path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
         reporter: dotnet-trx
 
     - name: Publish test results (Windows)
       if: matrix.os == 'windows-latest' && (success() || failure())
       uses: dorny/test-reporter@v1
       with:
-        name: Tests
-        path: ${{ github.workspace }}\LogicAppUnit.Samples.LogicApps.Tests\TestResults\**.trx
+        name: Tests (${{ matrix.os }})
+        path: ${{ github.workspace }}\LogicAppUnit.Samples.LogicApps.Tests\TestResults\*.trx
         reporter: dotnet-trx
