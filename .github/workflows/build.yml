@@ -71,15 +71,23 @@ jobs:
 
     - name: Publish test log
       uses: actions/upload-artifact@v3
-      if: always()
+      if: success() || failure()
       with:
-        name: test-results
+        name: test-results.${{ matrix.os }}
         path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/**.trx
 
-    - name: Publish test results
+    - name: Publish test results (not Windows)
+      if: matrix.os != 'windows-latest' && (success() || failure())
       uses: dorny/test-reporter@v1
-      if: always()
       with:
         name: Tests
         path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/**.trx
+        reporter: dotnet-trx
+
+    - name: Publish test results (Windows)
+      if: matrix.os == 'windows-latest' && (success() || failure())
+      uses: dorny/test-reporter@v1
+      with:
+        name: Tests
+        path: ${{ github.workspace }}\LogicAppUnit.Samples.LogicApps.Tests\TestResults\**.trx
         reporter: dotnet-trx
