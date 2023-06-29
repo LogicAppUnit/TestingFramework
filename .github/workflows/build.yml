@@ -58,7 +58,7 @@ jobs:
       shell: bash
 
     - name: List Path
-      run: 'path'
+      run: 'set'
       shell: cmd
 
     - name: List NPM
