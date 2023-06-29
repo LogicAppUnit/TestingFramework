@@ -56,11 +56,12 @@ jobs:
     - name: Start Azurite services (not Windows)
       if: matrix.os != 'windows-latest'
       run: 'azurite &'
+      shell: bash
 
     - name: Start Azurite services (Windows)
       if: matrix.os == 'windows-latest'
-      run: 'azurite'
-      shell: cmd
+      run: 'azurite &'
+      shell: bash
 
     # Run tests
 
