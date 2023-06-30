@@ -316,7 +316,7 @@ namespace LogicAppUnit.Mocking
             }
             if (_requestContentJsonMatcherDelegate != null && !_requestContentJsonMatcherDelegate(await requestCache.ContentAsJsonAsync()))
             {
-                return new MockRequestMatchResult(false, $"The request content is not matched");
+                return new MockRequestMatchResult(false, $"The JSON request content is not matched");
             }
 
             _requestMatchCounter++;

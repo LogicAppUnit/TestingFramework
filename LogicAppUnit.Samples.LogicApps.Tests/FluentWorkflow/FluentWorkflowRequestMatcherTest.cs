@@ -539,6 +539,8 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithInternalServerError());
+
+                // THIS IS COMMENTED OUT BECAUSE IT WILL TRIGGER AN 'Object reference not set to an instance of an object' ERROR IN THE DELEGATE FUNCTION
                 //testRunner
                 //    .AddMockResponse("Content-SpaceX",
                 //        MockRequestMatcher.Create()

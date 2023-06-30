@@ -231,6 +231,7 @@ namespace LogicAppUnit.Mocking
         private static HttpResponseMessage WrapMockResponseDelegate(HttpRequestMessage httpRequestMessage, Func<HttpRequestMessage, HttpResponseMessage> mockDefinedInTestCase = null)
         {
             // Wire up the archive mock
+            // THIS WILL BE REMOVED IN A FUTURE VERSION
             if (httpRequestMessage.RequestUri.AbsolutePath.Contains("Archive"))
                 return GetMockArchiveResponse(httpRequestMessage);
 
