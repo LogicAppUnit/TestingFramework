@@ -162,7 +162,7 @@ namespace LogicAppUnit.Mocking
                 requestLog.Log.Add("No mock request matchers have been configured");
             }
 
-            requestLog.Log.Add("Runing mock response delegate because no requests were matched");
+            requestLog.Log.Add("Running mock response delegate because no requests were matched");
             return GetResponseUsingDelegate(request, requestLog.Log);
         }
 
