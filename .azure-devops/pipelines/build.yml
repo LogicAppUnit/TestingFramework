@@ -1,24 +1,20 @@
-# Enable the pipeline trigger when any specified branch has changed
-trigger:
-  batch: true
-  branches:
-    include:
-    - main
-    - features/*
+# Manual trigger only
 
-# Enable the pipeline trigger when new PR is created
-pr:
-  autoCancel: true
-  branches:
-    include:
-    - main
+strategy:
+  matrix:
+    linux:
+      imageName: 'ubuntu-latest'
+    windows:
+      imageName: 'windows-latest'
+    #mac:
+    #  imageName: 'macOS-latest'
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: $(imageName)
 
 jobs:
 - job: build
-  displayName: 'Build'
+  displayName: 'Build ($(imageName))'
   timeoutInMinutes: 20
 
   steps:
@@ -78,7 +74,7 @@ jobs:
 
     - task: DotNetCoreCLI@2
       continueOnError: true
-      displayName: 'Run tests'
+      displayName: 'Run tests ($(imageName))'
       inputs:
         command: test
         arguments: '--no-restore --verbosity normal'
