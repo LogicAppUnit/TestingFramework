@@ -1,21 +1,22 @@
 # Manual trigger only
 
-strategy:
-  matrix:
-    linux:
-      imageName: 'ubuntu-latest'
-    windows:
-      imageName: 'windows-latest'
-    #mac:
-    #  imageName: 'macOS-latest'
-
-pool:
-  vmImage: $(imageName)
-
 jobs:
 - job: build
-  displayName: 'Build ($(imageName))'
   timeoutInMinutes: 20
+
+  strategy:
+    matrix:
+      linux:
+        imageName: 'ubuntu-latest'
+      windows:
+        imageName: 'windows-latest'
+      #mac:
+      #  imageName: 'macOS-latest'
+
+  pool:
+    vmImage: $(imageName)
+
+  displayName: 'Build ($(imageName))'
 
   steps:
 
