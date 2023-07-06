@@ -4,7 +4,6 @@ on:
   push:
     branches:
     - main
-    - automated_build
     - 'features/**'
   pull_request:
     branches:
@@ -14,7 +13,12 @@ on:
 jobs:
 
   Build:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    runs-on: ${{ matrix.os }}
 
     steps:
     - name: Checkout
@@ -51,25 +55,27 @@ jobs:
 
     - name: Start Azurite services
       run: 'azurite &'
+      shell: bash
 
     # Run tests
 
     - name: Run tests
-      run: dotnet test --no-restore --verbosity normal --logger "TRX"
+      run: dotnet test --no-restore --verbosity normal --logger "trx"
 
     # Publish artefacts and test results
 
     - name: Publish test log
       uses: actions/upload-artifact@v3
-      if: always()
+      if: success() || failure()
       with:
-        name: test-results
-        path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/**.trx
+        name: test-results.${{ matrix.os }}
+        path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
 
     - name: Publish test results
+      if: (success() || failure()) && github.event_name != 'pull_request'
       uses: dorny/test-reporter@v1
-      if: always()
       with:
-        name: Test Results
-        path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/**.trx
+        name: Test Results (${{ matrix.os }})
+        path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
+        path-replace-backslashes: true
         reporter: dotnet-trx
