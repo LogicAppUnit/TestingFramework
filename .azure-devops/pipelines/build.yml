@@ -103,7 +103,7 @@ jobs:
 
     - task: PublishPipelineArtifact@1
       displayName: 'Publish NuGet package (Release build only)'
-      condition: eq(${{ parameters.buildConfiguration }}, 'Release')
+      condition: eq('${{ parameters.buildConfiguration }}', 'Release')
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/LogicAppUnit/bin/${{ parameters.buildConfiguration }}'
         artifact: 'NuGetPackage'
