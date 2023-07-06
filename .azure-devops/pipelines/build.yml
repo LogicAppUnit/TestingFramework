@@ -16,65 +16,70 @@ pr:
 pool:
   vmImage: ubuntu-latest
 
-steps:
+jobs:
+- job: build
+  displayName: 'Build'
+  timeoutInMinutes: 20
 
-  # Build .NET solution
+  steps:
 
-  - task: UseDotNet@2
-    displayName: 'Setup .NET'
-    inputs:
-      packageType: sdk
-      version: '6.x'
-      installationPath: $(Agent.ToolsDirectory)/dotnet
+    # Build .NET solution
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Restore dependencies'
-    inputs:
-      command: restore
-      verbosityRestore: Normal
-      projects: '$(System.DefaultWorkingDirectory)/**/*.csproj'
+    - task: UseDotNet@2
+      displayName: 'Setup .NET'
+      inputs:
+        packageType: sdk
+        version: '6.x'
+        installationPath: $(Agent.ToolsDirectory)/dotnet
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Build'
-    inputs:
-      command: build
-      arguments: '--no-restore'
-      projects: '$(System.DefaultWorkingDirectory)/**/*.csproj'
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore dependencies'
+      inputs:
+        command: restore
+        verbosityRestore: Normal
+        projects: '$(System.DefaultWorkingDirectory)/**/*.csproj'
 
-  # Install and configure Logic Apps runtime environment
+    - task: DotNetCoreCLI@2
+      displayName: 'Build'
+      inputs:
+        command: build
+        arguments: '--no-restore'
+        projects: '$(System.DefaultWorkingDirectory)/**/*.csproj'
 
-  - task: NodeTool@0
-    displayName: 'Setup node'
-    inputs:
-      versionSpec: '18.x'
+    # Install and configure Logic Apps runtime environment
 
-  - task: FuncToolsInstaller@0
-    displayName: 'Install Functions core tools'
-    inputs:
-      version: 'latest'
+    - task: NodeTool@0
+      displayName: 'Setup node'
+      inputs:
+        versionSpec: '18.x'
 
-  - task: CmdLine@2
-    displayName: 'Check Functions Core tools installation'
-    inputs:
-      script: func
-  
-  - task: Npm@1
-    displayName: 'Install Azurite'
-    inputs:
-      command: 'custom'
-      customCommand: 'install -g azurite@3.24.0'
+    - task: FuncToolsInstaller@0
+      displayName: 'Install Functions core tools'
+      inputs:
+        version: 'latest'
 
-  - task: CmdLine@2
-    displayName: 'Start Azurite services'
-    inputs:
-      script: 'azurite &'
+    - task: CmdLine@2
+      displayName: 'Check Functions Core tools installation'
+      inputs:
+        script: func
+    
+    - task: Npm@1
+      displayName: 'Install Azurite'
+      inputs:
+        command: 'custom'
+        customCommand: 'install -g azurite@3.24.0'
 
-  # Run tests
+    - task: CmdLine@2
+      displayName: 'Start Azurite services'
+      inputs:
+        script: 'azurite &'
 
-  - task: DotNetCoreCLI@2
-    continueOnError: true
-    displayName: 'Run tests'
-    inputs:
-      command: test
-      arguments: '--no-restore'
-      projects: '$(System.DefaultWorkingDirectory)/**/*.Tests.csproj'
+    # Run tests
+
+    - task: DotNetCoreCLI@2
+      continueOnError: true
+      displayName: 'Run tests'
+      inputs:
+        command: test
+        arguments: '--no-restore --verbosity normal'
+        projects: '$(System.DefaultWorkingDirectory)/**/*.Tests.csproj'
