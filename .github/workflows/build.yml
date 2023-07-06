@@ -70,6 +70,6 @@ jobs:
       uses: dorny/test-reporter@v1
       if: always()
       with:
-        name: Tests
+        name: Test Results
         path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/**.trx
         reporter: dotnet-trx
