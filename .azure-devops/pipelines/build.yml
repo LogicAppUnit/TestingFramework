@@ -1,4 +1,5 @@
 # Manual trigger only
+trigger: none
 
 parameters:
 - name: buildConfiguration
@@ -17,10 +18,13 @@ jobs:
     matrix:
       Linux:
         imageName: 'ubuntu-latest'
+        platformName: Linux
       Windows:
         imageName: 'windows-latest'
-      #mac:
+        platformName: Windows
+      #Mac:
       #  imageName: 'macOS-latest'
+      #  platformName: Mac
 
   pool:
     vmImage: $(imageName)
@@ -76,13 +80,13 @@ jobs:
         customCommand: 'install -g azurite@3.24.0'
 
     - task: CmdLine@2
-      condition: ne(variables.imageName, 'windows-latest')
+      condition: and(succeeded(), ne(variables.imageName, 'windows-latest'))
       displayName: 'Start Azurite services (not Windows)'
       inputs:
         script: 'azurite &'
 
     - task: CmdLine@2
-      condition: eq(variables.imageName, 'windows-latest')
+      condition: and(succeeded(), eq(variables.imageName, 'windows-latest'))
       displayName: 'Start Azurite services (Windows)'
       inputs:
         script: 'start /b azurite'
@@ -103,8 +107,8 @@ jobs:
 
     - task: PublishPipelineArtifact@1
       displayName: 'Publish NuGet package (Release build only)'
-      condition: eq('${{ parameters.buildConfiguration }}', 'Release')
+      condition: and(succeeded(), eq('${{ parameters.buildConfiguration }}', 'Release'))
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/LogicAppUnit/bin/${{ lower(parameters.buildConfiguration) }}'
-        artifact: 'NuGetPackage-$(imageName)'
+        targetPath: '$(System.DefaultWorkingDirectory)/LogicAppUnit/bin/${{ parameters.buildConfiguration }}'
+        artifact: 'NuGetPackage-$(platformName)'
         publishLocation: 'pipeline'
