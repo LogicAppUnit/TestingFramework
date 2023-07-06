@@ -1,0 +1,58 @@
+# Enable the pipeline trigger when any specified branch has changed
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+    - features/*
+
+# Enable the pipeline trigger when new PR is created
+pr:
+  autoCancel: true
+  branches:
+    include:
+    - main
+    - features/*
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+
+    # Build .NET solution
+
+  - task: UseDotNet@2
+    displayName: 'Install .Net 6 SDK'
+    inputs:
+      packageType: sdk
+      version: '6.x'
+      installationPath: $(Agent.ToolsDirectory)/dotnet
+
+
+    # Install and configure Logic Apps runtime environment
+
+  - task: NodeTool@0
+    displayName: 'Setup node'
+    inputs:
+      versionSpec: '18.x'
+
+  - task: FuncToolsInstaller@0
+    displayName: 'Install Functions core tools'
+    inputs:
+      version: 'latest'
+
+  - task: CmdLine@2
+    displayName: 'Check Functions Core tools installation'
+    inputs:
+      script: func
+  
+  - task: Npm@1
+    displayName: 'Install Azurite'
+    inputs:
+      command: 'custom'
+      customCommand: 'install -g azurite@3.24.0'
+
+  - task: CmdLine@2
+    displayName: 'Start Azurite services'
+    inputs:
+      script: start /b azurite --silent
