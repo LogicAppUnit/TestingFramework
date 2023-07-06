@@ -77,4 +77,4 @@ steps:
     inputs:
       command: test
       arguments: '--no-restore'
-    projects: '$(System.DefaultWorkingDirectory)/**/*.Tests.csproj'
+      projects: '$(System.DefaultWorkingDirectory)/**/*.Tests.csproj'
