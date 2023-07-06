@@ -24,8 +24,8 @@ namespace LogicAppUnit.InternalHelper
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
 
-            // If Azurite is running, it will run on localhost (127.0.0.1)
-            IPAddress expectedIp = new IPAddress(new byte[] { 127, 0, 0, 1 });
+            // If Azurite is running, it will run on configured port
+            IPAddress expectedIp = new IPAddress(config.IPAddress);
             var expectedPorts = new[]
             {
                 config.BlobServicePort,

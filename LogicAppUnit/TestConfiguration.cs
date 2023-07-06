@@ -76,6 +76,11 @@ namespace LogicAppUnit
         /// Port number used by the Table service.
         /// </summary>
         public int TableServicePort { get; set; } = 10002;
+        
+        /// <summary>
+        /// The Azurite IP address.
+        /// </summary>
+        public byte[] IPAddress { get; set; } = { 127, 0, 0, 1 };
     }
 
     /// <summary>
