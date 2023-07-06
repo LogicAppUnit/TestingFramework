@@ -1,5 +1,14 @@
 # Manual trigger only
 
+parameters:
+- name: buildConfiguration
+  displayName: 'Build configuration'
+  type: string
+  default: Debug
+    values:
+      - Release
+      - Debug
+
 jobs:
 - job: build
   timeoutInMinutes: 20
@@ -37,10 +46,10 @@ jobs:
         projects: '$(System.DefaultWorkingDirectory)/**/*.csproj'
 
     - task: DotNetCoreCLI@2
-      displayName: 'Build'
+      displayName: 'Build (${{ parameters.buildConfiguration }})'
       inputs:
         command: build
-        arguments: '--no-restore'
+        arguments: '--no-restore --configuration ${{ parameters.buildConfiguration }}'
         projects: '$(System.DefaultWorkingDirectory)/**/*.csproj'
 
     # Install and configure Logic Apps runtime environment
@@ -82,9 +91,20 @@ jobs:
 
     - task: DotNetCoreCLI@2
       continueOnError: true
-      displayName: 'Run tests ($(imageName))'
+      displayName: 'Run tests'
       inputs:
         command: test
-        arguments: '--no-restore --verbosity normal'
+        arguments: '--no-restore --verbosity normal --configuration ${{ parameters.buildConfiguration }}'
         projects: '$(System.DefaultWorkingDirectory)/**/*.Tests.csproj'
         publishTestResults: true
+        testRunTitle: 'Tests ($(imageName))'
+
+    # Publish NuGet package
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish NuGet package (Release build only)'
+      condition: eq(${{ parameters.buildConfiguration }}, 'Release')
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/LogicAppUnit/bin/${{ parameters.buildConfiguration }}'
+        artifact: 'NuGetPackage'
+        publishLocation: 'pipeline'
