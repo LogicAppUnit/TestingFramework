@@ -6,8 +6,8 @@ parameters:
   type: string
   default: Debug
   values:
-    - Release
     - Debug
+    - Release
 
 jobs:
 - job: build
@@ -106,5 +106,5 @@ jobs:
       condition: eq('${{ parameters.buildConfiguration }}', 'Release')
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/LogicAppUnit/bin/${{ parameters.buildConfiguration }}'
-        artifact: 'NuGetPackage'
+        artifact: 'NuGetPackage-$(imageName)'
         publishLocation: 'pipeline'
