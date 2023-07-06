@@ -74,7 +74,7 @@ jobs:
       inputs:
         script: 'azurite &'
 
-    # Run tests
+    # Run tests and publish test results to Azure DevOps
 
     - task: DotNetCoreCLI@2
       continueOnError: true
@@ -83,3 +83,4 @@ jobs:
         command: test
         arguments: '--no-restore --verbosity normal'
         projects: '$(System.DefaultWorkingDirectory)/**/*.Tests.csproj'
+        publishTestResults: true
