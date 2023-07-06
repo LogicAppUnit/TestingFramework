@@ -80,7 +80,7 @@ jobs:
       if: (success() || failure()) && github.event_name != 'pull_request'
       uses: dorny/test-reporter@v1
       with:
-        name: Tests (${{ matrix.os }})
+        name: Test Results (${{ matrix.os }})
         path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
         path-replace-backslashes: true
         reporter: dotnet-trx

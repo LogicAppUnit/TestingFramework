@@ -1,0 +1,86 @@
+# Enable the pipeline trigger when any specified branch has changed
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+    - features/*
+
+# Enable the pipeline trigger when new PR is created
+pr:
+  autoCancel: true
+  branches:
+    include:
+    - main
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+- job: build
+  displayName: 'Build'
+  timeoutInMinutes: 20
+
+  steps:
+
+    # Build .NET solution
+
+    - task: UseDotNet@2
+      displayName: 'Setup .NET'
+      inputs:
+        packageType: sdk
+        version: '6.x'
+        installationPath: $(Agent.ToolsDirectory)/dotnet
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore dependencies'
+      inputs:
+        command: restore
+        verbosityRestore: Normal
+        projects: '$(System.DefaultWorkingDirectory)/**/*.csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build'
+      inputs:
+        command: build
+        arguments: '--no-restore'
+        projects: '$(System.DefaultWorkingDirectory)/**/*.csproj'
+
+    # Install and configure Logic Apps runtime environment
+
+    - task: NodeTool@0
+      displayName: 'Setup node'
+      inputs:
+        versionSpec: '18.x'
+
+    - task: FuncToolsInstaller@0
+      displayName: 'Install Functions core tools'
+      inputs:
+        version: 'latest'
+
+    - task: CmdLine@2
+      displayName: 'Check Functions Core tools installation'
+      inputs:
+        script: func
+    
+    - task: Npm@1
+      displayName: 'Install Azurite'
+      inputs:
+        command: 'custom'
+        customCommand: 'install -g azurite@3.24.0'
+
+    - task: CmdLine@2
+      displayName: 'Start Azurite services'
+      inputs:
+        script: 'azurite &'
+
+    # Run tests and publish test results to Azure DevOps
+
+    - task: DotNetCoreCLI@2
+      continueOnError: true
+      displayName: 'Run tests'
+      inputs:
+        command: test
+        arguments: '--no-restore --verbosity normal'
+        projects: '$(System.DefaultWorkingDirectory)/**/*.Tests.csproj'
+        publishTestResults: true
