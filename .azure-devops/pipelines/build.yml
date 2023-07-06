@@ -105,6 +105,6 @@ jobs:
       displayName: 'Publish NuGet package (Release build only)'
       condition: eq('${{ parameters.buildConfiguration }}', 'Release')
       inputs:
-        targetPath: '$(Build.ArtifactStagingDirectory)/LogicAppUnit/bin/${{ parameters.buildConfiguration }}'
+        targetPath: '$(System.DefaultWorkingDirectory)/LogicAppUnit/bin/${{ lower(parameters.buildConfiguration) }}'
         artifact: 'NuGetPackage-$(imageName)'
         publishLocation: 'pipeline'
