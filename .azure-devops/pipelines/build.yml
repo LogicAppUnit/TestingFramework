@@ -5,9 +5,9 @@ parameters:
   displayName: 'Build configuration'
   type: string
   default: Debug
-    values:
-      - Release
-      - Debug
+  values:
+    - Release
+    - Debug
 
 jobs:
 - job: build
