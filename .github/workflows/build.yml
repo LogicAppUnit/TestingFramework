@@ -50,6 +50,16 @@ jobs:
     - name: Check Functions Core tools installation
       run: 'func'
 
+    - name: Path Check (Process)
+      shell: pwsh
+      run: |
+        [Environment]::GetEnvironmentVariable('Path').Split(";") | foreach { $fullPath = [IO.Path]::Combine($_, "func.exe"); $fileExists = [IO.File]::Exists($fullPath); Write-Host "$fileExists - $fullPath" }
+
+    - name: Path Check (Machine)
+      shell: pwsh
+      run: |
+        [Environment]::GetEnvironmentVariable('Path', 'Machine').Split(";") | foreach { $fullPath = [IO.Path]::Combine($_, "func.exe"); $fileExists = [IO.File]::Exists($fullPath); Write-Host "$fileExists - $fullPath" }
+    
     - name: Install Azurite
       run: 'npm install -g azurite@3.24.0'
 

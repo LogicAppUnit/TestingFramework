@@ -12,6 +12,7 @@ parameters:
 
 jobs:
 - job: build
+  displayName: 'Build'
   timeoutInMinutes: 20
 
   strategy:
@@ -28,8 +29,6 @@ jobs:
 
   pool:
     vmImage: $(imageName)
-
-  displayName: 'Build'
 
   steps:
 
@@ -72,7 +71,21 @@ jobs:
       displayName: 'Check Functions Core tools installation'
       inputs:
         script: func
-    
+
+    - task: PowerShell@2
+      displayName: Path Check (Process)
+      inputs:
+        targetType: inline
+        script: |
+          [Environment]::GetEnvironmentVariable('Path').Split(";") | foreach { $fullPath = [IO.Path]::Combine($_, "func.exe"); $fileExists = [IO.File]::Exists($fullPath); Write-Host "$fileExists - $fullPath" }
+
+    - task: PowerShell@2
+      displayName: Path Check (Machine)
+      inputs:
+        targetType: inline
+        script: |
+          [Environment]::GetEnvironmentVariable('Path', 'Machine').Split(";") | foreach { $fullPath = [IO.Path]::Combine($_, "func.exe"); $fileExists = [IO.File]::Exists($fullPath); Write-Host "$fileExists - $fullPath" }
+
     - task: Npm@1
       displayName: 'Install Azurite'
       inputs:
