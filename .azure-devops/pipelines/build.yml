@@ -12,24 +12,36 @@ pr:
   branches:
     include:
     - main
-    - features/*
 
 pool:
   vmImage: ubuntu-latest
 
 steps:
 
-    # Build .NET solution
+  # Build .NET solution
 
   - task: UseDotNet@2
-    displayName: 'Install .Net 6 SDK'
+    displayName: 'Setup .NET'
     inputs:
       packageType: sdk
       version: '6.x'
       installationPath: $(Agent.ToolsDirectory)/dotnet
 
+  - task: DotNetCoreCLI@2
+    displayName: 'Restore dependencies'
+    inputs:
+      command: restore
+      verbosityRestore: Normal
+      projects: '$(System.DefaultWorkingDirectory)/**/*.csproj'
 
-    # Install and configure Logic Apps runtime environment
+  - task: DotNetCoreCLI@2
+    displayName: 'Build'
+    inputs:
+      command: build
+      arguments: '--no-restore'
+      projects: '$(System.DefaultWorkingDirectory)/**/*.csproj'
+
+  # Install and configure Logic Apps runtime environment
 
   - task: NodeTool@0
     displayName: 'Setup node'
@@ -55,4 +67,8 @@ steps:
   - task: CmdLine@2
     displayName: 'Start Azurite services'
     inputs:
-      script: start /b azurite --silent
+      script: 'azurite &'
+
+    # Run tests
+
+    # Publish artefacts and test results
