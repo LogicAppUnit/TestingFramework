@@ -69,6 +69,12 @@ steps:
     inputs:
       script: 'azurite &'
 
-    # Run tests
+  # Run tests
 
-    # Publish artefacts and test results
+  - task: DotNetCoreCLI@2
+    continueOnError: true
+    displayName: 'Run tests'
+    inputs:
+      command: test
+      arguments: '--no-restore'
+    projects: '$(System.DefaultWorkingDirectory)/**/*.Tests.csproj'
