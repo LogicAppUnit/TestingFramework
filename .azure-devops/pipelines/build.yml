@@ -62,16 +62,10 @@ jobs:
       inputs:
         versionSpec: '18.x'
 
-  #  - task: FuncToolsInstaller@0
-  #    displayName: 'Install Functions core tools'
-  #    inputs:
-  #      version: 'latest'
-
-    - task: Npm@1
+    - task: FuncToolsInstaller@0
       displayName: 'Install Functions core tools'
       inputs:
-        command: 'custom'
-        customCommand: 'install -g azure-functions-core-tools@4 --unsafe-perm true'
+        version: 'latest'
 
     - task: CmdLine@2
       displayName: 'Check Functions Core tools installation'
@@ -80,6 +74,7 @@ jobs:
 
     - task: PowerShell@2
       displayName: Path Check (Process)
+      condition: and(succeeded(), eq(variables.matrixName, 'Windows'))
       inputs:
         targetType: inline
         script: |
@@ -87,6 +82,7 @@ jobs:
 
     - task: PowerShell@2
       displayName: Path Check (Machine)
+      condition: and(succeeded(), eq(variables.matrixName, 'Windows'))
       inputs:
         targetType: inline
         script: |
