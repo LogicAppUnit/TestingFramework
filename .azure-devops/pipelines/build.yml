@@ -12,24 +12,23 @@ parameters:
 
 jobs:
 - job: build
+  displayName: 'Build'
   timeoutInMinutes: 20
 
   strategy:
     matrix:
       Linux:
         imageName: 'ubuntu-latest'
-        platformName: Linux
+        matrixName: Linux
       Windows:
         imageName: 'windows-latest'
-        platformName: Windows
+        matrixName: Windows
       #Mac:
       #  imageName: 'macOS-latest'
-      #  platformName: Mac
+      #  matrixName: Mac
 
   pool:
     vmImage: $(imageName)
-
-  displayName: 'Build'
 
   steps:
 
@@ -80,13 +79,13 @@ jobs:
         customCommand: 'install -g azurite@3.24.0'
 
     - task: CmdLine@2
-      condition: and(succeeded(), ne(variables.imageName, 'windows-latest'))
+      condition: and(succeeded(), ne(variables.matrixName, 'Windows'))
       displayName: 'Start Azurite services (not Windows)'
       inputs:
         script: 'azurite &'
 
     - task: CmdLine@2
-      condition: and(succeeded(), eq(variables.imageName, 'windows-latest'))
+      condition: and(succeeded(), eq(variables.matrixName, 'Windows'))
       displayName: 'Start Azurite services (Windows)'
       inputs:
         script: 'start /b azurite'
@@ -101,7 +100,7 @@ jobs:
         arguments: '--no-restore --verbosity normal --configuration ${{ parameters.buildConfiguration }}'
         projects: '$(System.DefaultWorkingDirectory)/**/*.Tests.csproj'
         publishTestResults: true
-        testRunTitle: 'Tests ($(imageName))'
+        testRunTitle: 'Tests ($(matrixName))'
 
     # Publish NuGet package
 
@@ -110,5 +109,5 @@ jobs:
       condition: and(succeeded(), eq('${{ parameters.buildConfiguration }}', 'Release'))
       inputs:
         targetPath: '$(System.DefaultWorkingDirectory)/LogicAppUnit/bin/${{ parameters.buildConfiguration }}'
-        artifact: 'NuGetPackage-$(platformName)'
+        artifact: 'NuGetPackage-$(matrixName)'
         publishLocation: 'pipeline'
