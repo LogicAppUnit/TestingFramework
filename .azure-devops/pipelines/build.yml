@@ -62,10 +62,16 @@ jobs:
       inputs:
         versionSpec: '18.x'
 
-    - task: FuncToolsInstaller@0
-      displayName: 'Install Functions core tools'
+    # - task: FuncToolsInstaller@0
+    #   displayName: 'Install Functions core tools'
+    #   inputs:
+    #     version: 'latest'
+
+    - task: Npm@1
+      displayName: 'Install Functions core tools (npm install)'
       inputs:
-        version: 'latest'
+        command: 'custom'
+        customCommand: 'install -g azure-functions-core-tools@4 --unsafe-perm true'
 
     - task: CmdLine@2
       displayName: 'Check Functions Core tools installation'
