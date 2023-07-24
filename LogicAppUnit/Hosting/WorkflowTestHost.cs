@@ -1,20 +1,19 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the MIT License. See License.txt in the project root for license information.
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace LogicAppUnit.Hosting
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Linq;
-    using System.Threading.Tasks;
-
     /// <summary>
     /// The function test host.
     /// </summary>
     internal class WorkflowTestHost : IDisposable
     {
+        private const string FunctionsExecutableName = "func";
+
         /// <summary>
         /// Get or sets the output data.
         /// </summary>
@@ -122,17 +121,17 @@ namespace LogicAppUnit.Hosting
                     StartInfo = new ProcessStartInfo
                     {
                         WorkingDirectory = this.WorkingDirectory,
-                        FileName = GetEnvPathForFunctionTools(),
+                        FileName = FunctionsExecutableName,
                         Arguments = "start --verbose",
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
                         UseShellExecute = false,
-                        CreateNoWindow = true,
+                        CreateNoWindow = true
                     }
                 };
 
+                // Hook up an event handler for the Standard Output stream
                 var processStarted = new TaskCompletionSource<bool>();
-
                 this.Process.OutputDataReceived += (sender, args) =>
                 {
                     var outputData = args.Data;
@@ -153,6 +152,7 @@ namespace LogicAppUnit.Hosting
                     }
                 };
 
+                // Hook up an event handler for the Standard Error stream
                 var errorData = string.Empty;
                 this.Process.ErrorDataReceived += (sender, args) =>
                 {
@@ -165,11 +165,23 @@ namespace LogicAppUnit.Hosting
                     }
                 };
 
-                this.Process.Start();
+                // Start the Functions Core Tools process
+                try
+                {
+                    this.Process.Start();
+                }
+                catch (System.ComponentModel.Win32Exception ex) when (ex.Message.Contains("The system cannot find the file specified"))
+                {
+                    Console.WriteLine($"Cannot start Azure Functions Core Tools directly: {ex.Message}");
+
+                    this.Process.StartInfo.FileName = GetEnvPathForFunctionTools();
+                    this.Process.Start();
+                }
 
                 this.Process.BeginOutputReadLine();
                 this.Process.BeginErrorReadLine();
 
+                // Wait for the Functions runtime to start, or timeout after 2 minutes
                 var result = Task.WhenAny(processStarted.Task, Task.Delay(TimeSpan.FromMinutes(2))).Result;
 
                 if (result != processStarted.Task)
@@ -200,7 +212,7 @@ namespace LogicAppUnit.Hosting
         /// </summary>
         private static void KillFunctionHostProcesses()
         {
-            Process[] processes = Process.GetProcessesByName("func");
+            Process[] processes = Process.GetProcessesByName(FunctionsExecutableName);
             foreach (var process in processes)
             {
                 process.Kill(true);
@@ -221,12 +233,12 @@ namespace LogicAppUnit.Hosting
             if (OperatingSystem.IsWindows())
             {
                 enviromentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine);
-                exeName = "func.exe";
+                exeName = $"{FunctionsExecutableName}.exe";
             }
             else
             {
                 enviromentPath = Environment.GetEnvironmentVariable("PATH");
-                exeName = "func";
+                exeName = FunctionsExecutableName;
             }
 
             string exePath = enviromentPath.Split(Path.PathSeparator).Select(x => Path.Combine(x, exeName)).Where(x => File.Exists(x)).FirstOrDefault();
@@ -237,7 +249,7 @@ namespace LogicAppUnit.Hosting
             }
             else
             {
-                throw new Exception("The enviroment variable PATH does not include the path for the 'func' executable.");
+                throw new Exception($"The enviroment variable PATH does not include the path for the '{FunctionsExecutableName}' executable.");
             }
         }
 
