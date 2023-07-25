@@ -214,7 +214,7 @@ namespace LogicAppUnit.Hosting
         /// <exception cref="Exception">Thrown when the location of the 'func' executable could not be found.</exception>
         private static string GetEnvPathForFunctionTools()
         {
-            string enviromentPath;
+            string environmentPath;
             string exeName;
 
             // Handle the differences between platforms
@@ -225,11 +225,11 @@ namespace LogicAppUnit.Hosting
             }
             else
             {
-                enviromentPath = Environment.GetEnvironmentVariable("PATH");
+                environmentPath = Environment.GetEnvironmentVariable("PATH");
                 exeName = "func";
             }
 
-            string exePath = enviromentPath.Split(Path.PathSeparator).Select(x => Path.Combine(x, exeName)).Where(x => File.Exists(x)).FirstOrDefault();
+            string exePath = environmentPath.Split(Path.PathSeparator).Select(x => Path.Combine(x, exeName)).Where(x => File.Exists(x)).FirstOrDefault();
             if (!string.IsNullOrWhiteSpace(exePath))
             {
                 Console.WriteLine($"Path for Azure Function Core tools: {exePath}");
