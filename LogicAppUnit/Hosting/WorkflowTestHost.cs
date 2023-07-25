@@ -232,7 +232,7 @@ namespace LogicAppUnit.Hosting
             // Handle the differences between platforms
             if (OperatingSystem.IsWindows())
             {
-                enviromentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine);
+                enviromentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
                 exeName = $"{FunctionsExecutableName}.exe";
             }
             else
