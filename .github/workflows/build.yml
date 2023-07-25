@@ -47,10 +47,10 @@ jobs:
     - name: Install Functions Core tools
       run: 'npm install -g azure-functions-core-tools@4 --unsafe-perm true'
 
-    #- name: Set Functions Core tools path (Windows only)
-    #  if: matrix.os == 'windows-latest'
-    #  run: 'setx Path "C:\npm\prefix\node_modules\azure-functions-core-tools\bin;%Path%'
-    #  shell: cmd
+    - name: Set Functions Core tools path (Windows only)
+      if: matrix.os == 'windows-latest'
+      run: 'setx /m Path "C:\npm\prefix\node_modules\azure-functions-core-tools\bin;%Path%"'
+      shell: cmd
 
     - name: Check Functions Core tools installation
       run: 'func'
