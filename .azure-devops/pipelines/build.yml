@@ -67,11 +67,17 @@ jobs:
       inputs:
         version: 'latest'
 
+    # - task: Npm@1
+    #   displayName: 'Install Functions core tools (npm install)'
+    #   inputs:
+    #     command: 'custom'
+    #     customCommand: 'install -g azure-functions-core-tools@4 --unsafe-perm true'
+
     - task: CmdLine@2
       displayName: 'Check Functions Core tools installation'
       inputs:
         script: func
-    
+
     - task: Npm@1
       displayName: 'Install Azurite'
       inputs:
@@ -79,22 +85,22 @@ jobs:
         customCommand: 'install -g azurite@3.24.0'
 
     - task: CmdLine@2
-      condition: and(succeeded(), ne(variables.matrixName, 'Windows'))
       displayName: 'Start Azurite services (not Windows)'
+      condition: and(succeeded(), ne(variables.matrixName, 'Windows'))
       inputs:
         script: 'azurite &'
 
     - task: CmdLine@2
-      condition: and(succeeded(), eq(variables.matrixName, 'Windows'))
       displayName: 'Start Azurite services (Windows)'
+      condition: and(succeeded(), eq(variables.matrixName, 'Windows'))
       inputs:
         script: 'start /b azurite'
 
     # Run tests and publish test results to Azure DevOps
 
     - task: DotNetCoreCLI@2
-      continueOnError: true
       displayName: 'Run tests'
+      continueOnError: true
       inputs:
         command: test
         arguments: '--no-restore --verbosity normal --configuration ${{ parameters.buildConfiguration }}'
