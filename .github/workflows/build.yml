@@ -49,7 +49,7 @@ jobs:
 
     - name: Set Functions Core tools path (Windows only)
       if: matrix.os == 'windows-latest'
-      run: 'setx /m Path "C:\npm\prefix\node_modules\azure-functions-core-tools\bin;%Path%"'
+      run: 'setx Path "C:\npm\prefix\node_modules\azure-functions-core-tools\bin;%Path%"'
       shell: cmd
 
     - name: Check Functions Core tools installation
