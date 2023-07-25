@@ -209,7 +209,7 @@ namespace LogicAppUnit.Hosting
         }
 
         /// <summary>
-        /// Retrieve the path of the 'func' executable (Azure Function core tools). 
+        /// Retrieve the path of the 'func' executable (Azure Functions Core tools). 
         /// </summary>
         /// <returns>The path to the 'func' executable.</returns>
         /// <exception cref="Exception">Thrown when the location of the 'func' executable could not be found.</exception>
@@ -222,7 +222,7 @@ namespace LogicAppUnit.Hosting
             if (OperatingSystem.IsWindows())
             {
                 // The path to the 'func' executable can be in any of the environment variable scopes, depending on how the Functions Core Tools were installed.
-                // If a DevOps build pipeline has updated the PATH for the 'Machine' or 'User' scopes to include the 'func' executable, the 'Process' scope is not automatically updated to reflect the change.
+                // If a DevOps build pipeline has updated the PATH environment variable for the 'Machine' or 'User' scopes, the 'Process' scope is not automatically updated to reflect the change.
                 // So merge all three scopes to be sure!
                 enviromentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process) + Path.PathSeparator + 
                                     Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User) + Path.PathSeparator +

@@ -55,24 +55,6 @@ jobs:
     - name: Check Functions Core tools installation
       run: 'func'
 
-    - name: Path Check (User)
-      if: matrix.os == 'windows-latest'
-      shell: pwsh
-      run: |
-        [Environment]::GetEnvironmentVariable('Path', 'User').Split(";") | foreach { $fullPath = [IO.Path]::Combine($_, "func.exe"); $fileExists = [IO.File]::Exists($fullPath); Write-Host "$fileExists - $fullPath" }
-
-    - name: Path Check (Process)
-      if: matrix.os == 'windows-latest'
-      shell: pwsh
-      run: |
-        [Environment]::GetEnvironmentVariable('Path', 'Process').Split(";") | foreach { $fullPath = [IO.Path]::Combine($_, "func.exe"); $fileExists = [IO.File]::Exists($fullPath); Write-Host "$fileExists - $fullPath" }
-
-    - name: Path Check (Machine)
-      if: matrix.os == 'windows-latest'
-      shell: pwsh
-      run: |
-        [Environment]::GetEnvironmentVariable('Path', 'Machine').Split(";") | foreach { $fullPath = [IO.Path]::Combine($_, "func.exe"); $fileExists = [IO.File]::Exists($fullPath); Write-Host "$fileExists - $fullPath" }
-    
     - name: Install Azurite
       run: 'npm install -g azurite@3.24.0'
 
