@@ -1,25 +1,34 @@
-# Enable the pipeline trigger when any specified branch has changed
-trigger:
-  batch: true
-  branches:
-    include:
-    - main
-    - features/*
+# Manual trigger only
+trigger: none
 
-# Enable the pipeline trigger when new PR is created
-pr:
-  autoCancel: true
-  branches:
-    include:
-    - main
-
-pool:
-  vmImage: ubuntu-latest
+parameters:
+- name: buildConfiguration
+  displayName: 'Build configuration'
+  type: string
+  default: Debug
+  values:
+    - Debug
+    - Release
 
 jobs:
 - job: build
   displayName: 'Build'
   timeoutInMinutes: 20
+
+  strategy:
+    matrix:
+      Linux:
+        imageName: 'ubuntu-latest'
+        matrixName: Linux
+      Windows:
+        imageName: 'windows-latest'
+        matrixName: Windows
+      #Mac:
+      #  imageName: 'macOS-latest'
+      #  matrixName: Mac
+
+  pool:
+    vmImage: $(imageName)
 
   steps:
 
@@ -40,10 +49,10 @@ jobs:
         projects: '$(System.DefaultWorkingDirectory)/**/*.csproj'
 
     - task: DotNetCoreCLI@2
-      displayName: 'Build'
+      displayName: 'Build (${{ parameters.buildConfiguration }})'
       inputs:
         command: build
-        arguments: '--no-restore'
+        arguments: '--no-restore --configuration ${{ parameters.buildConfiguration }}'
         projects: '$(System.DefaultWorkingDirectory)/**/*.csproj'
 
     # Install and configure Logic Apps runtime environment
@@ -58,11 +67,17 @@ jobs:
       inputs:
         version: 'latest'
 
+    # - task: Npm@1
+    #   displayName: 'Install Functions core tools (npm install)'
+    #   inputs:
+    #     command: 'custom'
+    #     customCommand: 'install -g azure-functions-core-tools@4 --unsafe-perm true'
+
     - task: CmdLine@2
       displayName: 'Check Functions Core tools installation'
       inputs:
         script: func
-    
+
     - task: Npm@1
       displayName: 'Install Azurite'
       inputs:
@@ -70,17 +85,35 @@ jobs:
         customCommand: 'install -g azurite@3.24.0'
 
     - task: CmdLine@2
-      displayName: 'Start Azurite services'
+      displayName: 'Start Azurite services (not Windows)'
+      condition: and(succeeded(), ne(variables.matrixName, 'Windows'))
       inputs:
         script: 'azurite &'
+
+    - task: CmdLine@2
+      displayName: 'Start Azurite services (Windows)'
+      condition: and(succeeded(), eq(variables.matrixName, 'Windows'))
+      inputs:
+        script: 'start /b azurite'
 
     # Run tests and publish test results to Azure DevOps
 
     - task: DotNetCoreCLI@2
-      continueOnError: true
       displayName: 'Run tests'
+      continueOnError: true
       inputs:
         command: test
-        arguments: '--no-restore --verbosity normal'
+        arguments: '--no-restore --verbosity normal --configuration ${{ parameters.buildConfiguration }}'
         projects: '$(System.DefaultWorkingDirectory)/**/*.Tests.csproj'
         publishTestResults: true
+        testRunTitle: 'Tests ($(matrixName))'
+
+    # Publish NuGet package
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish NuGet package (Release build only)'
+      condition: and(succeeded(), eq('${{ parameters.buildConfiguration }}', 'Release'))
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/LogicAppUnit/bin/${{ parameters.buildConfiguration }}'
+        artifact: 'NuGetPackage-$(matrixName)'
+        publishLocation: 'pipeline'

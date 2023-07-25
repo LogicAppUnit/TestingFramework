@@ -1,20 +1,19 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the MIT License. See License.txt in the project root for license information.
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace LogicAppUnit.Hosting
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Linq;
-    using System.Threading.Tasks;
-
     /// <summary>
     /// The function test host.
     /// </summary>
     internal class WorkflowTestHost : IDisposable
     {
+        private const string FunctionsExecutableName = "func";
+
         /// <summary>
         /// Get or sets the output data.
         /// </summary>
@@ -127,12 +126,12 @@ namespace LogicAppUnit.Hosting
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
                         UseShellExecute = false,
-                        CreateNoWindow = true,
+                        CreateNoWindow = true
                     }
                 };
 
+                // Hook up an event handler for the Standard Output stream
                 var processStarted = new TaskCompletionSource<bool>();
-
                 this.Process.OutputDataReceived += (sender, args) =>
                 {
                     var outputData = args.Data;
@@ -153,6 +152,7 @@ namespace LogicAppUnit.Hosting
                     }
                 };
 
+                // Hook up an event handler for the Standard Error stream
                 var errorData = string.Empty;
                 this.Process.ErrorDataReceived += (sender, args) =>
                 {
@@ -165,11 +165,12 @@ namespace LogicAppUnit.Hosting
                     }
                 };
 
+                // Start the Functions Core Tools process
                 this.Process.Start();
-
                 this.Process.BeginOutputReadLine();
                 this.Process.BeginErrorReadLine();
 
+                // Wait for the Functions runtime to start, or timeout after 2 minutes
                 var result = Task.WhenAny(processStarted.Task, Task.Delay(TimeSpan.FromMinutes(2))).Result;
 
                 if (result != processStarted.Task)
@@ -200,7 +201,7 @@ namespace LogicAppUnit.Hosting
         /// </summary>
         private static void KillFunctionHostProcesses()
         {
-            Process[] processes = Process.GetProcessesByName("func");
+            Process[] processes = Process.GetProcessesByName(FunctionsExecutableName);
             foreach (var process in processes)
             {
                 process.Kill(true);
@@ -208,7 +209,7 @@ namespace LogicAppUnit.Hosting
         }
 
         /// <summary>
-        /// Retrieve the path of the 'func' executable (Azure Function core tools). 
+        /// Retrieve the path of the 'func' executable (Azure Functions Core tools). 
         /// </summary>
         /// <returns>The path to the 'func' executable.</returns>
         /// <exception cref="Exception">Thrown when the location of the 'func' executable could not be found.</exception>
@@ -220,24 +221,30 @@ namespace LogicAppUnit.Hosting
             // Handle the differences between platforms
             if (OperatingSystem.IsWindows())
             {
-                enviromentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
-                exeName = "func.exe";
+                // The path to the 'func' executable can be in any of the environment variable scopes, depending on how the Functions Core Tools were installed.
+                // If a DevOps build pipeline has updated the PATH environment variable for the 'Machine' or 'User' scopes, the 'Process' scope is not automatically updated to reflect the change.
+                // So merge all three scopes to be sure!
+                environmentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process) + Path.PathSeparator + 
+                                    Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User) + Path.PathSeparator +
+                                    Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine);
+                exeName = $"{FunctionsExecutableName}.exe";
             }
             else
             {
                 environmentPath = Environment.GetEnvironmentVariable("PATH");
-                exeName = "func";
+                exeName = FunctionsExecutableName;
             }
 
-            string exePath = environmentPath.Split(Path.PathSeparator).Select(x => Path.Combine(x, exeName)).Where(x => File.Exists(x)).FirstOrDefault();
-            if (!string.IsNullOrWhiteSpace(exePath))
+            var exePaths = environmentPath.Split(Path.PathSeparator).Distinct().Select(x => Path.Combine(x, exeName));
+            string exePathMatch = exePaths.Where(x => File.Exists(x)).FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(exePathMatch))
             {
-                Console.WriteLine($"Path for Azure Function Core tools: {exePath}");
-                return exePath;
+                Console.WriteLine($"Path for Azure Function Core tools: {exePathMatch}");
+                return exePathMatch;
             }
             else
             {
-                throw new Exception("The enviroment variable PATH does not include the path for the 'func' executable.");
+                throw new TestException($"The enviroment variable PATH does not include the path for the '{FunctionsExecutableName}' executable. Searched: {string.Join(Path.PathSeparator, exePaths)}");
             }
         }
 
