@@ -14,7 +14,8 @@
       "sendMessage",
       "uploadBlob",
       "deleteBlob",
-      "putMessage"
+      "putMessage",
+      "CreateOrUpdateDocument"
     ],
     "autoConfigureWithStatelessRunHistory": true
   }
