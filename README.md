@@ -52,7 +52,7 @@ The framework has been tested with these environments:
 - MacOS
 
 
-## Contributors
+## Main Contributors
 
 - [Mark Abrams](https://github.com/mark-abrams)
 - [Sanket Borhade](https://github.com/sanket-borhade)

@@ -1,4 +1,4 @@
-# 1.7.0 (24th July 2023)
+# 1.7.0 (27th July 2023)
 
 LogicAppUnit Testing Framework:
 
@@ -6,6 +6,7 @@ LogicAppUnit Testing Framework:
 - Removed public methods `ContentHelper.SerializeObject()`, `ContentHelper.DeserializeObject()` and `ContentHelper.JClone()`, these were for internal use only and are now obsolete.
 - Include the LogicAppUnit version at the end of the test log.
 - The maximum execution time for a workflow can now be set in the `testConfiguration.json` file using the `runner.maxWorkflowExecutionDuration` option. Previously this duration was hard-coded to 5 minutes. The default value for this option is 300 seconds (5 minutes).
+- Improved the logic that locates the Azure Functions runtime executable (`func.exe`) when running on a Windows platform. Previous versions of the framework used the PATH environment variable in the `Machine` scope which caused issues when tests were running in an Azure DevOps pipeline (because the `FuncToolsInstaller@0` task adds the path for `func.exe` to the PATH environment variable in the `Process` scope). Now the framework combines the PATH environment variables for the `Machine`, `Process` and `User` scopes to ensure that all possible paths are checked. [[PR #20](https://github.com/LogicAppUnit/TestingFramework/pull/22), [@AlexanderDobrescu](https://github.com/AlexanderDobrescu) and [PR #21](https://github.com/LogicAppUnit/TestingFramework/pull/21), [@danielduartemindera](https://github.com/danielduartemindera)]
 
 LogicAppUnit.Samples.LogicApps.Tests:
 
