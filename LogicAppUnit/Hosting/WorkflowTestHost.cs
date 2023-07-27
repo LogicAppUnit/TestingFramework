@@ -245,7 +245,7 @@ namespace LogicAppUnit.Hosting
             }
             else
             {
-                throw new TestException($"The enviroment variable PATH does not include the path for the '{FunctionsExecutableName}' executable. Searched: {string.Join(Path.PathSeparator, exePaths)}");
+                throw new TestException($"The enviroment variable PATH does not include the path for the '{FunctionsExecutableName}' executable. Searched:{Environment.NewLine}{string.Join(Environment.NewLine, exePaths.OrderBy(s => s))}");
             }
         }
 
