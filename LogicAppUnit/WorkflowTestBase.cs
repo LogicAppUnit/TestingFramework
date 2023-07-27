@@ -1,7 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using LogicAppUnit.Hosting;
+﻿using LogicAppUnit.Hosting;
 using LogicAppUnit.InternalHelper;
+using LogicAppUnit.Wrapper;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,9 +20,9 @@ namespace LogicAppUnit
         private TestConfiguration _testConfig;
         private DirectoryInfo _artifactDirectory;
 
-        private WorkflowHelper _workflowDefinition;
-        private SettingsHelper _localSettings;
-        private ConnectionHelper _connections;
+        private WorkflowDefinitionWrapper _workflowDefinition;
+        private LocalSettingsWrapper _localSettings;
+        private ConnectionsWrapper _connections;
 
         private string _parameters;
         private string _host;
@@ -57,10 +58,7 @@ namespace LogicAppUnit
         /// </remarks>
         protected static string MockTestWorkflowHostUri
         {
-            get
-            {
-                return TestEnvironment.FlowV2MockTestHostUri;
-            }
+            get => TestEnvironment.FlowV2MockTestHostUri;
         }
 
         /// <summary>
@@ -105,8 +103,8 @@ namespace LogicAppUnit
             if (_testConfig.Azurite.EnableAzuritePortCheck && !AzuriteHelper.IsRunning(_testConfig.Azurite))
                 throw new TestException($"Azurite is not running on ports {_testConfig.Azurite.BlobServicePort} (Blob service), {_testConfig.Azurite.QueueServicePort} (Queue service) and {_testConfig.Azurite.TableServicePort} (Table service). Logic App workflows cannot run unless all three services are running in Azurite");
 
-            // Set up the workflow
-            _workflowDefinition = new WorkflowHelper(workflowName, ReadFromPath(Path.Combine(logicAppBasePath, workflowName, Constants.WORKFLOW)));
+            // Set up the workflow definition
+            _workflowDefinition = new WorkflowDefinitionWrapper(workflowName, ReadFromPath(Path.Combine(logicAppBasePath, workflowName, Constants.WORKFLOW)));
             Console.WriteLine($"Workflow '{_workflowDefinition.WorkflowName}' is {_workflowDefinition.WorkflowType}");
             _workflowDefinition.ReplaceRetryPoliciesWithNone();
             _workflowDefinition.ReplaceTriggersWithHttp();
@@ -115,11 +113,11 @@ namespace LogicAppUnit
 
             // Set up the local settings
             // The name of the local setting file can be set in the test configuration
-            _localSettings = new SettingsHelper(ReadFromPath(Path.Combine(logicAppBasePath, SetLocalSettingsFile(localSettingsFilename))));
+            _localSettings = new LocalSettingsWrapper(ReadFromPath(Path.Combine(logicAppBasePath, SetLocalSettingsFile(localSettingsFilename))));
             _localSettings.ReplaceExternalUrlsWithMockServer(_testConfig.Workflow.ExternalApiUrlsToMock);
 
             // Set up the connections
-            _connections = new ConnectionHelper(ReadFromPath(Path.Combine(logicAppBasePath, Constants.CONNECTIONS), optional: true), _localSettings);
+            _connections = new ConnectionsWrapper(ReadFromPath(Path.Combine(logicAppBasePath, Constants.CONNECTIONS), optional: true), _localSettings);
             _connections.ReplaceManagedApiConnectionUrlsWithMockServer();
 
             // Set up the artifacts (schemas, maps)
@@ -179,7 +177,7 @@ namespace LogicAppUnit
             }
 
             return new TestRunner(
-                _testConfig.Logging,
+                _testConfig.Logging, _testConfig.Runner,
                 _client,
                 _workflowDefinition, _localSettings, _host, _parameters, _connections, _artifactDirectory);
         }

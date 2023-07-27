@@ -5,10 +5,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 
-namespace LogicAppUnit.Samples.LogicApps.Tests.InvokeWorkflowTest
+namespace LogicAppUnit.Samples.LogicApps.Tests.InvokeWorkflow
 {
     /// <summary>
-    /// Test cases for the <i>invoke-test-workflow</i> workflow.
+    /// Test cases for the <i>invoke-workflow</i> workflow.
     /// </summary>
     [TestClass]
     public class InvokeWorkflowTest : WorkflowTestBase

@@ -18,8 +18,5 @@
 
         // Logic App folders
         internal static readonly string ARTIFACTS_FOLDER = "Artifacts";
-
-        // Maximum time (in minutes) to poll for the workflow results
-        internal static readonly int MAX_TIME_MINUTES_WHILE_POLLING_WORKFLOW_RESULT = 5;
     }
 }

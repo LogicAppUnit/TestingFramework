@@ -1,0 +1,8 @@
+{
+  "name": "Starship",
+  "manufacturer": "SpaceX",
+  "diameter": 9,
+  "height": 120,
+  "massToLeo": 150,
+  "volumeToLeo": 1000
+}

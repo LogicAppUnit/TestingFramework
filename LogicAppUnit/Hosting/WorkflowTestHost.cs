@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LogicAppUnit.InternalHelper;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 namespace LogicAppUnit.Hosting
 {
     /// <summary>
-    /// The function test host.
+    /// The workflow test host.
     /// </summary>
     internal class WorkflowTestHost : IDisposable
     {
@@ -165,22 +166,22 @@ namespace LogicAppUnit.Hosting
                     }
                 };
 
-                // Start the Functions Core Tools process
+                // Start the Function host process
                 this.Process.Start();
                 this.Process.BeginOutputReadLine();
                 this.Process.BeginErrorReadLine();
 
-                // Wait for the Functions runtime to start, or timeout after 2 minutes
+                // Wait for the Function host process to start, or timeout after 2 minutes
                 var result = Task.WhenAny(processStarted.Task, Task.Delay(TimeSpan.FromMinutes(2))).Result;
 
                 if (result != processStarted.Task)
                 {
-                    throw new InvalidOperationException("Runtime did not start properly. Please make sure you have the latest Azure Functions Core Tools installed and available on your PATH environment variable, and that Azurite is up and running.");
+                    throw new InvalidOperationException("Functions runtime did not start properly. Please make sure you have the latest Azure Functions Core Tools installed and available on your PATH environment variable, and that Azurite is up and running.");
                 }
 
                 if (this.Process.HasExited)
                 {
-                    throw new InvalidOperationException($"Runtime did not start properly. The error is '{errorData}'. Please make sure you have the latest Azure Functions Core Tools installed and available on your PATH environment variable, and that Azurite is up and running.");
+                    throw new InvalidOperationException($"Functions runtime did not start properly. The error is '{errorData}'. Please make sure you have the latest Azure Functions Core Tools installed and available on your PATH environment variable, and that Azurite is up and running.");
                 }
             }
             catch (Exception ex)
@@ -244,7 +245,7 @@ namespace LogicAppUnit.Hosting
             }
             else
             {
-                throw new TestException($"The enviroment variable PATH does not include the path for the '{FunctionsExecutableName}' executable. Searched: {string.Join(Path.PathSeparator, exePaths)}");
+                throw new TestException($"The enviroment variable PATH does not include the path for the '{FunctionsExecutableName}' executable. Searched:{Environment.NewLine}{string.Join(Environment.NewLine, exePaths.OrderBy(s => s))}");
             }
         }
 
@@ -284,6 +285,12 @@ namespace LogicAppUnit.Hosting
         /// </summary>
         public void Dispose()
         {
+            LoggingHelper.LogBanner("Test completed");
+
+            // Log the version number
+            var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            Console.WriteLine($"LogicAppUnit v{version.Major}.{version.Minor}.{version.Build}");
+
             try
             {
                 // Kill any remaining function host processes so that we can then delete the working directory

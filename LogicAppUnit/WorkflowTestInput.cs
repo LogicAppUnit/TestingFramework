@@ -6,19 +6,19 @@
     public class WorkflowTestInput
     {
         /// <summary>
-        /// Gets or sets the workflow name.
+        /// Gets the workflow name.
         /// </summary>
-        public string WorkflowName { get; set; }
+        public string WorkflowName { init; get; }
 
         /// <summary>
-        /// Gets or sets the workflow definition.
+        /// Gets the workflow definition.
         /// </summary>
-        public string WorkflowDefinition { get; set; }
+        public string WorkflowDefinition { init; get; }
 
         /// <summary>
-        /// Gets or sets the workflow filename.
+        /// Gets the workflow filename.
         /// </summary>
-        public string WorkflowFilename { get; set; }
+        public string WorkflowFilename { init; get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WorkflowTestInput"/> class.

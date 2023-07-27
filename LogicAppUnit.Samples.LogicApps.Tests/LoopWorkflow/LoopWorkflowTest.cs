@@ -1,13 +1,14 @@
 ﻿using LogicAppUnit.Helper;
+using LogicAppUnit.Mocking;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Net.Http;
 
-namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
+namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflow
 {
     /// <summary>
-    /// Test cases for the <i>loop-test-workflow</i> workflow.
+    /// Test cases for the <i>loop-workflow</i> workflow.
     /// This workflow includes actions in an <i>Until</i> loop and a <i>ForEach</i>/> loop to demonstrate how the testing framework can be used to test actions that are run multiple times in a workflow run.
     /// These types of actions are known as action repetitions.
     /// </summary>
@@ -36,39 +37,51 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
 
             using (ITestRunner testRunner = CreateTestRunner())
             {
-                // Mock the HTTP calls and customize responses
-                int iterationCounter = 0;
-                testRunner.AddApiMocks = (request) =>
-                {
-                    HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    iterationCounter += 1;
-                    if (request.RequestUri.AbsolutePath == "/api/v1/doSomethingInsideUntilLoop" && request.Method == HttpMethod.Post && iterationCounter == 4)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.InternalServerError;
-                        mockedResponse.Content = GetMockResponse(iterationCounter, "Internal server error detected in System One");
-                    }
-                    else if (request.RequestUri.AbsolutePath == "/api/v1/doSomethingInsideUntilLoop" && request.Method == HttpMethod.Post && iterationCounter != 4)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                        mockedResponse.Content = GetMockResponse(iterationCounter, "All working in System One");
-                    }
-                    else if (request.RequestUri.AbsolutePath == "/api/v1.1/doSomethingInsideForEachLoop" && request.Method == HttpMethod.Post && iterationCounter == 7)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.BadRequest;
-                        mockedResponse.Content = GetMockResponse(iterationCounter, "Bad request received by System Two");
-                    }
-                    else if (request.RequestUri.AbsolutePath == "/api/v1.1/doSomethingInsideForEachLoop" && request.Method == HttpMethod.Post && iterationCounter != 7)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                        mockedResponse.Content = GetMockResponse(iterationCounter, "All working in System Two");
-                    }
-
-                    return mockedResponse;
-                };
+                // Configure mock responses
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.Exact, "/api/v1/doSomethingInsideUntilLoop")
+                        // Match call number 4 only - all other calls to this API operation will "fall through" to the next request matcher
+                        .WithMatchCount(4))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError()
+                        .WithContent(() => GetMockResponse("Internal server error detected in System One")));
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.Exact, "/api/v1/doSomethingInsideUntilLoop"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess()
+                        .WithContent(() => GetMockResponse("All working in System One"))
+                        // Add a random delay in seconds
+                        .AfterDelay(1, 5));
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.Exact, "/api/v1.1/doSomethingInsideForEachLoop")
+                        // Match anything apart from call numbers 1, 4 and 5 - all other calls to this API operation will "fall through" to the next request matcher
+                        .WithNotMatchCount(1, 4, 5))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithStatusCode(HttpStatusCode.BadRequest)
+                        .WithContent(() => GetMockResponse("Bad request received by System Two")));
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.Exact, "/api/v1.1/doSomethingInsideForEachLoop"))
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess()
+                        .WithContent(() => GetMockResponse("All working in System Two"))
+                        // Add a random delay in milliseconds
+                        .AfterDelay(new System.TimeSpan(0, 0, 1), new System.TimeSpan(0, 0, 8)));
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(
@@ -110,7 +123,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
                 // If your FoEach loop is set up to use parallel iterations, assertions like this might not be possible
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service_Two", 1));
                 Assert.AreEqual(ActionStatus.Failed, testRunner.GetWorkflowActionStatus("Call_Service_Two", 2));
-                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service_Two", 3));
+                Assert.AreEqual(ActionStatus.Failed, testRunner.GetWorkflowActionStatus("Call_Service_Two", 3));
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service_Two", 4));
                 Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Call_Service_Two", 5));
 
@@ -135,11 +148,10 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.LoopWorkflowTest
             });
         }
 
-        private static StringContent GetMockResponse(int iterationNumber, string message)
+        private static StringContent GetMockResponse(string message)
         {
             return ContentHelper.CreateJsonStringContent(new
             {
-                iterationNumber,
                 message
             });
         }

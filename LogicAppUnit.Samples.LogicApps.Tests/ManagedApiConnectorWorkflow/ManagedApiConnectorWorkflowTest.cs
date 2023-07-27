@@ -1,14 +1,15 @@
 ﻿using LogicAppUnit.Helper;
+using LogicAppUnit.Mocking;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 
-namespace LogicAppUnit.Samples.LogicApps.Tests.ManagedApiConnectorWorkflowTest
+namespace LogicAppUnit.Samples.LogicApps.Tests.ManagedApiConnectorWorkflow
 {
     /// <summary>
-    /// Test cases for the <i>managed-api-connector-test-workflow</i> workflow.
+    /// Test cases for the <i>managed-api-connector-workflow</i> workflow.
     /// </summary>
     [TestClass]
     public class ManagedApiConnectorWorkflowTest : WorkflowTestBase
@@ -38,23 +39,21 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.ManagedApiConnectorWorkflowTest
             {
                 // Mock the Salesforce and Outlook actions (that use a Managed API connector) and customize responses
                 // For both types of actions, the URI in the request matches the 'connectionRuntimeUrl' in 'connections.json' and the 'path' configuration of the action
-                testRunner.AddApiMocks = (request) =>
-                {
-                    HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    if (request.RequestUri.AbsolutePath.EndsWith("/default/tables/Account_Staging__c/externalIdFields/External_Id__c/54624") && request.Method == HttpMethod.Patch)
-                    {
-                        // No response content for Salesforce actions
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                    }
-                    else if (request.RequestUri.AbsolutePath == "/v2/Mail" && request.Method == HttpMethod.Post)
-                    {
-                        // No response content for Send Email actions
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                    }
-                    return mockedResponse;
-                };
+                // It might be easier to use 'PathMatchType.EndsWith' since the URL can be quite long
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingPatch()
+                        .WithPath(PathMatchType.EndsWith, "/default/tables/Account_Staging__c/externalIdFields/External_Id__c/54624"))
+                    // No response content for Salesforce actions
+                    .RespondWithDefault();
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.EndsWith, "/v2/Mail"))
+                    // No response content for Send Email actions
+                    .RespondWithDefault();
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(GetRequest(), HttpMethod.Post);
@@ -98,26 +97,27 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.ManagedApiConnectorWorkflowTest
 
             using (ITestRunner testRunner = CreateTestRunner(settingsToOverride))
             {
-                // Mock the Salesforce and Outlook actions (that use a Managed API connector) and customize responses
+                // Configure mock responses for the Salesforce and Outlook actions (that use a Managed API connector)
                 // For both types of actions, the URI in the request matches the 'connectionRuntimeUrl' in 'connections.json' and the 'path' configuration of the action
-                // It might be easier to use 'AbsolutePath.EndsWith()' instead of an equality check since the URL can be quite long
-                testRunner.AddApiMocks = (request) =>
-                {
-                    HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    if (request.RequestUri.AbsolutePath.EndsWith("/default/tables/Account_Staging__c/externalIdFields/External_Id__c/54624") && request.Method == HttpMethod.Patch)
-                    {
-                        // No response content for Salesforce actions
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                    }
-                    else if (request.RequestUri.AbsolutePath.EndsWith("/v2/Mail") && request.Method == HttpMethod.Post)
-                    {
-                        // No response content for Send Email actions
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.Unauthorized;
-                    }
-                    return mockedResponse;
-                };
+                // It might be easier to use 'PathMatchType.EndsWith' since the URL can be quite long
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingPatch()
+                        .WithPath(PathMatchType.EndsWith, "/default/tables/Account_Staging__c/externalIdFields/External_Id__c/54624"))
+                    // No response content for Salesforce actions
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithSuccess());
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.EndsWith, "/v2/Mail"))
+                    // No response content for Send Email actions
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithUnauthorized());
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(GetRequest(), HttpMethod.Post);

@@ -19,7 +19,25 @@ namespace LogicAppUnit.Helper
         private const string PlainTextContentType = "text/plain";
         private const string XmlContentType = "application/xml";
 
-        #region HTTP Content
+        #region Stream Content
+
+        /// <summary>
+        /// Create HTTP content from the given <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="stream">The stream to be used for the HTTP content.</param>
+        /// <param name="contentType">The content type.</param>
+        /// <returns>The HTTP content.</returns>
+        public static StreamContent CreateStreamContent(Stream stream, string contentType)
+        {
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+            if (string.IsNullOrEmpty(contentType))
+                throw new ArgumentNullException(nameof(contentType));
+
+            StreamContent content = new StreamContent(stream);
+            content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+            return content;
+        }
 
         /// <summary>
         /// Create HTTP JSON content from the given <see cref="Stream"/>.
@@ -28,13 +46,42 @@ namespace LogicAppUnit.Helper
         /// <returns>The HTTP content.</returns>
         public static StreamContent CreateJsonStreamContent(Stream jsonStream)
         {
-            StreamContent content = new StreamContent(jsonStream);
-            content.Headers.ContentType = new MediaTypeHeaderValue(JsonContentType);
-            return content;
+            return CreateStreamContent(jsonStream, JsonContentType);
         }
 
         /// <summary>
-        /// Create HTTP JSON content from the JSON string provided.
+        /// Create HTTP plain-text content from the given <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="stream">The stream to be used for the HTTP content.</param>
+        /// <returns>The HTTP content.</returns>
+        public static StreamContent CreatePlainStreamContent(Stream stream)
+        {
+            return CreateStreamContent(stream, PlainTextContentType);
+        }
+
+        #endregion // Stream Content
+
+        #region String Content
+
+        /// <summary>
+        /// Create HTTP content from the given <see cref="string"/>.
+        /// </summary>
+        /// <param name="value">String to be converted to HTTP content.</param>
+        /// <param name="contentType">The content type.</param>
+        /// <param name="encoding">The encoding for the string value. If an encoding is not provided, the default is <see cref="Encoding.UTF8"/>.</param>
+        /// <returns>The HTTP content.</returns>
+        public static StringContent CreateStringContent(string value, string contentType, Encoding encoding = null)
+        {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+            if (string.IsNullOrEmpty(contentType))
+                throw new ArgumentNullException(nameof(contentType));
+
+            return new StringContent(value, encoding ?? Encoding.UTF8, contentType);
+        }
+
+        /// <summary>
+        /// Create HTTP JSON content from the given <see cref="string"/>.
         /// </summary>
         /// <param name="jsonString">JSON string to be converted to HTTP content.</param>
         /// <returns>The HTTP content.</returns>
@@ -47,21 +94,7 @@ namespace LogicAppUnit.Helper
         }
 
         /// <summary>
-        /// Create HTTP JSON content from the JSON object provided.
-        /// </summary>
-        /// <param name="jsonObject">JSON object to be converted to HTTP content.</param>
-        /// <returns>The HTTP content.</returns>
-        public static StringContent CreateJsonStringContent(object jsonObject)
-        {
-            if (jsonObject == null)
-                throw new ArgumentNullException(nameof(jsonObject));
-
-            var json = JsonConvert.SerializeObject(jsonObject);
-            return new StringContent(json, Encoding.UTF8, JsonContentType);
-        }
-
-        /// <summary>
-        /// Create HTTP plain-text content from the given string value.
+        /// Create HTTP plain-text content from the given <see cref="string"/>.
         /// </summary>
         /// <param name="value">String to be converted to HTTP content.</param>
         /// <returns>The HTTP content.</returns>
@@ -71,13 +104,30 @@ namespace LogicAppUnit.Helper
         }
 
         /// <summary>
-        /// Create HTTP XML content from the given string value.
+        /// Create HTTP XML content from the given <see cref="string"/>.
         /// </summary>
         /// <param name="xmlString">XML string to be converted to HTTP content.</param>
         /// <returns>The HTTP content.</returns>
         public static StringContent CreateXmlStringContent(string xmlString)
         {
             return new StringContent(xmlString, Encoding.UTF8, XmlContentType);
+        }
+
+        #endregion // String Content
+
+        /// <summary>
+        /// Create HTTP JSON content from the given object.
+        /// </summary>
+        /// <param name="jsonObject">JSON object to be converted to HTTP content.</param>
+        /// <returns>The HTTP content.</returns>
+        public static StringContent CreateJsonStringContent(object jsonObject)
+        {
+            // The name of this method is inconsistent
+            if (jsonObject == null)
+                throw new ArgumentNullException(nameof(jsonObject));
+
+            var json = JsonConvert.SerializeObject(jsonObject);
+            return new StringContent(json, Encoding.UTF8, JsonContentType);
         }
 
         /// <summary>
@@ -87,49 +137,14 @@ namespace LogicAppUnit.Helper
         /// <returns>The HTTP content.</returns>
         public static StringContent CreateXmlStringContent(XmlDocument xmlDoc)
         {
+            // The name of this method is inconsistent
+            if (xmlDoc == null)
+                throw new ArgumentNullException(nameof(xmlDoc));
+
             return new StringContent(xmlDoc.ToString(), Encoding.UTF8, XmlContentType);
         }
 
-        #endregion // HTTP Content
-
-        #region JSON Serialization
-
-        /// <summary>
-        /// Serialize a .NET object into a JSON string.
-        /// </summary>
-        /// <param name="inputObject">The .NET object to be serialized.</param>
-        /// <returns>THe JSON string representation of the object.</returns>
-        public static string SerializeObject(this object inputObject)
-        {
-            return JsonConvert.SerializeObject(inputObject, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Deserialize a JSON string into a .NET object.
-        /// </summary>
-        /// <param name="inputObject">The JSON string to be deserialized.</param>
-        /// <returns>The .NET object representation of the JSON.</returns>
-        public static object DeserializeObject(string inputObject)
-        {
-            return JsonConvert.DeserializeObject(inputObject);
-        }
-
-        /// <summary>
-        /// Clone a dynamic JSON object.
-        /// </summary>
-        /// <param name="source">THe object to be cloned.</param>
-        /// <returns>The clone.</returns>
-        public static dynamic JClone(dynamic source)
-        {
-            if (source == null)
-                return null;
-
-            return JsonConvert.DeserializeObject(JsonConvert.SerializeObject(source));
-        }
-
-        #endregion // JSON Serialization
-
-        #region Streams
+        #region Stream Conversion
 
         /// <summary>
         /// Read a <see cref="Stream"/> and return the content as a <see cref="string"/> value.
@@ -164,7 +179,7 @@ namespace LogicAppUnit.Helper
             return new MemoryStream(byteArray);
         }
 
-        #endregion // Streams
+        #endregion // Stream Conversion
 
         #region Formatting
 

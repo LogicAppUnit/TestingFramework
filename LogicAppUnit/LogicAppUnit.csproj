@@ -8,7 +8,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
-    <Version>1.6.0</Version>
+    <Version>1.7.0</Version>
     <Title>Logic App Unit Testing Framework</Title>
     <Description>Unit testing framework for Standard Logic Apps.</Description>
     <RepositoryUrl>https://github.com/LogicAppUnit/TestingFramework</RepositoryUrl>

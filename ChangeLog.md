@@ -1,3 +1,18 @@
+# 1.7.0 (27th July 2023)
+
+LogicAppUnit Testing Framework:
+
+- Mock responses can be configured using a fluent API, this includes the definition of the request matching conditions and the response. 
+- Removed public methods `ContentHelper.SerializeObject()`, `ContentHelper.DeserializeObject()` and `ContentHelper.JClone()`, these were for internal use only and are now obsolete.
+- Include the LogicAppUnit version at the end of the test log.
+- The maximum execution time for a workflow can now be set in the `testConfiguration.json` file using the `runner.maxWorkflowExecutionDuration` option. Previously this duration was hard-coded to 5 minutes. The default value for this option is 300 seconds (5 minutes).
+- Improved the logic that locates the Azure Functions runtime executable (`func.exe`) when running on a Windows platform. Previous versions of the framework used the PATH environment variable in the `Machine` scope which caused issues when tests were running in an Azure DevOps pipeline (because the `FuncToolsInstaller@0` task adds the path for `func.exe` to the PATH environment variable in the `Process` scope). Now the framework combines the PATH environment variables for the `Machine`, `Process` and `User` scopes to ensure that all possible paths are checked. [[PR #20](https://github.com/LogicAppUnit/TestingFramework/pull/20), [@AlexanderDobrescu](https://github.com/AlexanderDobrescu) and [PR #21](https://github.com/LogicAppUnit/TestingFramework/pull/21), [@danielduartemindera](https://github.com/danielduartemindera)]
+
+LogicAppUnit.Samples.LogicApps.Tests:
+
+- Added a `fluent-workflow` workflow and unit tests to demonstrate the use of the fluent API.
+
+
 # 1.6.0 (5th June 2023)
 
 LogicAppUnit Testing Framework:
@@ -12,7 +27,7 @@ LogicAppUnit Testing Framework:
 
 LogicAppUnit.Samples.LogicApps.Tests:
 
-- Added an `HttpAsyncWorkflowTest` workflow and unit tests to demonstrate the use of the testing framework with HTTP triggers and asynchronous responses.
+- Added a `http-async-workflow` workflow and unit tests to demonstrate the use of the testing framework with HTTP triggers and asynchronous responses.
 
 Thanks to [@easchi](https://github.com/eashi) and [@atthevergeof](https://github.com/atthevergeof) for their contributions.
 
@@ -28,7 +43,7 @@ LogicAppUnit Testing Framework:
 
 LogicAppUnit.Samples.LogicApps.Tests:
 
-- Added an `InvokeWorkflowTest` workflow and unit tests to demonstrate the use of the testing framework with child workflows that are invoked from a parent workflow.
+- Added an `invoke-workflow` workflow and unit tests to demonstrate the use of the testing framework with child workflows that are invoked from a parent workflow.
 
 
 # 1.4.0 (21st February 2023)
@@ -48,7 +63,7 @@ LogicAppUnit Testing Framework:
 
 LogicAppUnit.Samples.LogicApps.Tests:
 
-- Updated the `HttpWorkflowTest` workflow and unit tests to include tracked properties.
+- Updated the `http-workflow` workflow and unit tests to include tracked properties.
 
 
 # 1.2.0 (9th January 2023)
@@ -62,7 +77,7 @@ LogicAppUnit Testing Framework:
 
 LogicAppUnit.Samples.LogicApps.Tests:
 
-- Added a `LoopWorkflowTest` workflow and unit tests to demonstrate the use of the testing framework with a workflow containing actions in an `Until` loop and a `ForEach` loop.
+- Added a `loop-workflow` workflow and unit tests to demonstrate the use of the testing framework with a workflow containing actions in an `Until` loop and a `ForEach` loop.
 
 
 # 1.1.0 (16th December 2022)
@@ -81,7 +96,7 @@ LogicAppUnit Testing Framework:
 
 LogicAppUnit.Samples.LogicApps.Tests:
 
-- Added a `StatelessWorkflowTest` workflow and unit tests to demonstrate the use of the testing framework with a stateless workflow, a custom client tracking id and a relative path configured in the HTTP trigger.
+- Added a `stateless-workflow` workflow and unit tests to demonstrate the use of the testing framework with a stateless workflow, a custom client tracking id and a relative path configured in the HTTP trigger.
 
 
 # 1.0.0 (9th December 2022)

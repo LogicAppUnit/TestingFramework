@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 
-namespace LogicAppUnit.Samples.LogicApps.Tests.StatelessWorkflowTest
+namespace LogicAppUnit.Samples.LogicApps.Tests.StatelessWorkflow
 {
     /// <summary>
     /// Test cases for the <i>stateless-workflow</i> workflow.
@@ -128,6 +128,50 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.StatelessWorkflowTest
                 Assert.AreEqual(
                     ContentHelper.FormatJson(ResourceHelper.GetAssemblyResourceAsString($"{GetType().Namespace}.MockData.UploadBlobRequest.json")),
                     ContentHelper.FormatJson(storageRequest.Content));
+            }
+        }
+
+        /// <summary>
+        /// Tests that the correct response is returned when the blob is not uploaded to the Storage container because an exception was thrown in the delegate function in the mock HTTP server.
+        /// </summary>
+        [TestMethod]
+        public void StatelessWorkflowTest_When_UploadBlob_MockServerException()
+        {
+            const string containerName = "thisIsMyContainer";
+            const string blobName = "thisIsMyBlob";
+
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Mock the HTTP calls and customize responses
+                testRunner.AddApiMocks = (request) =>
+                {
+                    throw new System.InvalidOperationException("I do not like your blob!");
+                };
+
+                // Run the workflow
+                // The relative path must be URL-encoded by the test case, if needed
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    ContentHelper.CreateJsonStreamContent(ResourceHelper.GetAssemblyResourceAsStream($"{GetType().Namespace}.MockData.WorkflowRequest.json")),
+                    HttpMethod.Post,
+                    $"{containerName}/{blobName}");
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Failed, testRunner.WorkflowRunStatus);
+
+                // Check workflow response
+                testRunner.ExceptionWrapper(() => Assert.AreEqual(HttpStatusCode.InternalServerError, workflowResponse.StatusCode));
+                Assert.AreEqual($"Blob '{blobName}' failed to upload to storage container '{containerName}'", workflowResponse.Content.ReadAsStringAsync().Result);
+                Assert.AreEqual("text/plain; charset=utf-8", workflowResponse.Content.Headers.ContentType.ToString());
+
+                // Check action result
+                Assert.AreEqual(ActionStatus.Failed, testRunner.GetWorkflowActionStatus("Upload_Blob"));
+                Assert.AreEqual(ActionStatus.Skipped, testRunner.GetWorkflowActionStatus("Success_Response"));
+                Assert.AreEqual(ActionStatus.Succeeded, testRunner.GetWorkflowActionStatus("Failed_Response"));
+
+                // Check response from Blob Storage container
+                // The mock HTTP server (based on Kestrel) does not write the exception message to the body of the response message
+                var storageResponse = testRunner.GetWorkflowActionOutput("Upload_Blob");
+                Assert.AreEqual("500", storageResponse["statusCode"].ToString());
             }
         }
     }

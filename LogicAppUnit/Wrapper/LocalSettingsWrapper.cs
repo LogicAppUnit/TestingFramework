@@ -5,20 +5,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace LogicAppUnit.InternalHelper
+namespace LogicAppUnit.Wrapper
 {
     /// <summary>
-    /// Helper class to manage the <i>local.settings.json</i> file.
+    /// Wrapper class to manage the <i>local.settings.json</i> file.
     /// </summary>
-    internal class SettingsHelper
+    internal class LocalSettingsWrapper
     {
         private readonly JObject _jObjectSettings;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SettingsHelper"/> class.
+        /// Initializes a new instance of the <see cref="LocalSettingsWrapper"/> class.
         /// </summary>
         /// <param name="settingsContent">The contents of the settings file.</param>
-        public SettingsHelper(string settingsContent)
+        public LocalSettingsWrapper(string settingsContent)
         {
             if (string.IsNullOrEmpty(settingsContent))
                 throw new ArgumentNullException(nameof(settingsContent));
@@ -53,7 +53,8 @@ namespace LogicAppUnit.InternalHelper
                 {
                     Console.WriteLine($"Updating local settings file for '{apiUrl}':");
 
-                    settings.ForEach((setting) => {
+                    settings.ForEach((setting) =>
+                    {
                         // Get the original URL that points to the external endpoint
                         Uri externalUrl = new Uri(setting.Value.ToString());
 
