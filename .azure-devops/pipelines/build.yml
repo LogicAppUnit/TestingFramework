@@ -1,5 +1,6 @@
 # Manual trigger only
 trigger: none
+pr: none
 
 parameters:
 - name: buildConfiguration
