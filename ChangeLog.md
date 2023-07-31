@@ -1,3 +1,10 @@
+# 1.8.0 (???? September 2023)
+
+LogicAppUnit Testing Framework:
+
+- Added new methods `TestRunner.WorkflowWasTerminated`, `TestRunner.WorkflowTerminationCode` and `TestRunner.WorkflowTerminationMessage` to allow the effects of a `Terminate` action in a workflow to be tested.
+
+
 # 1.7.0 (27th July 2023)
 
 LogicAppUnit Testing Framework:

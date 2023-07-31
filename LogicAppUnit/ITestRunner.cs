@@ -64,6 +64,25 @@ namespace LogicAppUnit
         /// <returns>The workflow run status.</returns>
         WorkflowRunStatus WorkflowRunStatus { get; }
 
+        /// <summary>
+        /// Gets whether the workflow was terminated.
+        /// </summary>
+        /// <returns><c>true</c> if the workflow was terminated, otherwise <c>false</c>.</returns>
+        /// <remarks>Use <see cref="ITestRunner.WorkflowRunStatus"/> to determine if the workflow was terminated with success, failure or cancelled.</remarks>
+        bool WorkflowWasTerminated { get; }
+
+        /// <summary>
+        /// Gets the workflow termination code. This only applies when a workflow was terminated with failure.
+        /// </summary>
+        /// <returns>The workflow termination code, or <c>null</c> if the workflow was not terminated, or terminated with a status that was not failed.</returns>
+        int? WorkflowTerminationCode { get; }
+
+        /// <summary>
+        /// Gets the workflow termination message. This only applies when a workflow was terminated with failure.
+        /// </summary>
+        /// <returns>The workflow termination message, or <c>null</c> if the workflow was not terminated, or terminated with a status that was not failed.</returns>
+        string WorkflowTerminationMessage { get; }
+
         #endregion // Workflow properties
 
         #region Action methods

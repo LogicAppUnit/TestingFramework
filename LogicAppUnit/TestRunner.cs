@@ -106,6 +106,33 @@ namespace LogicAppUnit
             }
         }
 
+        /// <inheritdoc cref="ITestRunner.WorkflowWasTerminated" />
+        public bool WorkflowWasTerminated
+        {
+            get
+            {
+                return "Terminated" == _apiHelper.WorkflowRunContent()["properties"]["code"]?.ToString();
+            }
+        }
+
+        /// <inheritdoc cref="ITestRunner.WorkflowTerminationCode" />
+        public int? WorkflowTerminationCode
+        {
+            get
+            {
+                return _apiHelper.WorkflowRunContent()["properties"]["error"]?["code"]?.ToObject<int>();
+            }
+        }
+
+        /// <inheritdoc cref="ITestRunner.WorkflowTerminationMessage" />
+        public string WorkflowTerminationMessage
+        {
+            get
+            {
+                return _apiHelper.WorkflowRunContent()["properties"]["error"]?["message"]?.ToString();
+            }
+        }
+
         #endregion // Workflow properties
 
         #region Lifetime management
