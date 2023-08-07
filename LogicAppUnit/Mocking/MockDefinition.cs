@@ -42,9 +42,6 @@ namespace LogicAppUnit.Mocking
             _mockResponsesFromTestCase = new List<MockResponse>();
 
             _mockRequestLog = new ConcurrentBag<MockRequestLog>();
-
-            // Hook up a default mock delegate
-            _mockResponseDelegate = (request) => WrapMockResponseDelegate(request);
         }
 
         /// <summary>
@@ -57,7 +54,7 @@ namespace LogicAppUnit.Mocking
         /// </summary>
         public Func<HttpRequestMessage, HttpResponseMessage> MockResponseDelegate
         {
-            set => _mockResponseDelegate = (request) => WrapMockResponseDelegate(request, value);
+            set => _mockResponseDelegate = value;
         }
 
         /// <summary>
@@ -108,7 +105,8 @@ namespace LogicAppUnit.Mocking
             // There won't be any duplicates, so use IEnumerable.Concat() instead of IEnumerable.Union()
             _mockResponses = _mockResponsesFromTestCase.Concat(_mockResponsesFromBase).ToList();
 
-            Console.WriteLine($"Using {_mockResponsesFromTestCase.Count} mock responses from the test case and {_mockResponsesFromBase.Count} mock responses from the base class");
+            string msg = (_mockResponseDelegate == null) ? "No mock response delegate is configured" : "A mock response delegate is configured";
+            Console.WriteLine($"Using {_mockResponsesFromTestCase.Count} mock responses from the test case and {_mockResponsesFromBase.Count} mock responses from the test class. {msg}.");
         }
 
         /// <summary>
@@ -165,12 +163,11 @@ namespace LogicAppUnit.Mocking
             };
             _mockRequestLog.Add(requestLog);
 
-            // Use fluent mock reponses first, then the mock response delegate
+            // Use fluent mock responses first
             if (_mockResponses.Count > 0)
             {
                 requestLog.Log.Add($"Checking {_mockResponses.Count} mock request matchers:");
                 HttpResponseMessage fluentResponse = await GetResponseUsingFluentMocksAsync(request, requestLog.Log);
-
                 if (fluentResponse != null)
                     return fluentResponse;
             }
@@ -179,8 +176,22 @@ namespace LogicAppUnit.Mocking
                 requestLog.Log.Add("No mock request matchers have been configured");
             }
 
-            requestLog.Log.Add("Running mock response delegate because no requests were matched");
-            return GetResponseUsingDelegate(request, requestLog.Log);
+            // Then try the mock response delegate
+            if (_mockResponseDelegate != null)
+            {
+                requestLog.Log.Add("Running mock response delegate:");
+                HttpResponseMessage delegateResponse = GetResponseUsingDelegate(request, requestLog.Log);
+                if (delegateResponse != null)
+                    return delegateResponse;
+            }
+            else
+            {
+                requestLog.Log.Add("No mock request delegate has been configured");
+            }
+
+            // Return the default response
+            requestLog.Log.Add("Using default response: status code = 200 (OK)");
+            return new HttpResponseMessage();
         }
 
         #region Private methods
@@ -229,30 +240,20 @@ namespace LogicAppUnit.Mocking
         {
             try
             {
-                return _mockResponseDelegate(request);
+                HttpResponseMessage matchedResponse = _mockResponseDelegate(request);
+                if (matchedResponse == null)
+                    requestMatchingLog.Add("  Not matched");
+                else
+                    requestMatchingLog.Add("  Matched");
+
+                return matchedResponse;
             }
             catch (Exception ex)
             {
                 // This exception will flow up to the Mock HTTP Server which will then return a HTTP 500 (Internal Server Error) to the workflow being tested
-                requestMatchingLog.Add($"    EXCEPTION: {ex.Message}");
+                requestMatchingLog.Add($"  EXCEPTION: {ex.Message}");
                 throw;
             }
-        }
-
-        /// <summary>
-        /// Wrap the mock delegate defined in the test case with additional functionality.
-        /// </summary>
-        /// <param name="httpRequestMessage">Request message for the mocked API call.</param>
-        /// <param name="mockDefinedInTestCase">Delegate function that sets the response message for the mocked API call.</param>
-        /// <returns>The response message.</returns>
-        private static HttpResponseMessage WrapMockResponseDelegate(HttpRequestMessage httpRequestMessage, Func<HttpRequestMessage, HttpResponseMessage> mockDefinedInTestCase = null)
-        {
-            // If there is no mock defined by the test case, return an empty response
-            // TODO: Think about this. Do we want to set the default response here, or does it belong higher up?
-            if (mockDefinedInTestCase == null)
-                return new HttpResponseMessage();
-            else
-                return mockDefinedInTestCase(httpRequestMessage);
         }
 
         #endregion // Private methods
