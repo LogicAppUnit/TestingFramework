@@ -1,9 +1,7 @@
-﻿using LogicAppUnit.Helper;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -19,7 +17,9 @@ namespace LogicAppUnit.Mocking
         private readonly bool _writeMockRequestMatchingLogs;
 
         // Request matchers and response builders that are configured using the fluent API
-        private readonly List<MockResponse> _mockResponses;
+        private List<MockResponse> _mockResponses;
+        private readonly List<MockResponse> _mockResponsesFromBase;
+        private readonly List<MockResponse> _mockResponsesFromTestCase;
 
         // Delegate function that creates a response from a request
         private Func<HttpRequestMessage, HttpResponseMessage> _mockResponseDelegate;
@@ -32,12 +32,15 @@ namespace LogicAppUnit.Mocking
         /// <summary>
         /// Initializes a new instance of the <see cref="MockDefinition"/> class.
         /// <param name="writeMockRequestMatchingLogs">Indicates if the mock request matching logs are to be written to the test execution logs.</param>
+        /// <param name="mockResponsesFromBase">Mock responses that have been configured in the test base class.</param>
         /// </summary>
-        public MockDefinition(bool writeMockRequestMatchingLogs)
+        public MockDefinition(bool writeMockRequestMatchingLogs, List<MockResponse> mockResponsesFromBase)
         {
             _writeMockRequestMatchingLogs = writeMockRequestMatchingLogs;
 
-            _mockResponses = new List<MockResponse>();
+            _mockResponsesFromBase = mockResponsesFromBase;
+            _mockResponsesFromTestCase = new List<MockResponse>();
+
             _mockRequestLog = new ConcurrentBag<MockRequestLog>();
 
             // Hook up a default mock delegate
@@ -75,11 +78,14 @@ namespace LogicAppUnit.Mocking
         /// <returns>The mocked response.</returns>
         public IMockResponse AddMockResponse(string name, IMockRequestMatcher mockRequestMatcher)
         {
-            if (!string.IsNullOrEmpty(name) && _mockResponses.Where(x => x.MockName == name).Any())
-                throw new ArgumentException($"A mock response with the name '{name}' already exists.");
+            if (!string.IsNullOrEmpty(name) && _mockResponsesFromTestCase.Where(x => x.MockName == name).Any())
+                throw new ArgumentException($"A mock response with the name '{name}' has already been created in the test case.");
+
+            if (!string.IsNullOrEmpty(name) && _mockResponsesFromBase.Where(x => x.MockName == name).Any())
+                throw new ArgumentException($"A mock response with the name '{name}' has already been created.");
 
             var mockResponse = new MockResponse(name, mockRequestMatcher);
-            _mockResponses.Add(mockResponse);
+            _mockResponsesFromTestCase.Add(mockResponse);
             return mockResponse;
         }
 
@@ -92,6 +98,17 @@ namespace LogicAppUnit.Mocking
         public List<MockRequest> MockRequests
         {
             get => _mockRequestsAsList;
+        }
+
+        /// <summary>
+        /// Called when the test execution is starting.
+        /// </summary>
+        public void TestRunStarting()
+        {
+            // There won't be any duplicates, so use IEnumerable.Concat() instead of IEnumerable.Union()
+            _mockResponses = _mockResponsesFromTestCase.Concat(_mockResponsesFromBase).ToList();
+
+            Console.WriteLine($"Using {_mockResponsesFromTestCase.Count} mock responses from the test case and {_mockResponsesFromBase.Count} mock responses from the base class");
         }
 
         /// <summary>
@@ -230,13 +247,8 @@ namespace LogicAppUnit.Mocking
         /// <returns>The response message.</returns>
         private static HttpResponseMessage WrapMockResponseDelegate(HttpRequestMessage httpRequestMessage, Func<HttpRequestMessage, HttpResponseMessage> mockDefinedInTestCase = null)
         {
-            // Wire up the archive mock
-            // THIS WILL BE REMOVED IN A FUTURE VERSION
-            if (httpRequestMessage.RequestUri.AbsolutePath.Contains("Archive"))
-                return GetMockArchiveResponse(httpRequestMessage);
-
-            // And then wire up the mock responses defined in the test case
             // If there is no mock defined by the test case, return an empty response
+            // TODO: Think about this. Do we want to set the default response here, or does it belong higher up?
             if (mockDefinedInTestCase == null)
                 return new HttpResponseMessage();
             else
@@ -263,26 +275,6 @@ namespace LogicAppUnit.Mocking
                 col.Add(header.Key, header.Value);
             }
             return col;
-        }
-
-        /// <summary>
-        /// Create a response message for the mocked archive API request.
-        /// </summary>
-        /// <param name="httpRequestMessage">Request message for the mocked API call.</param>
-        /// <returns>The response message.</returns>
-        private static HttpResponseMessage GetMockArchiveResponse(HttpRequestMessage httpRequestMessage)
-        {
-            if (httpRequestMessage == null)
-                throw new ArgumentNullException(nameof(httpRequestMessage));
-
-            var mockedResponse = new HttpResponseMessage
-            {
-                RequestMessage = httpRequestMessage,
-                StatusCode = HttpStatusCode.OK,
-                Content = ContentHelper.CreatePlainStringContent("archived")
-            };
-
-            return mockedResponse;
         }
 
         #endregion // Private static methods

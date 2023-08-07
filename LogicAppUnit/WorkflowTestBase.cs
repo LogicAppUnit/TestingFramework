@@ -1,11 +1,13 @@
 ﻿using LogicAppUnit.Hosting;
 using LogicAppUnit.InternalHelper;
+using LogicAppUnit.Mocking;
 using LogicAppUnit.Wrapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 
 namespace LogicAppUnit
@@ -19,6 +21,7 @@ namespace LogicAppUnit
 
         private TestConfiguration _testConfig;
         private DirectoryInfo _artifactDirectory;
+        private readonly List<MockResponse> _mockResponses;
 
         private WorkflowDefinitionWrapper _workflowDefinition;
         private LocalSettingsWrapper _localSettings;
@@ -28,6 +31,8 @@ namespace LogicAppUnit
         private string _host;
 
         private bool _workflowIsInitialised = false;
+
+        #region Lifetime management
 
         /// <summary>
         /// Static initializer for a new instance of the <see cref="WorkflowTestBase"/> class.
@@ -43,12 +48,14 @@ namespace LogicAppUnit
         }
 
         /// <summary>
-        /// Releases resources held by the test framework.
+        /// Initializes a new instance of the <see cref="WorkflowTestBase"/> class.
         /// </summary>
-        protected static void Close()
+        public WorkflowTestBase()
         {
-            _client?.Dispose();
+            _mockResponses = new List<MockResponse>();
         }
+
+        #endregion // Lifetime management
 
         /// <summary>
         /// Gets the URI for the mock test workflow host.
@@ -60,6 +67,36 @@ namespace LogicAppUnit
         {
             get => TestEnvironment.FlowV2MockTestHostUri;
         }
+
+        #region Mock request handling
+
+        /// <summary>
+        /// Add a mocked response that is used across all test cases, consisting of a request matcher and a corresponding response builder.
+        /// </summary>
+        /// <param name="mockRequestMatcher">The request matcher.</param>
+        /// <returns>The mocked response.</returns>
+        public IMockResponse AddMockResponse(IMockRequestMatcher mockRequestMatcher)
+        {
+            return AddMockResponse(null, mockRequestMatcher);
+        }
+
+        /// <summary>
+        /// Add a named mocked response that is used across all test cases, consisting of a request matcher and a corresponding response builder.
+        /// </summary>
+        /// <param name="name">Name of the mock.</param>
+        /// <param name="mockRequestMatcher">The request matcher.</param>
+        /// <returns>The mocked response.</returns>
+        public IMockResponse AddMockResponse(string name, IMockRequestMatcher mockRequestMatcher)
+        {
+            if (!string.IsNullOrEmpty(name) && _mockResponses.Where(x => x.MockName == name).Any())
+                throw new ArgumentException($"A mock response with the name '{name}' already exists.");
+
+            var mockResponse = new MockResponse(name, mockRequestMatcher);
+            _mockResponses.Add(mockResponse);
+            return mockResponse;
+        }
+
+        #endregion // Mock request handling
 
         /// <summary>
         /// Initializes all the workflow specific variables which will be used throughout the test executions.
@@ -145,6 +182,16 @@ namespace LogicAppUnit
         }
 
         /// <summary>
+        /// Releases resources held by the test framework.
+        /// </summary>
+        protected static void Close()
+        {
+            _client?.Dispose();
+        }
+
+        #region Create test runner
+
+        /// <summary>
         /// Create a new instance of the test runner. This is used to run a test for a workflow.
         /// </summary>
         /// <returns>An instance of the test runner.</returns>
@@ -179,8 +226,13 @@ namespace LogicAppUnit
             return new TestRunner(
                 _testConfig.Logging, _testConfig.Runner,
                 _client,
+                _mockResponses,
                 _workflowDefinition, _localSettings, _host, _parameters, _connections, _artifactDirectory);
         }
+
+        #endregion Create test runner
+
+        #region Private methods
 
         /// <summary>
         /// Determine the local settings file to be used.
@@ -206,6 +258,7 @@ namespace LogicAppUnit
 
             return localSettingsFile;
         }
+
         /// <summary>
         /// Check if the Logic App has any artifacts or not. If yes then the <i>artifactDirectory</i> variable is set with the path value,
         /// which can be used inside WorkflowTestHost as an input.
@@ -256,5 +309,7 @@ namespace LogicAppUnit
 
             return File.ReadAllText(fullPath);
         }
+
+        #endregion // Private methods
     }
 }
