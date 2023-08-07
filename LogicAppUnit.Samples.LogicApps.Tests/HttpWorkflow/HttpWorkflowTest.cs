@@ -22,9 +22,6 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.HttpWorkflow
         public void TestInitialize()
         {
             Initialize(Constants.LOGIC_APP_TEST_EXAMPLE_BASE_PATH, Constants.HTTP_WORKFLOW);
-
-            // This matcher will match all requests, but will have a lower priority than the matchers defined in the test cases. So it should never be matched.
-            AddMockResponse("DefinedInBasrClass", MockRequestMatcher.Create()).RespondWith(MockResponseBuilder.Create().WithNotFound());
         }
 
         [ClassCleanup]
