@@ -39,6 +39,9 @@ namespace LogicAppUnit.Mocking
         /// </summary>
         public MockDefinition(bool writeMockRequestMatchingLogs, int defaultHttpResponseStatusCode, List<MockResponse> mockResponsesFromBase)
         {
+            if (!Enum.IsDefined(typeof(HttpStatusCode), defaultHttpResponseStatusCode))
+                throw new TestException($"The default HTTP response status code of {defaultHttpResponseStatusCode} is not a valid status code.");
+
             _writeMockRequestMatchingLogs = writeMockRequestMatchingLogs;
             _defaultHttpResponseStatusCode = (HttpStatusCode)defaultHttpResponseStatusCode;
 
