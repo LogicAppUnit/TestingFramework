@@ -258,7 +258,7 @@ namespace LogicAppUnit
         #region WaitForAsynchronousResponse
 
         /// <summary>
-        /// Configure the test runner (in seconds) to wait for and return the asynchronous response.
+        /// Configure the test runner to wait (in seconds) for and return the asynchronous response.
         /// </summary>
         /// <param name="maxTimeoutSeconds">The maximum number of seconds to poll for the asynchronous response after which test runner will time out.</param>
         void WaitForAsynchronousResponse(int maxTimeoutSeconds);
