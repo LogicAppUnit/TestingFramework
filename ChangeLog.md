@@ -3,7 +3,8 @@
 LogicAppUnit Testing Framework:
 
 - Added new methods `TestRunner.WorkflowWasTerminated`, `TestRunner.WorkflowTerminationCode` and `TestRunner.WorkflowTerminationMessage` to allow the effects of a `Terminate` action in a workflow to be tested.
-- Mock responses can be configured using the fluent API in the test class initialization method, using the `WorkflowTestBase.AddMockResponse()` method. Mock responses configured using this method will be used by every test runner that is created in the same test class, and have a lower priority compared to the mock responses created using `ITestRunner.AddMockResponse()`.
+- Mock responses can be configured using the fluent API in the test class initialization method, using the `WorkflowTestBase.AddMockResponse()` method. Mock responses configured using this method will be used by every test runner that is created in the same test class, and have a lower priority compared to the mock responses created using `ITestRunner.AddMockResponse()` and `ITestRunner.AddApiMocks`.
+- The HTTP status code for the default mock response can now be set in the `testConfiguration.json` file using the `runner.defaultHttpResponseStatusCode` option. Previously the status code was hard-coded to HTTP 200 (OK). The default value for this option is HTTP 200 (OK) to ensure backwards compatibility.
 
 
 # 1.7.0 (27th July 2023)

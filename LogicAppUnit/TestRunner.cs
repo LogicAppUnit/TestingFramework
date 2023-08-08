@@ -186,7 +186,7 @@ namespace LogicAppUnit
             _apiHelper = new WorkflowApiHelper(client, workflowDefinition.WorkflowName);
 
             // Create the mock definition and mock HTTP host
-            _mockDefinition = new MockDefinition(loggingConfig.WriteMockRequestMatchingLogs, mockResponsesFromBase);
+            _mockDefinition = new MockDefinition(loggingConfig.WriteMockRequestMatchingLogs, runnerConfig.DefaultHttpResponseStatusCode, mockResponsesFromBase);
             _mockHttpHost = new MockHttpHost(_mockDefinition);
         }
 

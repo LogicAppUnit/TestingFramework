@@ -74,7 +74,18 @@ namespace LogicAppUnit
         /// <summary>
         /// Maximum time (in seconds) to poll for the workflow result. The Test Runner will fail any test where the workflow execution is longer than this value.
         /// </summary>
+        /// <remarks>
+        /// Default value is 300 seconds (5 minutes).
+        /// </remarks>
         public int MaxWorkflowExecutionDuration { get; set; } = 300;
+
+        /// <summary>
+        /// The HTTP status code for the default mock response, used when no mock Request Matchers are matched and when the mock response delegate function is not set, or returns <c>null</c>.
+        /// </summary>
+        /// <remarks>
+        /// Default value is HTTP 200 (OK).
+        /// </remarks>
+        public int DefaultHttpResponseStatusCode { get; set; } = 200;
     }
 
     /// <summary>
@@ -85,6 +96,9 @@ namespace LogicAppUnit
         /// <summary>
         /// <c>true</c> if the test framework checks that Azurite is running and listening on the required ports, otherwise <c>false</c>.
         /// </summary>
+        /// <remarks>
+        /// Default value is <c>true</c>.
+        /// </remarks>
         public bool EnableAzuritePortCheck { get; set; } = true;
 
         /// <summary>
@@ -121,6 +135,9 @@ namespace LogicAppUnit
         /// <summary>
         /// <c>true</c> if the test framework automatically configures the <i>OperationOptions</i> setting to <i>WithStatelessRunHistory</i> for a stateless workflow, otherwise <c>false</c>.
         /// </summary>
+        /// <remarks>
+        /// Default value is <c>true</c>.
+        /// </remarks>
         public bool AutoConfigureWithStatelessRunHistory { get; set; } = true;
     }
 }

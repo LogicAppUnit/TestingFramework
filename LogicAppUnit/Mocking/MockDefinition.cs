@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -13,8 +14,9 @@ namespace LogicAppUnit.Mocking
     /// </summary>
     internal class MockDefinition
     {
-        // <c>true</c> if the mock request matching logs are to be written to the test execution logs, otherwise <c>false</c>.
+        // Configuration
         private readonly bool _writeMockRequestMatchingLogs;
+        private readonly HttpStatusCode _defaultHttpResponseStatusCode;
 
         // Request matchers and response builders that are configured using the fluent API
         private List<MockResponse> _mockResponses;
@@ -32,11 +34,13 @@ namespace LogicAppUnit.Mocking
         /// <summary>
         /// Initializes a new instance of the <see cref="MockDefinition"/> class.
         /// <param name="writeMockRequestMatchingLogs">Indicates if the mock request matching logs are to be written to the test execution logs.</param>
+        /// <param name="defaultHttpResponseStatusCode">The HTTP status code for the default mock response.</param>
         /// <param name="mockResponsesFromBase">Mock responses that have been configured in the test base class.</param>
         /// </summary>
-        public MockDefinition(bool writeMockRequestMatchingLogs, List<MockResponse> mockResponsesFromBase)
+        public MockDefinition(bool writeMockRequestMatchingLogs, int defaultHttpResponseStatusCode, List<MockResponse> mockResponsesFromBase)
         {
             _writeMockRequestMatchingLogs = writeMockRequestMatchingLogs;
+            _defaultHttpResponseStatusCode = (HttpStatusCode)defaultHttpResponseStatusCode;
 
             _mockResponsesFromBase = mockResponsesFromBase;
             _mockResponsesFromTestCase = new List<MockResponse>();
@@ -190,8 +194,8 @@ namespace LogicAppUnit.Mocking
             }
 
             // Return the default response
-            requestLog.Log.Add("Using default response: status code = 200 (OK)");
-            return new HttpResponseMessage();
+            requestLog.Log.Add($"Using default response: status code = {(int)_defaultHttpResponseStatusCode} ({_defaultHttpResponseStatusCode})");
+            return new HttpResponseMessage(_defaultHttpResponseStatusCode);
         }
 
         #region Private methods
