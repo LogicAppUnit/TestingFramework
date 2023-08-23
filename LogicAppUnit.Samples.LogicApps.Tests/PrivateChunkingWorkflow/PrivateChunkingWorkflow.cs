@@ -56,7 +56,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.PrivateChunkingWorkflow
                     .RespondWith(
                         MockResponseBuilder.Create()
                         .WithSuccess()
-                        .WithHeader("Location", $"{MockTestWorkflowHostUri}/api/v1.1/{chunkEndpoint}")
+                        .WithHeader("Location", $"http://{Environment.MachineName}:7075/api/v1.1/{chunkEndpoint}")
                         .WithHeader("x-ms-chunk-size", chunkSizeInBytes.ToString()));
 
                 testRunner.AddApiMocks = (request) =>
