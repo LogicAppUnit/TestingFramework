@@ -5,6 +5,7 @@ on:
     branches:
     - main
     - 'features/**'
+    - 'spike/**'
   pull_request:
     branches:
     - main
