@@ -41,7 +41,7 @@ namespace LogicAppUnit.Hosting
         /// <summary>
         /// The test host URI.
         /// </summary>
-        public static readonly string FlowV2TestHostUri = (new UriBuilder(Uri.UriSchemeHttp, TestEnvironment.MachineHostName, 7071).Uri.ToString()).TrimEnd('/');
+        public static readonly string FlowV2TestHostUri = (new UriBuilder(Uri.UriSchemeHttp, "localhost", 7071).Uri.ToString()).TrimEnd('/');
 
         /// <summary>
         /// The mock test host URI.
@@ -51,7 +51,7 @@ namespace LogicAppUnit.Hosting
         /// <summary>
         /// The test host URI.
         /// </summary>
-        public static readonly string FlowV2TestManagementHostUri = (new UriBuilder(Uri.UriSchemeHttp, TestEnvironment.MachineHostName, 7071).Uri.ToString()).TrimEnd('/');
+        public static readonly string FlowV2TestManagementHostUri = (new UriBuilder(Uri.UriSchemeHttp, "localhost", 7071).Uri.ToString()).TrimEnd('/');
 
         /// <summary>
         /// Flow runtime webhook extension URI management base path.
