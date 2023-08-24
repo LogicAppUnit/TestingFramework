@@ -21,7 +21,7 @@ namespace LogicAppUnit.Hosting
         /// <summary>
         /// The local machine name.
         /// </summary>
-        public static readonly string MachineHostName = OperatingSystem.IsWindows() ? Environment.MachineName : "localhost";
+        public static readonly string MachineHostName = Environment.MachineName; //OperatingSystem.IsWindows() ? Environment.MachineName : "localhost";
 
         /// <summary>
         /// Flow runtime webhook extension URI base path.
