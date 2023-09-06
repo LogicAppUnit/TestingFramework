@@ -214,5 +214,30 @@ namespace LogicAppUnit.Wrapper
                 });
             }
         }
+
+        /// <summary>
+        /// Remove the chunking configuration from all HTTP actions.
+        /// </summary>
+        /// <remarks>
+        /// HTTP chunking requires that the mock HTTP server and the mock response configuration support the Logic App chunking protocol, which it does not.
+        /// </remarks>
+        public void RemoveHttpChunkingConfiguration()
+        {
+            var httpActionsWithChunking = _jObjectWorkflow.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "Http")
+                .Where(x => x["runtimeConfiguration"]?["contentTransfer"]?["transferMode"].ToString() == "Chunked").Select(x => x["runtimeConfiguration"] as JObject).ToList();
+
+            if (httpActionsWithChunking.Count > 0)
+            {
+                Console.WriteLine("Updating workflow HTTP actions to remove chunking configuration:");
+
+                httpActionsWithChunking.ForEach(x =>
+                {
+                    x.Remove("contentTransfer");
+
+                    Console.WriteLine($"    {((JProperty)x.Parent.Parent.Parent).Name}");
+                });
+            }
+
+        }
     }
 }

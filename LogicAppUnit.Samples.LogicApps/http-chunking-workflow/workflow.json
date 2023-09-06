@@ -1,0 +1,80 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Get_Action": {
+                "type": "Http",
+                "inputs": {
+                    "uri": "@{parameters('ServiceOne-Url')}/data",
+                    "method": "GET"
+                },
+                "runAfter": {},
+                "runtimeConfiguration": {
+                    "contentTransfer": {
+                        "transferMode": "Chunked"
+                    }
+                }
+            },
+            "Post_Action": {
+                "type": "Http",
+                "inputs": {
+                    "uri": "@{parameters('ServiceTwo-Url')}/upload",
+                    "method": "POST",
+                    "body": "@body('Get_Action')"
+                },
+                "runAfter": {
+                    "Get_Action": [
+                        "SUCCEEDED"
+                    ]
+                },
+                "runtimeConfiguration": {
+                    "contentTransfer": {
+                        "transferMode": "Chunked"
+                    }
+                }
+            }
+        },
+        "triggers": {
+            "Recurrence": {
+                "type": "Recurrence",
+                "recurrence": {
+                    "frequency": "Day",
+                    "interval": 1,
+                    "schedule": {
+                        "hours": [
+                            "8"
+                        ]
+                    }
+                }
+            }
+        },
+        "parameters": {
+            "ServiceOne-Url": {
+                "type": "String",
+                "value": "@appsetting('ServiceOne-Url')",
+                "defaultValue": "@appsetting('ServiceOne-Url')"
+            },
+            "ServiceOne-Authentication-APIKey": {
+                "type": "String",
+                "value": "@appsetting('ServiceOne-Authentication-APIKey')",
+                "defaultValue": "@appsetting('ServiceOne-Authentication-APIKey')"
+            },
+            "ServiceOne-Authentication-WebHook-APIKey": {
+                "type": "String",
+                "value": "@appsetting('ServiceOne-Authentication-WebHook-APIKey')",
+                "defaultValue": "@appsetting('ServiceOne-Authentication-WebHook-APIKey')"
+            },
+            "ServiceTwo-Url": {
+                "type": "String",
+                "value": "@appsetting('ServiceTwo-Url')",
+                "defaultValue": "@appsetting('ServiceTwo-Url')"
+            },
+            "ServiceTwo-Authentication-APIKey": {
+                "type": "String",
+                "value": "@appsetting('ServiceTwo-Authentication-APIKey')",
+                "defaultValue": "@appsetting('ServiceTwo-Authentication-APIKey')"
+            }
+        }
+    },
+    "kind": "Stateful"
+}

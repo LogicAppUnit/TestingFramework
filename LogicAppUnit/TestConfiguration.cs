@@ -139,5 +139,14 @@ namespace LogicAppUnit
         /// Default value is <c>true</c>.
         /// </remarks>
         public bool AutoConfigureWithStatelessRunHistory { get; set; } = true;
+
+        /// <summary>
+        /// <c>true</c> if the chunking configuration in HTTP actions is to be removed, otherwise <c>false</c>.
+        /// </summary>
+        /// <remarks>
+        /// Default value is <c>true</c>.
+        /// </remarks>
+        public bool RemoveHttpChunkingConfiguration { get; set; } = true;
+
     }
 }
