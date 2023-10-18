@@ -70,6 +70,6 @@ This is a list of possible future improvements and changes for the framework. Pl
 
 - Add more features to the fluent API for request matching and the creation of mock responses.
 - Add a feature to the fluent API to allow a mock response to be matched using just the name of the workflow action that created the request. This would make it easier to match the request, compared to using multiple properties of the request such as the HTTP method, URI path and/or request content.
-- Allow mocked responses to be configured in a test class's Initialize step, these responses would then be automatically applied to all tests within the test class. This would remove the need to repeatedly configure the same mocked responses in multiple tests.
-- Add a `Verifiable()` feature to the fluent API so that a test case can assert that a test execution did send a request to the mock HTTP server that was successfully matched. This would work in a simialar way to the `Verifiable()` feature in the `moq` unit testing framework.
+- Add a `Verifiable()` feature to the fluent API so that a test case can assert that a test execution did send a request to the mock HTTP server that was successfully matched. This would work in a simialar way to the `Verifiable()` feature in the [moq](https://github.com/devlooped/moq) unit testing framework.
 - Add a test configuration option to allow the port number for the mock HTTP server to be changed from the default of 7075.
+- Support the `Call a local function` action when calling a .NET Framework function from a Logic App workflow.
