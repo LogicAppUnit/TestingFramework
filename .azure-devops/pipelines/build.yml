@@ -14,7 +14,7 @@ parameters:
 jobs:
 - job: build
   displayName: 'Build'
-  timeoutInMinutes: 20
+  timeoutInMinutes: 30
 
   strategy:
     matrix:
