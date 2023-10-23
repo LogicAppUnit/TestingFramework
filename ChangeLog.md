@@ -6,6 +6,7 @@ LogicAppUnit Testing Framework:
 - Mock responses can be configured using the fluent API in the test class initialization method, using the `WorkflowTestBase.AddMockResponse()` method. Mock responses configured using this method will be used by every test runner that is created in the same test class, and have a lower priority compared to the mock responses created using `ITestRunner.AddMockResponse()` and `ITestRunner.AddApiMocks`. This feature removes the need to repeatedly configure the same mocked responses in multiple tests in a test class.
 - The HTTP status code for the default mock response can now be set in the `testConfiguration.json` file using the `runner.defaultHttpResponseStatusCode` option. Previously the status code was hard-coded to HTTP 200 (OK). The default value for this option is HTTP 200 (OK) to ensure backwards compatibility.
 - Added a new feature to remove the chunking configuration for HTTP actions (`runtimeConfiguration.contentTransfer.transferMode`). This feature is enabled/disabled in the `testConfiguration.json` file using the `workflow.removeHttpChunkingConfiguration` option. The default value for this option is `true`. [[Issue #24](https://github.com/LogicAppUnit/TestingFramework/issues/24)]
+- Added `IMockResponseBuilder.WithAccepted()` as a short-cut when creating a response with a HTTP 202 (Accepted) status code.
 
 
 # 1.7.0 (27th July 2023)
