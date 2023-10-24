@@ -1,8 +1,19 @@
+# 1.8.0 (24th October 2023)
+
+LogicAppUnit Testing Framework:
+
+- Added new methods `TestRunner.WorkflowWasTerminated`, `TestRunner.WorkflowTerminationCode` and `TestRunner.WorkflowTerminationMessage` to allow the effects of a `Terminate` action in a workflow to be tested.
+- Mock responses can be configured using the fluent API in the test class initialization method, using the `WorkflowTestBase.AddMockResponse()` method. Mock responses configured using this method will be used by every test runner that is created in the same test class, and have a lower priority compared to the mock responses created using `ITestRunner.AddMockResponse()` and `ITestRunner.AddApiMocks`. This feature removes the need to repeatedly configure the same mocked responses in multiple tests in a test class.
+- The HTTP status code for the default mock response can now be set in the `testConfiguration.json` file using the `runner.defaultHttpResponseStatusCode` option. Previously the status code was hard-coded to HTTP 200 (OK). The default value for this option is HTTP 200 (OK) to ensure backwards compatibility.
+- Added a new feature to remove the chunking configuration for HTTP actions (`runtimeConfiguration.contentTransfer.transferMode`). This feature is enabled/disabled in the `testConfiguration.json` file using the `workflow.removeHttpChunkingConfiguration` option. The default value for this option is `true`. [[Issue #24](https://github.com/LogicAppUnit/TestingFramework/issues/24)]
+- Added `IMockResponseBuilder.WithAccepted()` as a short-cut when creating a response with a HTTP 202 (Accepted) status code.
+
+
 # 1.7.0 (27th July 2023)
 
 LogicAppUnit Testing Framework:
 
-- Mock responses can be configured using a fluent API, this includes the definition of the request matching conditions and the response. 
+- Mock responses can be configured using `ITestRunner.AddMockResponse()` and a fluent API, this includes the definition of the request matching conditions and the response. 
 - Removed public methods `ContentHelper.SerializeObject()`, `ContentHelper.DeserializeObject()` and `ContentHelper.JClone()`, these were for internal use only and are now obsolete.
 - Include the LogicAppUnit version at the end of the test log.
 - The maximum execution time for a workflow can now be set in the `testConfiguration.json` file using the `runner.maxWorkflowExecutionDuration` option. Previously this duration was hard-coded to 5 minutes. The default value for this option is 300 seconds (5 minutes).
@@ -28,8 +39,6 @@ LogicAppUnit Testing Framework:
 LogicAppUnit.Samples.LogicApps.Tests:
 
 - Added a `http-async-workflow` workflow and unit tests to demonstrate the use of the testing framework with HTTP triggers and asynchronous responses.
-
-Thanks to [@easchi](https://github.com/eashi) and [@atthevergeof](https://github.com/atthevergeof) for their contributions.
 
 
 # 1.5.0 (14th April 2023)

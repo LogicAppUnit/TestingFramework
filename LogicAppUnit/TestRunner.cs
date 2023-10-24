@@ -106,6 +106,33 @@ namespace LogicAppUnit
             }
         }
 
+        /// <inheritdoc cref="ITestRunner.WorkflowWasTerminated" />
+        public bool WorkflowWasTerminated
+        {
+            get
+            {
+                return "Terminated" == _apiHelper.WorkflowRunContent()["properties"]["code"]?.ToString();
+            }
+        }
+
+        /// <inheritdoc cref="ITestRunner.WorkflowTerminationCode" />
+        public int? WorkflowTerminationCode
+        {
+            get
+            {
+                return _apiHelper.WorkflowRunContent()["properties"]["error"]?["code"]?.ToObject<int>();
+            }
+        }
+
+        /// <inheritdoc cref="ITestRunner.WorkflowTerminationMessage" />
+        public string WorkflowTerminationMessage
+        {
+            get
+            {
+                return _apiHelper.WorkflowRunContent()["properties"]["error"]?["message"]?.ToString();
+            }
+        }
+
         #endregion // Workflow properties
 
         #region Lifetime management
@@ -116,6 +143,7 @@ namespace LogicAppUnit
         /// <param name="loggingConfig">The logging configuration for the test execution.</param>
         /// <param name="runnerConfig">The test runner configuration for the test execution.</param>
         /// <param name="client">The HTTP client.</param>
+        /// <param name="mockResponsesFromBase">Mock responses that have been configured in the test base class.</param>
         /// <param name="workflowDefinition">The workflow definition file.</param>
         /// <param name="localSettings">The local settings file.</param>
         /// <param name="host">The contents of the host file.</param>
@@ -126,6 +154,7 @@ namespace LogicAppUnit
             TestConfigurationLogging loggingConfig,
             TestConfigurationRunner runnerConfig,
             HttpClient client,
+            List<MockResponse> mockResponsesFromBase,
             WorkflowDefinitionWrapper workflowDefinition,
             LocalSettingsWrapper localSettings, string host, string parameters = null, ConnectionsWrapper connections = null, DirectoryInfo artifactsDirectory = null)
         {
@@ -135,6 +164,8 @@ namespace LogicAppUnit
                 throw new ArgumentNullException(nameof(runnerConfig));
             if (client == null)
                 throw new ArgumentNullException(nameof(client));
+            if (mockResponsesFromBase == null)
+                throw new ArgumentNullException(nameof(mockResponsesFromBase));
             if (workflowDefinition == null)
                 throw new ArgumentNullException(nameof(workflowDefinition));
             if (localSettings == null)
@@ -155,7 +186,7 @@ namespace LogicAppUnit
             _apiHelper = new WorkflowApiHelper(client, workflowDefinition.WorkflowName);
 
             // Create the mock definition and mock HTTP host
-            _mockDefinition = new MockDefinition(loggingConfig.WriteMockRequestMatchingLogs);
+            _mockDefinition = new MockDefinition(loggingConfig.WriteMockRequestMatchingLogs, runnerConfig.DefaultHttpResponseStatusCode, mockResponsesFromBase);
             _mockHttpHost = new MockHttpHost(_mockDefinition);
         }
 
@@ -354,6 +385,7 @@ namespace LogicAppUnit
                 }
             }
 
+            _mockDefinition.TestRunStarting();
             LoggingHelper.LogBanner("Starting workflow execution");
             Console.WriteLine("Workflow trigger:");
             Console.WriteLine($"    Name: {triggerName}");

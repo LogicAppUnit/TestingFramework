@@ -19,6 +19,12 @@ namespace LogicAppUnit.Mocking
         IMockResponseBuilder WithSuccess();
 
         /// <summary>
+        /// Configures an Accepted (HTTP 202) status code for the response.
+        /// </summary>
+        /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
+        IMockResponseBuilder WithAccepted();
+
+        /// <summary>
         /// Configures a No Content (HTTP 204) status code for the response and removes any configured response content.
         /// </summary>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>

@@ -400,6 +400,28 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
             }
         }
 
+        /// <summary>
+        /// Tests the response when neither a response builder, nor a delegate response, have been configured. A HTTP 200 (OK) response should be received with no content.
+        /// </summary>
+        [TestMethod]
+        public void FluentWorkflowTest_ResponseBuilder_NoResponseConfigured()
+        {
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Run the workflow
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    GetRequest(),
+                    HttpMethod.Post);
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
+
+                // Check workflow response
+                Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode);
+                Assert.AreEqual("", workflowResponse.Content.ReadAsStringAsync().Result);
+            }
+        }
+
         private static StringContent GetRequest()
         {
             return ContentHelper.CreateJsonStringContent(new

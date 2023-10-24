@@ -53,6 +53,11 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflow
                 // Check workflow run status
                 Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
 
+                // Check the workflow termination status
+                Assert.IsFalse(testRunner.WorkflowWasTerminated);
+                Assert.IsNull(testRunner.WorkflowTerminationCode);
+                Assert.IsNull(testRunner.WorkflowTerminationMessage);
+
                 // Check workflow response
                 // The workflow does not have a 'Response' action, so no content to validate
                 Assert.AreEqual(HttpStatusCode.Accepted, workflowResponse.StatusCode);
@@ -105,6 +110,11 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflow
 
                 // Check workflow run status
                 Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
+
+                // Check the workflow termination status
+                Assert.IsFalse(testRunner.WorkflowWasTerminated);
+                Assert.IsNull(testRunner.WorkflowTerminationCode);
+                Assert.IsNull(testRunner.WorkflowTerminationMessage);
 
                 // Check workflow response
                 // The workflow does not have a 'Response' action, so no content to validate
@@ -159,6 +169,9 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflow
                 // Check workflow run status
                 // This workflow has terminated with failure
                 Assert.AreEqual(WorkflowRunStatus.Failed, testRunner.WorkflowRunStatus);
+                Assert.IsTrue(testRunner.WorkflowWasTerminated);
+                Assert.AreEqual((int)HttpStatusCode.InternalServerError, testRunner.WorkflowTerminationCode);
+                Assert.AreEqual("Language Code 'xx-GB' is not valid", testRunner.WorkflowTerminationMessage);
 
                 // Check workflow response
                 // The workflow does not have a 'Response' action, so no content to validate

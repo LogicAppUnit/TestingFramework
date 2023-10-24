@@ -50,6 +50,12 @@ namespace LogicAppUnit.Mocking
             return WithStatusCode(HttpStatusCode.OK);
         }
 
+        /// <inheritdoc cref="IMockResponseBuilder.WithAccepted" />
+        public IMockResponseBuilder WithAccepted()
+        {
+            return WithStatusCode(HttpStatusCode.Accepted);
+        }
+
         /// <inheritdoc cref="IMockResponseBuilder.WithNoContent" />
         public IMockResponseBuilder WithNoContent()
         {

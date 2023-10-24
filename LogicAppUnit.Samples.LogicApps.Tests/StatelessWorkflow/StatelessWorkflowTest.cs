@@ -92,7 +92,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.StatelessWorkflow
                     if (request.RequestUri.AbsolutePath == "/Upload_Blob" && request.Method == HttpMethod.Post)
                     {
                         mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.InternalServerError;
+                        mockedResponse.StatusCode = HttpStatusCode.BadRequest;
                         mockedResponse.Content = ContentHelper.CreateJsonStreamContent(ResourceHelper.GetAssemblyResourceAsStream($"{GetType().Namespace}.MockData.UploadBlobResponseFailed.json"));
                     }
                     return mockedResponse;

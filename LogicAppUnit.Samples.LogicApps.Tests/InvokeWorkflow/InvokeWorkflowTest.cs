@@ -1,4 +1,5 @@
 ﻿using LogicAppUnit.Helper;
+using LogicAppUnit.Mocking;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using System.Linq;
@@ -17,6 +18,13 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.InvokeWorkflow
         public void TestInitialize()
         {
             Initialize(Constants.LOGIC_APP_TEST_EXAMPLE_BASE_PATH, Constants.INVOKE_WORKFLOW);
+
+            // Configure mock responses for all tests
+            AddMockResponse("DeleteBlob",
+                MockRequestMatcher.Create()
+                .UsingPost()
+                .WithPath(PathMatchType.Exact, "/Delete_blob"))
+            .RespondWithDefault();
         }
 
         [ClassCleanup]
@@ -33,24 +41,17 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.InvokeWorkflow
         {
             using (ITestRunner testRunner = CreateTestRunner())
             {
-                // Mock the HTTP calls and customize responses
-                testRunner.AddApiMocks = (request) =>
-                {
-                    HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    if (request.RequestUri.AbsolutePath == "/Invoke_a_workflow_(not_Priority)" && request.Method == HttpMethod.Post)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                        mockedResponse.Content = ContentHelper.CreatePlainStringContent("Upsert is successful");
-                    }
-                    else if (request.RequestUri.AbsolutePath == "/Delete_blob" && request.Method == HttpMethod.Post)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                    }
-                    return mockedResponse;
-                };
+                // Configure mock responses
+                testRunner
+                    .AddMockResponse("Invoke-Not Priority",
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.Exact, "/Invoke_a_workflow_(not_Priority)"))
+                    .RespondWith(
+                        MockResponseBuilder.Create().
+                        WithContentAsPlainText("Upsert is successful"));
 
+                // Create request
                 JObject x = JObject.Parse(ResourceHelper.GetAssemblyResourceAsString($"{GetType().Namespace}.MockData.WorkflowRequest.json"));
                 ((JValue)x["name"]).Value = "Standard customer.json";
 
@@ -92,18 +93,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.InvokeWorkflow
                 testRunner.AddApiMocks = (request) =>
                 {
                     HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    if (request.RequestUri.AbsolutePath == "/Invoke_a_workflow_(Priority)" && request.Method == HttpMethod.Post)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                        mockedResponse.Content = ContentHelper.CreatePlainStringContent("Upsert is successful");
-                    }
-                    else if (request.RequestUri.AbsolutePath == "/Add_customer_to_Priority_queue" && request.Method == HttpMethod.Post)
-                    {
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                    }
-                    else if (request.RequestUri.AbsolutePath == "/Delete_blob" && request.Method == HttpMethod.Post)
+                    if (request.RequestUri.AbsolutePath == "/Add_customer_to_Priority_queue" && request.Method == HttpMethod.Post)
                     {
                         mockedResponse.RequestMessage = request;
                         mockedResponse.StatusCode = HttpStatusCode.OK;
@@ -111,6 +101,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.InvokeWorkflow
                     return mockedResponse;
                 };
 
+                // Create request
                 JObject x = JObject.Parse(ResourceHelper.GetAssemblyResourceAsString($"{GetType().Namespace}.MockData.WorkflowRequest.json"));
                 ((JValue)x["name"]).Value = "Priority customer.json";
 
