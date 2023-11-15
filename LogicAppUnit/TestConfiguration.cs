@@ -55,7 +55,7 @@ namespace LogicAppUnit
         /// <remarks>
         /// Default value is <c>false</c>.
         /// </remarks>
-        public bool WriteFunctionRuntineStartupLogs { get; set; } = false;
+        public bool WriteFunctionRuntimeStartupLogs { get; set; } = false;
 
         /// <summary>
         /// <c>true</c> if the mock request matching logs are to be written to the test execution logs, otherwise <c>false</c>.

@@ -120,7 +120,7 @@ namespace LogicAppUnit.InternalHelper
             }
             catch (HttpRequestException hrex) when (hrex.StatusCode == HttpStatusCode.NotFound)
             {
-                throw new TestException($"The callback endpoint for workflow '{_workflowName}' was not found. This indicates that the Function runtime could not start the workflow. Enable the Function runtime start-up logging using the 'logging.writeFunctionRuntineStartupLogs' option in 'testConfiguration.json'. Then check the logs for any errors.", hrex);
+                throw new TestException($"The callback endpoint for workflow '{_workflowName}' was not found. This indicates that the Function runtime could not start the workflow. Enable the Function runtime start-up logging using the 'logging.WriteFunctionRuntimeStartupLogs' option in 'testConfiguration.json'. Then check the logs for any errors.", hrex);
             }
             catch (AggregateException ae)
             {
