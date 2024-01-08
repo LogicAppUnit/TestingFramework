@@ -174,15 +174,15 @@ namespace LogicAppUnit
             LoggingHelper.LogBanner("Starting test runner");
             //Console.WriteLine($"Max workflow duration: {runnerConfig.MaxWorkflowExecutionDuration} seconds");
 
-            if (!loggingConfig.WriteFunctionRuntineStartupLogs)
-                Console.WriteLine("Logging of the Function runtime startup logs is disabled. This can be enabled using the 'logging.writeFunctionRuntineStartupLogs' option in 'testConfiguration.json'.");
+            if (!loggingConfig.WriteFunctionRuntimeStartupLogs)
+                Console.WriteLine("Logging of the Function runtime startup logs is disabled. This can be enabled using the 'logging.WriteFunctionRuntimeStartupLogs' option in 'testConfiguration.json'.");
 
             _client = client;
             _workflowDefinition = workflowDefinition;
             _runnerConfig = runnerConfig;
 
             var workflowTestInput = new WorkflowTestInput[] { new WorkflowTestInput(workflowDefinition.WorkflowName, workflowDefinition.ToString()) };
-            _workflowTestHost = new WorkflowTestHost(workflowTestInput, localSettings.ToString(), parameters, connections.ToString(), host, artifactsDirectory, loggingConfig.WriteFunctionRuntineStartupLogs);
+            _workflowTestHost = new WorkflowTestHost(workflowTestInput, localSettings.ToString(), parameters, connections.ToString(), host, artifactsDirectory, loggingConfig.WriteFunctionRuntimeStartupLogs);
             _apiHelper = new WorkflowApiHelper(client, workflowDefinition.WorkflowName);
 
             // Create the mock definition and mock HTTP host

@@ -35,7 +35,7 @@ namespace LogicAppUnit.Hosting
 
         /// <c>true</c> if the Functions runtime start-up logs are to be written to the console, otherwise <c>false</c>.
         /// The start-up logs can be rather verbose so we don't always went to include this information in the test execution logs.
-        private readonly bool WriteFunctionRuntineStartupLogsToConsole;
+        private readonly bool WriteFunctionRuntimeStartupLogsToConsole;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WorkflowTestHost"/> class.
@@ -43,12 +43,12 @@ namespace LogicAppUnit.Hosting
         public WorkflowTestHost(
             WorkflowTestInput[] inputs = null,
             string localSettings = null, string parameters = null, string connectionDetails = null, string host = null, DirectoryInfo artifactsDirectory = null,
-            bool writeFunctionRuntineStartupLogsToConsole = false)
+            bool WriteFunctionRuntimeStartupLogsToConsole = false)
         {
             this.WorkingDirectory = Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString());
             this.OutputData = new List<string>();
             this.ErrorData = new List<string>();
-            this.WriteFunctionRuntineStartupLogsToConsole = writeFunctionRuntineStartupLogsToConsole;
+            this.WriteFunctionRuntimeStartupLogsToConsole = WriteFunctionRuntimeStartupLogsToConsole;
 
             this.StartFunctionRuntime(inputs, localSettings, parameters, connectionDetails, host, artifactsDirectory);
         }
@@ -137,7 +137,7 @@ namespace LogicAppUnit.Hosting
                 {
                     var outputData = args.Data;
 
-                    if (WriteFunctionRuntineStartupLogsToConsole || processStarted.Task.IsCompleted)
+                    if (WriteFunctionRuntimeStartupLogsToConsole || processStarted.Task.IsCompleted)
                     {
                         Console.WriteLine(outputData);
                     }
