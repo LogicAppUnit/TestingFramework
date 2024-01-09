@@ -21,6 +21,7 @@ namespace LogicAppUnit
 
         private TestConfiguration _testConfig;
         private DirectoryInfo _artifactDirectory;
+        private DirectoryInfo _customLibraryDirectory;
         private readonly List<MockResponse> _mockResponses;
 
         private WorkflowDefinitionWrapper _workflowDefinition;
@@ -129,37 +130,29 @@ namespace LogicAppUnit
             // Load the test configuration settings
             _testConfig = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile(testConfigFilename, false, false)
+                .AddJsonFile(testConfigFilename, true, false)
                 .Build()
                 .Get<TestConfiguration>();
+
             if (_testConfig == null)
-                throw new TestException($"The test configuration could not be loaded. Ensure that the test project includes a '{testConfigFilename}' file, it is copied to the output directory and it is formatted correctly.");
+            {
+                _testConfig = new TestConfiguration();
+                Console.WriteLine($"A test configuration file '{testConfigFilename}' could not be found, or does not contain any settings. Using default test configuration settings.");
+            }
 
             // Make sure Azurite is running
             // If Azurite is not running we want to fail the tests quickly, not wait for the tests to run and then fail
             if (_testConfig.Azurite.EnableAzuritePortCheck && !AzuriteHelper.IsRunning(_testConfig.Azurite))
                 throw new TestException($"Azurite is not running on ports {_testConfig.Azurite.BlobServicePort} (Blob service), {_testConfig.Azurite.QueueServicePort} (Queue service) and {_testConfig.Azurite.TableServicePort} (Table service). Logic App workflows cannot run unless all three services are running in Azurite");
 
-            // Set up the workflow definition
-            _workflowDefinition = new WorkflowDefinitionWrapper(workflowName, ReadFromPath(Path.Combine(logicAppBasePath, workflowName, Constants.WORKFLOW)));
-            Console.WriteLine($"Workflow '{_workflowDefinition.WorkflowName}' is {_workflowDefinition.WorkflowType}");
-            _workflowDefinition.ReplaceRetryPoliciesWithNone();
-            _workflowDefinition.ReplaceTriggersWithHttp();
-            _workflowDefinition.ReplaceInvokeWorkflowActionsWithHttp();
-            _workflowDefinition.ReplaceBuiltInConnectorActionsWithHttp(_testConfig.Workflow.BuiltInConnectorsToMock);
-            if (_testConfig.Workflow.RemoveHttpChunkingConfiguration) { _workflowDefinition.RemoveHttpChunkingConfiguration(); }
+            // Process the workflow definition, local settings ans connection files
+            ProcessWorkflowDefinitionFile(logicAppBasePath, workflowName);
+            ProcessLocalSettingsFile(logicAppBasePath, localSettingsFilename);
+            ProcessConnectionsFile(logicAppBasePath);
 
-            // Set up the local settings
-            // The name of the local setting file can be set in the test configuration
-            _localSettings = new LocalSettingsWrapper(ReadFromPath(Path.Combine(logicAppBasePath, SetLocalSettingsFile(localSettingsFilename))));
-            _localSettings.ReplaceExternalUrlsWithMockServer(_testConfig.Workflow.ExternalApiUrlsToMock);
-
-            // Set up the connections
-            _connections = new ConnectionsWrapper(ReadFromPath(Path.Combine(logicAppBasePath, Constants.CONNECTIONS), optional: true), _localSettings);
-            _connections.ReplaceManagedApiConnectionUrlsWithMockServer();
-
-            // Set up the artifacts (schemas, maps)
-            SetArtifactDirectory(logicAppBasePath);
+            // Set up the artifacts (schemas, maps) and custom library folders
+            _artifactDirectory = SetSourceDirectory(logicAppBasePath, Constants.ARTIFACTS_FOLDER, "artifacts");
+            _customLibraryDirectory = SetSourceDirectory(logicAppBasePath, Constants.CUSTOM_LIB_FOLDER, "custom library");
 
             // Other files needed to test the workflow, but we don't need to update these
             _parameters = ReadFromPath(Path.Combine(logicAppBasePath, Constants.PARAMETERS), optional: true);
@@ -228,10 +221,74 @@ namespace LogicAppUnit
                 _testConfig.Logging, _testConfig.Runner,
                 _client,
                 _mockResponses,
-                _workflowDefinition, _localSettings, _host, _parameters, _connections, _artifactDirectory);
+                _workflowDefinition, _localSettings, _host, _parameters, _connections, _artifactDirectory, _customLibraryDirectory);
         }
 
         #endregion Create test runner
+
+        #region Source file processing
+
+        /// <summary>
+        /// Process a workflow definition file before the test is run.
+        /// </summary>
+        /// <param name="logicAppBasePath">Path to the root folder containing the workflows.</param>
+        /// <param name="workflowName">The name of the workflow. This matches the name of the folder that contains the workflow definition file.</param>
+        private void ProcessWorkflowDefinitionFile(string logicAppBasePath, string workflowName)
+        {
+            _workflowDefinition = new WorkflowDefinitionWrapper(workflowName, ReadFromPath(Path.Combine(logicAppBasePath, workflowName, Constants.WORKFLOW)));
+            Console.WriteLine($"Workflow '{_workflowDefinition.WorkflowName}' is {_workflowDefinition.WorkflowType}");
+
+            _workflowDefinition.ReplaceTriggersWithHttp();
+
+            if (_testConfig.Workflow.RemoveHttpRetryConfiguration)
+                _workflowDefinition.ReplaceHttpRetryPoliciesWithNone();
+
+            if (_testConfig.Workflow.RemoveHttpChunkingConfiguration)
+                _workflowDefinition.RemoveHttpChunkingConfiguration();
+
+            if (_testConfig.Workflow.RemoveManagedApiConnectionRetryConfiguration)
+                _workflowDefinition.ReplaceManagedApiConnectionRetryPoliciesWithNone();
+
+            _workflowDefinition.ReplaceInvokeWorkflowActionsWithHttp();
+            _workflowDefinition.ReplaceCallLocalFunctionActionsWithHttp();
+            _workflowDefinition.ReplaceBuiltInConnectorActionsWithHttp(_testConfig.Workflow.BuiltInConnectorsToMock);
+        }
+
+        /// <summary>
+        /// Process a workflow local settings file before the test is run.
+        /// </summary>
+        /// <param name="logicAppBasePath">Path to the root folder containing the workflows.</param>
+        /// <param name="localSettingsFilename">The name of the local settings file to be used, this can be used to override the default of <i>local.settings.json</i>.</param>
+        private void ProcessLocalSettingsFile(string logicAppBasePath, string localSettingsFilename)
+        {
+            // The name of the local setting file can be set in the test configuration
+            _localSettings = new LocalSettingsWrapper(ReadFromPath(Path.Combine(logicAppBasePath, SetLocalSettingsFile(localSettingsFilename))));
+
+            _localSettings.ReplaceExternalUrlsWithMockServer(_testConfig.Workflow.ExternalApiUrlsToMock);
+        }
+
+        /// <summary>
+        /// Process a workflow connections file before the test is run.
+        /// </summary>
+        /// <param name="logicAppBasePath">Path to the root folder containing the workflows.</param>
+        private void ProcessConnectionsFile(string logicAppBasePath)
+        {
+            const string invalidConnectionsMsg = "configured to use the 'ManagedServiceIdentity' authentication type. Only the 'Raw' and 'ActiveDirectoryOAuth' authentication types are allowed in a local developer environment";
+
+            _connections = new ConnectionsWrapper(ReadFromPath(Path.Combine(logicAppBasePath, Constants.CONNECTIONS), optional: true), _localSettings);
+
+            _connections.ReplaceManagedApiConnectionUrlsWithMockServer();
+
+            // The Functions runtime will not start if there are any Managed API connections using the 'ManagedServiceIdentity' authentication type
+            // Check for this so that the test will fail early with a meaningful error message
+            var invalidConnections = _connections.ListManagedApiConnectionsUsingManagedServiceIdentity();
+            if (invalidConnections.Count() == 1)
+                throw new TestException($"There is 1 managed API connection ({invalidConnections.First()}) that is {invalidConnectionsMsg}");
+            else if (invalidConnections.Any())
+                throw new TestException($"There are {invalidConnections.Count()} managed API connections ({string.Join(", ", invalidConnections)}) that are {invalidConnectionsMsg}");
+        }
+
+        #endregion // Source file processing
 
         #region Private methods
 
@@ -261,25 +318,24 @@ namespace LogicAppUnit
         }
 
         /// <summary>
-        /// Check if the Logic App has any artifacts or not. If yes then the <i>artifactDirectory</i> variable is set with the path value,
-        /// which can be used inside WorkflowTestHost as an input.
+        /// Check if a source folder for the Logic App exists.
         /// </summary>
-        /// <param name="logicAppBasePath">Path to the root folder containing the workflows.</param>
-        private void SetArtifactDirectory(string logicAppBasePath)
+        /// <param name="logicAppBasePath">Path to the root folder for the Logic App.</param>
+        /// <param name="sourcePath">Relative path to the source folder to be checked, from the root folder of the Logic App.</param>
+        /// <param name="sourceName">The name of the source folder to be checked, used for logging only.</param>
+        /// <returns>A <see cref="DirectoryInfo"/> if the source folder exists, or <c>null</c> if it does not exist.</returns>
+        private static DirectoryInfo SetSourceDirectory(string logicAppBasePath, string sourcePath, string sourceName)
         {
-            if (string.IsNullOrEmpty(logicAppBasePath))
-                throw new ArgumentNullException(nameof(logicAppBasePath));
-
-            DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(logicAppBasePath, Constants.ARTIFACTS_FOLDER));
+            DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(logicAppBasePath, sourcePath));
             if (directoryInfo.Exists)
             {
-                _artifactDirectory = directoryInfo;
-                Console.WriteLine($"Using artifacts directory: {Path.Combine(directoryInfo.Parent.Name, directoryInfo.Name)}");
+                Console.WriteLine($"Using {sourceName} directory: {Path.Combine(directoryInfo.Parent.Name, directoryInfo.Name)}");
+                return directoryInfo;
             }
             else
             {
-                _artifactDirectory = null;
-                Console.WriteLine("Artifacts directory does not exist.");
+                Console.WriteLine($"The {sourceName} directory does not exist: {Path.Combine(directoryInfo.Parent.Name, directoryInfo.Name)}");
+                return null;
             }
         }
 
@@ -299,13 +355,9 @@ namespace LogicAppUnit
             if (!File.Exists(fullPath))
             {
                 if (optional)
-                {
                     return null;
-                }
                 else
-                {
                     throw new TestException($"File {fullPath} does not exist and it is a mandatory file for a Logic App");
-                }
             }
 
             return File.ReadAllText(fullPath);

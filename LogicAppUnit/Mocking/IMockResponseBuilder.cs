@@ -176,5 +176,16 @@ namespace LogicAppUnit.Mocking
         /// <param name="contentType">The content type.</param>
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
         IMockResponseBuilder WithContent(string resourceName, Assembly containingAssembly, string contentType);
+
+        /// <summary>
+        /// Configures an exception to be thrown when processing the response.
+        /// </summary>
+        /// <param name="exceptionToThrow">An instance of the exception to be thrown.</param>
+        /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
+        /// <remarks>
+        /// Throwing an exception takes precedence over the other configurations that create the response. <br />
+        /// Use this method to throw an exception in a mock for a local .NET Framework function and therefore force a failure in the function call.
+        /// </remarks>
+        IMockResponseBuilder ThrowsException(Exception exceptionToThrow);
     }
 }

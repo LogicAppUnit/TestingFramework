@@ -53,7 +53,7 @@ namespace LogicAppUnit.InternalHelper
             if (_workflowRunContent == null)
             {
                 // The API responds with an array of workflow runs, we only want the first one (the most recent)
-                _workflowRunContent = GetWorkflowRun(TestEnvironment.GetRunsRequestUriWithManagementHost(_workflowName)).First();
+                _workflowRunContent = GetWorkflowRun(TestEnvironment.GetListWorkflowRunsRequestUri(_workflowName)).First();
             }
             return _workflowRunContent;
         }
@@ -70,7 +70,7 @@ namespace LogicAppUnit.InternalHelper
 
             if (_actionsContent == null)
             {
-                _actionsContent = GetActionsInChunks(TestEnvironment.GetRunActionsRequestUri(_workflowName, workflowRunId));
+                _actionsContent = GetActionsInChunks(TestEnvironment.GetListWorkflowRunActionsRequestUri(_workflowName, workflowRunId));
             }
             return _actionsContent;
         }
@@ -90,7 +90,7 @@ namespace LogicAppUnit.InternalHelper
 
             if (!_actionRepetitionsContent.ContainsKey(actionName))
             {
-                IEnumerable<JToken> response = GetActionRepetitions(actionName, TestEnvironment.GetRunActionRepetitionsRequestUri(_workflowName, workflowRunId, actionName));
+                IEnumerable<JToken> response = GetActionRepetitions(actionName, TestEnvironment.GetListWorkflowRunActionRepetitionsRequestUri(_workflowName, workflowRunId, actionName));
                 _actionRepetitionsContent.Add(actionName, response);
             }
             return _actionRepetitionsContent[actionName];
@@ -111,7 +111,7 @@ namespace LogicAppUnit.InternalHelper
             try
             {
                 using (var workflowTriggerCallbackResponse = _client.PostAsync(
-                    TestEnvironment.GetTriggerCallbackRequestUri(flowName: _workflowName, triggerName: triggerName),
+                    TestEnvironment.GetTriggerCallbackRequestUri(_workflowName, triggerName),
                     ContentHelper.CreatePlainStringContent("")).Result)
                 {
                     workflowTriggerCallbackResponse.EnsureSuccessStatusCode();
@@ -120,7 +120,7 @@ namespace LogicAppUnit.InternalHelper
             }
             catch (HttpRequestException hrex) when (hrex.StatusCode == HttpStatusCode.NotFound)
             {
-                throw new TestException($"The callback endpoint for workflow '{_workflowName}' was not found. This indicates that the Function runtime could not start the workflow. Enable the Function runtime start-up logging using the 'logging.WriteFunctionRuntimeStartupLogs' option in 'testConfiguration.json'. Then check the logs for any errors.", hrex);
+                throw new TestException($"The callback endpoint for workflow '{_workflowName}' was not found. This indicates that the Function runtime could not start the workflow. Enable the Function runtime start-up logging using the 'logging.writeFunctionRuntimeStartupLogs' option in 'testConfiguration.json'. Then check the logs for any errors.", hrex);
             }
             catch (AggregateException ae)
             {

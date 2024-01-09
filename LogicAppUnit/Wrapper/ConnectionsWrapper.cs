@@ -1,6 +1,7 @@
 ﻿using LogicAppUnit.Hosting;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LogicAppUnit.Wrapper
@@ -87,6 +88,18 @@ namespace LogicAppUnit.Wrapper
                     Console.WriteLine($"        {newConnectionUrl}");
                 });
             }
+        }
+
+        /// <summary>
+        /// List all connections that are using the <i>ManagedServiceIdentity</i> authentication type.
+        /// </summary>
+        public IEnumerable<string> ListManagedApiConnectionsUsingManagedServiceIdentity()
+        {
+            if (_jObjectConnection == null)
+                return null;
+
+            var managedApiConnectionsUsingMsi = _jObjectConnection.SelectTokens("managedApiConnections.*").Where(x => x["authentication"]["type"].ToString() == "ManagedServiceIdentity").ToList();
+            return managedApiConnectionsUsingMsi.Select(x => ((JProperty)x.Parent).Name);
         }
     }
 }

@@ -141,6 +141,14 @@ namespace LogicAppUnit
         public bool AutoConfigureWithStatelessRunHistory { get; set; } = true;
 
         /// <summary>
+        /// <c>true</c> if the retry configuration in HTTP actions is to be removed, otherwise <c>false</c>.
+        /// </summary>
+        /// <remarks>
+        /// Default value is <c>true</c>.
+        /// </remarks>
+        public bool RemoveHttpRetryConfiguration { get; set; } = true;
+
+        /// <summary>
         /// <c>true</c> if the chunking configuration in HTTP actions is to be removed, otherwise <c>false</c>.
         /// </summary>
         /// <remarks>
@@ -148,5 +156,12 @@ namespace LogicAppUnit
         /// </remarks>
         public bool RemoveHttpChunkingConfiguration { get; set; } = true;
 
+        /// <summary>
+        /// <c>true</c> if the retry configuration in actions using managed API connections is to be removed, otherwise <c>false</c>.
+        /// </summary>
+        /// <remarks>
+        /// Default value is <c>true</c>.
+        /// </remarks>
+        public bool RemoveManagedApiConnectionRetryConfiguration { get; set; } = true;
     }
 }

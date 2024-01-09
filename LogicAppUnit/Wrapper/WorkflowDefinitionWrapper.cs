@@ -86,16 +86,37 @@ namespace LogicAppUnit.Wrapper
         /// <remarks>
         /// This change will reduce the time that it takes to execute a workflow when testing scenarios that include failed HTTP calls.
         /// </remarks>
-        public void ReplaceRetryPoliciesWithNone()
+        public void ReplaceHttpRetryPoliciesWithNone()
         {
-            var httpActions = _jObjectWorkflow.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "Http").Select(x => x["inputs"] as JObject).ToList();
+            ReplaceRetryPoliciesWithNone("Http", "workflow HTTP actions");
+        }
 
-            if (httpActions.Count > 0)
+        /// <summary>
+        /// Update all actions using managed API connections to include a retry policy of 'none' so that when making API calls from the workflow, any configured retries for a failed call won't happen.
+        /// </summary>
+        /// <remarks>
+        /// This change will reduce the time that it takes to execute a workflow when testing scenarios that include failed API calls.
+        /// </remarks>
+        public void ReplaceManagedApiConnectionRetryPoliciesWithNone()
+        {
+            ReplaceRetryPoliciesWithNone("ApiConnection", "workflow actions that use a managed API connection");
+        }
+
+        /// <summary>
+        /// Update all actions of a specific type to include a retry policy of 'none'.
+        /// </summary>
+        /// <paramref name="actionType">The type of action to be processed.</paramref>
+        /// <paramref name="msg">Message to be included in the logs.</paramref>
+        private void ReplaceRetryPoliciesWithNone(string actionType, string msg)
+        {
+            var actions = _jObjectWorkflow.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == actionType).Select(x => x["inputs"] as JObject).ToList();
+
+            if (actions.Count > 0)
             {
-                Console.WriteLine("Updating workflow HTTP actions to remove any existing Retry policies and replace with a 'none' policy:");
+                Console.WriteLine($"Updating {msg} to remove any existing Retry policies and replace with a 'none' policy:");
                 var retryObj = new { type = "none" };
 
-                httpActions.ForEach(x =>
+                actions.ForEach(x =>
                 {
                     // Remove any retryPolicy block in case it is there already
                     x.Remove("retryPolicy");
@@ -159,7 +180,7 @@ namespace LogicAppUnit.Wrapper
                             retryPolicy = new { type = "none" }
                         },
                         runAfter = currentAction["runAfter"],
-                        operationOptions = "DisableAsyncPattern, SuppressWorkflowHeaders"
+                        operationOptions = "DisableAsyncPattern"
                     });
 
                     Console.WriteLine($"    {((JProperty)currentAction.Parent).Name}:");
@@ -202,7 +223,7 @@ namespace LogicAppUnit.Wrapper
                             retryPolicy = new { type = "none" }
                         },
                         runAfter = currentAction["runAfter"],
-                        operationOptions = "DisableAsyncPattern, SuppressWorkflowHeaders"
+                        operationOptions = "DisableAsyncPattern"
                     });
 
                     JToken serviceProviderConfig = currentAction["inputs"]["serviceProviderConfiguration"];
@@ -238,6 +259,42 @@ namespace LogicAppUnit.Wrapper
                 });
             }
 
+        }
+
+        /// <summary>
+        /// Replace <i>Call a Local Function</i> actions with HTTP actions so that the invoked function can be easily mocked.
+        /// </summary>
+        public void ReplaceCallLocalFunctionActionsWithHttp()
+        {
+            var callLocalFunctionActions = _jObjectWorkflow.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "InvokeFunction").Select(x => x as JObject).ToList();
+
+            if (callLocalFunctionActions.Count > 0)
+            {
+                Console.WriteLine("Updating Call Local Function actions to replace call with a HTTP action for the mock test server:");
+
+                callLocalFunctionActions.ForEach(currentAction =>
+                {
+                    // Copy the 'inputs' object into the HTTP request, this includes the name of the invoked function and the parameters
+                    var newAction = JObject.FromObject(new
+                    {
+                        type = "Http",
+                        inputs = new
+                        {
+                            method = "POST",
+                            uri = TestEnvironment.FlowV2MockTestHostUri + "/" + WebUtility.UrlEncode(((JProperty)currentAction.Parent).Name),
+                            body = currentAction["inputs"].Value<object>(),
+                            retryPolicy = new { type = "none" }
+                        },
+                        runAfter = currentAction["runAfter"],
+                        operationOptions = "DisableAsyncPattern"
+                    });
+
+                    Console.WriteLine($"    {((JProperty)currentAction.Parent).Name}:");
+                    Console.WriteLine($"      Mocked URL: {newAction["inputs"]["uri"]}");
+
+                    ((JProperty)currentAction.Parent).Value = newAction;
+                });
+            }
         }
     }
 }

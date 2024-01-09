@@ -53,6 +53,13 @@ namespace LogicAppUnit.Mocking
         IMockRequestMatcher UsingMethod(params HttpMethod[] methods);
 
         /// <summary>
+        /// Configure request matching based on the names of one or more workflow actions that sent the request.
+        /// </summary>
+        /// <param name="actionNames">The action names to match.</param>
+        /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
+        IMockRequestMatcher FromAction(params string[] actionNames);
+
+        /// <summary>
         /// Configure request matching using one or more URL absolute paths.
         /// </summary>
         /// <param name="matchType">The type of match to be used when matching the absolute paths.</param>

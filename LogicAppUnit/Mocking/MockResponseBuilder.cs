@@ -19,6 +19,7 @@ namespace LogicAppUnit.Mocking
         private readonly Dictionary<string, string> _responseHeaders;
         private Func<TimeSpan> _delayDelegate;
         private Func<HttpContent> _contentDelegate;
+        private Exception _excpetionToThrow;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MockResponseBuilder"/> class.
@@ -201,6 +202,16 @@ namespace LogicAppUnit.Mocking
             return WithContent(() => ContentHelper.CreateStreamContent(ResourceHelper.GetAssemblyResourceAsStream(resourceName, containingAssembly), contentType));
         }
 
+        /// <inheritdoc cref="IMockResponseBuilder.ThrowsException(Exception)" />
+        public IMockResponseBuilder ThrowsException(Exception excpetionToThrow)
+        {
+            if (excpetionToThrow == null)
+                throw new ArgumentNullException(nameof(excpetionToThrow));
+
+            _excpetionToThrow = excpetionToThrow;
+            return this;
+        }
+
         #endregion // IMockResponseBuilder implementation
 
         #region Internal methods
@@ -226,6 +237,10 @@ namespace LogicAppUnit.Mocking
         /// <returns>The HTTP response message.</returns>
         internal HttpResponseMessage BuildResponse(HttpRequestMessage request)
         {
+            // Throwing an excpetion takes precedence
+            if (_excpetionToThrow != null)
+                throw _excpetionToThrow;
+
             var response = new HttpResponseMessage();
             response.RequestMessage = request;
             response.StatusCode = _statusCode;

@@ -150,13 +150,15 @@ namespace LogicAppUnit
         /// <param name="parameters">The contents of the parameters file, or <c>null</c> if the file does not exist.</param>
         /// <param name="connections">The connections file, or <c>null</c> if the file does not exist.</param>
         /// <param name="artifactsDirectory">The (optional) artifacts directory containing maps and schemas that are used by the workflow being tested.</param>
+        /// <param name="customLibraryDirectory">The (optional) custom library (lib/custom) directory containing custom components that are used by the workflow being tested.</param>
         internal TestRunner(
             TestConfigurationLogging loggingConfig,
             TestConfigurationRunner runnerConfig,
             HttpClient client,
             List<MockResponse> mockResponsesFromBase,
             WorkflowDefinitionWrapper workflowDefinition,
-            LocalSettingsWrapper localSettings, string host, string parameters = null, ConnectionsWrapper connections = null, DirectoryInfo artifactsDirectory = null)
+            LocalSettingsWrapper localSettings, string host, string parameters = null, ConnectionsWrapper connections = null,
+            DirectoryInfo artifactsDirectory = null, DirectoryInfo customLibraryDirectory = null)
         {
             if (loggingConfig == null)
                 throw new ArgumentNullException(nameof(loggingConfig));
@@ -175,14 +177,15 @@ namespace LogicAppUnit
             //Console.WriteLine($"Max workflow duration: {runnerConfig.MaxWorkflowExecutionDuration} seconds");
 
             if (!loggingConfig.WriteFunctionRuntimeStartupLogs)
-                Console.WriteLine("Logging of the Function runtime startup logs is disabled. This can be enabled using the 'logging.WriteFunctionRuntimeStartupLogs' option in 'testConfiguration.json'.");
+                Console.WriteLine("Logging of the Function runtime startup logs is disabled. This can be enabled using the 'logging.writeFunctionRuntimeStartupLogs' option in 'testConfiguration.json'.");
 
             _client = client;
             _workflowDefinition = workflowDefinition;
             _runnerConfig = runnerConfig;
 
             var workflowTestInput = new WorkflowTestInput[] { new WorkflowTestInput(workflowDefinition.WorkflowName, workflowDefinition.ToString()) };
-            _workflowTestHost = new WorkflowTestHost(workflowTestInput, localSettings.ToString(), parameters, connections.ToString(), host, artifactsDirectory, loggingConfig.WriteFunctionRuntimeStartupLogs);
+            _workflowTestHost = new WorkflowTestHost(workflowTestInput, localSettings.ToString(), parameters, connections.ToString(), host,
+                                                        artifactsDirectory, customLibraryDirectory, loggingConfig.WriteFunctionRuntimeStartupLogs);
             _apiHelper = new WorkflowApiHelper(client, workflowDefinition.WorkflowName);
 
             // Create the mock definition and mock HTTP host
@@ -552,10 +555,17 @@ namespace LogicAppUnit
 
             while (stopwatch.Elapsed < TimeSpan.FromSeconds(_runnerConfig.MaxWorkflowExecutionDuration))
             {
-                using (var latestWorkflowHttpResponse = _client.GetAsync(TestEnvironment.GetRunsRequestUriWithManagementHost(flowName: _workflowDefinition.WorkflowName)).Result)
+                using (var latestWorkflowHttpResponse = _client.GetAsync(TestEnvironment.GetListWorkflowRunsRequestUri(_workflowDefinition.WorkflowName)).Result)
                 {
                     var latestWorkflowHttpResponseContent = latestWorkflowHttpResponse.Content.ReadAsAsync<JToken>().Result;
-                    var runStatusOfWorkflow = latestWorkflowHttpResponseContent["value"][0]["properties"]["status"].ToString();
+                    var runStatusOfWorkflow = latestWorkflowHttpResponseContent["value"]?[0]?["properties"]?["status"]?.ToString();
+
+                    if (string.IsNullOrEmpty(runStatusOfWorkflow))
+                    {
+                        // There should always be a status in the response
+                        Console.WriteLine("WARNING: The workflow status (properties.status) was not included in the response from the Logic App Management API");
+                        Console.WriteLine($"    Response: {latestWorkflowHttpResponseContent.ToString()}");
+                    }
 
                     // If we got status code other than Accepted then return the appropriate response
                     if (latestWorkflowHttpResponse.StatusCode != HttpStatusCode.Accepted && runStatusOfWorkflow != ActionStatus.Running.ToString())

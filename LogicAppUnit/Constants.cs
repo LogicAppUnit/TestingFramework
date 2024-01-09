@@ -2,7 +2,6 @@
 {
     /// <summary>
     /// Commonly used hardcoded strings.
-    /// Do not include any constants that are specific to any particular Logic App or workflow.
     /// </summary>
     /// <remarks>
     /// This class and its members are <i>internal</i> because they are only intended for use within the test framework, not for use by the test classes.
@@ -18,5 +17,8 @@
 
         // Logic App folders
         internal static readonly string ARTIFACTS_FOLDER = "Artifacts";
+        internal static readonly string LIB_FOLDER = "lib";
+        internal static readonly string CUSTOM_FOLDER = "custom";
+        internal static readonly string CUSTOM_LIB_FOLDER = System.IO.Path.Combine(LIB_FOLDER, CUSTOM_FOLDER);
     }
 }

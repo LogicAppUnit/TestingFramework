@@ -1,4 +1,5 @@
-﻿using LogicAppUnit.InternalHelper;
+﻿using LogicAppUnit;
+using LogicAppUnit.InternalHelper;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -42,80 +43,54 @@ namespace LogicAppUnit.Hosting
         /// </summary>
         public WorkflowTestHost(
             WorkflowTestInput[] inputs = null,
-            string localSettings = null, string parameters = null, string connectionDetails = null, string host = null, DirectoryInfo artifactsDirectory = null,
-            bool WriteFunctionRuntimeStartupLogsToConsole = false)
+            string localSettings = null, string parameters = null, string connectionDetails = null, string host = null,
+            DirectoryInfo artifactsDirectory = null, DirectoryInfo customLibraryDirectory = null,
+            bool writeFunctionRuntimeStartupLogsToConsole = false)
         {
-            this.WorkingDirectory = Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString());
             this.OutputData = new List<string>();
             this.ErrorData = new List<string>();
-            this.WriteFunctionRuntimeStartupLogsToConsole = WriteFunctionRuntimeStartupLogsToConsole;
+            this.WriteFunctionRuntimeStartupLogsToConsole = writeFunctionRuntimeStartupLogsToConsole;
 
-            this.StartFunctionRuntime(inputs, localSettings, parameters, connectionDetails, host, artifactsDirectory);
+            this.WorkingDirectory = CreateWorkingFolder();
+            CreateWorkingFilesRequiredForTest(inputs, localSettings, parameters, connectionDetails, host, artifactsDirectory, customLibraryDirectory);
+            StartFunctionRuntime();
         }
 
         /// <summary>
-        /// Starts the function runtime.
+        /// Create all of the working files and folders required to run the test.
         /// </summary>
-        protected void StartFunctionRuntime(WorkflowTestInput[] inputs, string localSettings, string parameters, string connectionDetails, string host, DirectoryInfo artifactsDirectory)
+        protected void CreateWorkingFilesRequiredForTest(WorkflowTestInput[] inputs,
+            string localSettings, string parameters, string connectionDetails, string host,
+            DirectoryInfo artifactsDirectory, DirectoryInfo customLibraryDirectory)
+        {
+            if (inputs != null && inputs.Length > 0)
+            {
+                foreach (var input in inputs)
+                {
+                    Directory.CreateDirectory(Path.Combine(this.WorkingDirectory, input.WorkflowName));
+                    CreateWorkingFile(input.WorkflowDefinition, Path.Combine(this.WorkingDirectory, input.WorkflowName, input.WorkflowFilename), true);
+                }
+            }
+
+            CreateWorkingFile(localSettings, Constants.LOCAL_SETTINGS, true);
+            CreateWorkingFile(host, Constants.HOST, true);
+            CreateWorkingFile(parameters, Constants.PARAMETERS);
+            CreateWorkingFile(connectionDetails, Constants.CONNECTIONS);
+
+            CopySourceFolderToWorkingFolder(artifactsDirectory, Constants.ARTIFACTS_FOLDER);
+            CopySourceFolderToWorkingFolder(customLibraryDirectory, Constants.CUSTOM_LIB_FOLDER);
+        }
+
+        /// <summary>
+        /// Start the Function runtime.
+        /// </summary>
+        /// <exception cref="TestException">Thrown when the Function runtime could not be started.</exception>
+        protected void StartFunctionRuntime()
         {
             try
             {
                 // Kill any remaining function host processes that might interfere with the tests
                 KillFunctionHostProcesses();
-
-                Directory.CreateDirectory(this.WorkingDirectory);
-
-                if (inputs != null && inputs.Length > 0)
-                {
-                    foreach (var input in inputs)
-                    {
-                        if (!string.IsNullOrEmpty(input.WorkflowName))
-                        {
-                            Directory.CreateDirectory(Path.Combine(this.WorkingDirectory, input.WorkflowName));
-                            File.WriteAllText(Path.Combine(this.WorkingDirectory, input.WorkflowName, input.WorkflowFilename), input.WorkflowDefinition);
-                        }
-                    }
-                }
-
-                if (artifactsDirectory != null)
-                {
-                    if (!artifactsDirectory.Exists)
-                    {
-                        throw new DirectoryNotFoundException(artifactsDirectory.FullName);
-                    }
-
-                    var artifactsWorkingDirectory = Path.Combine(this.WorkingDirectory, "Artifacts");
-                    Directory.CreateDirectory(artifactsWorkingDirectory);
-                    CopyDirectory(source: artifactsDirectory, destination: new DirectoryInfo(artifactsWorkingDirectory));
-                }
-
-                if (!string.IsNullOrEmpty(parameters))
-                {
-                    File.WriteAllText(Path.Combine(this.WorkingDirectory, "parameters.json"), parameters);
-                }
-
-                if (!string.IsNullOrEmpty(connectionDetails))
-                {
-                    File.WriteAllText(Path.Combine(this.WorkingDirectory, "connections.json"), connectionDetails);
-                }
-
-                if (!string.IsNullOrEmpty(localSettings))
-                {
-                    File.WriteAllText(Path.Combine(this.WorkingDirectory, "local.settings.json"), localSettings);
-                }
-                else
-                {
-                    throw new InvalidOperationException("The local.settings.json file is not provided or its path not found. This file is needed for the unit testing.");
-                }
-
-                if (!string.IsNullOrEmpty(host))
-                {
-                    File.WriteAllText(Path.Combine(this.WorkingDirectory, "host.json"), host);
-                }
-                else
-                {
-                    throw new InvalidOperationException("The host.json file is not provided or its path not found. This file is needed for the unit testing.");
-                }
 
                 this.Process = new Process
                 {
@@ -176,12 +151,12 @@ namespace LogicAppUnit.Hosting
 
                 if (result != processStarted.Task)
                 {
-                    throw new InvalidOperationException("Functions runtime did not start properly. Please make sure you have the latest Azure Functions Core Tools installed and available on your PATH environment variable, and that Azurite is up and running.");
+                    throw new TestException("Functions runtime did not start properly. Please make sure you have the latest Azure Functions Core Tools installed and available on your PATH environment variable, and that Azurite is running.");
                 }
 
                 if (this.Process.HasExited)
                 {
-                    throw new InvalidOperationException($"Functions runtime did not start properly. The error is '{errorData}'. Please make sure you have the latest Azure Functions Core Tools installed and available on your PATH environment variable, and that Azurite is up and running.");
+                    throw new TestException($"Functions runtime did not start properly. The error is '{errorData}'. Please make sure you have the latest Azure Functions Core Tools installed and available on your PATH environment variable, and that Azurite is running.");
                 }
             }
             catch (Exception ex)
@@ -213,7 +188,7 @@ namespace LogicAppUnit.Hosting
         /// Retrieve the path of the 'func' executable (Azure Functions Core tools). 
         /// </summary>
         /// <returns>The path to the 'func' executable.</returns>
-        /// <exception cref="Exception">Thrown when the location of the 'func' executable could not be found.</exception>
+        /// <exception cref="TestException">Thrown when the location of the 'func' executable could not be found.</exception>
         private static string GetEnvPathForFunctionTools()
         {
             string environmentPath;
@@ -250,33 +225,82 @@ namespace LogicAppUnit.Hosting
         }
 
         /// <summary>
-        /// Copies the directory.
+        /// Create a unique working folder that is used by the test.
+        /// </summary>
+        private string CreateWorkingFolder()
+        {
+            string workingDirectory = Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(workingDirectory);
+
+            if (this.WriteFunctionRuntimeStartupLogsToConsole)
+                Console.WriteLine($"Test Working Directory: {workingDirectory}");
+
+            return workingDirectory;
+        }
+
+        /// <summary>
+        /// Create a working file that is used by the test.
+        /// </summary>
+        /// <param name="filecontent">The file content.</param>
+        /// <param name="fileName">The name of the file to be created.</param>
+        /// <param name="isMandatory"><c>true</c> if the file is mandatory (i.e. there must be content), otherwise <c>false</c>.</param>
+        /// <exception cref="TestException">A file is mandatory but has no content.</exception>
+        private void CreateWorkingFile(string filecontent, string fileName, bool isMandatory = false)
+        {
+            if (string.IsNullOrEmpty(filecontent))
+            {
+                if (isMandatory)
+                    throw new TestException($"The {fileName} file is not provided or its path not found. This file is needed for the unit testing.");
+            }
+            else
+            {
+                File.WriteAllText(Path.Combine(this.WorkingDirectory, fileName), filecontent);
+            }
+        }
+
+        /// <summary>
+        /// Copy the contents of a source folder to the working folder that is used by the test.
+        /// </summary>
+        /// <param name="directoryToCopy">The source directory to be copied.</param>
+        /// <param name="targetDirectoryPath">The name of the target directory.</param>
+        /// <exception cref="DirectoryNotFoundException">Thrown when the directory to be copied does not exist.</exception>
+        private void CopySourceFolderToWorkingFolder(DirectoryInfo directoryToCopy, string targetDirectoryPath)
+        {
+            if (directoryToCopy != null)
+            {
+                if (!directoryToCopy.Exists)
+                {
+                    throw new DirectoryNotFoundException(directoryToCopy.FullName);
+                }
+
+                var copyDestinationDirectory = Path.Combine(this.WorkingDirectory, targetDirectoryPath);
+                DeepCopyDirectory(source: directoryToCopy, destination: new DirectoryInfo(copyDestinationDirectory));
+            }
+        }
+
+        /// <summary>
+        /// Copies the directory and all sub-directories (deep copy).
         /// </summary>
         /// <param name="source">The source.</param>
         /// <param name="destination">The destination.</param>
-        protected static void CopyDirectory(DirectoryInfo source, DirectoryInfo destination)
+        private static void DeepCopyDirectory(DirectoryInfo source, DirectoryInfo destination)
         {
             if (!destination.Exists)
             {
                 destination.Create();
             }
 
-            // Copy all files
-            var files = source.GetFiles();
-            foreach (var file in files)
+            // Copy files
+            foreach (var file in source.GetFiles())
             {
                 file.CopyTo(Path.Combine(destination.FullName, file.Name));
             }
 
-            // Process subdirectories
-            var dirs = source.GetDirectories();
-            foreach (var dir in dirs)
+            // Copy sub-directories
+            foreach (var dir in source.GetDirectories())
             {
-                // Get destination directory
                 var destinationDir = Path.Combine(destination.FullName, dir.Name);
-
-                // Call CopyDirectory() recursively
-                CopyDirectory(dir, new DirectoryInfo(destinationDir));
+                DeepCopyDirectory(dir, new DirectoryInfo(destinationDir));
             }
         }
 
