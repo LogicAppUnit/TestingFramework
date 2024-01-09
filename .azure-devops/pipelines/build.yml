@@ -94,7 +94,19 @@ jobs:
     # Run tests and publish test results to Azure DevOps
 
     - task: DotNetCoreCLI@2
-      displayName: 'Run tests'
+      displayName: 'Run tests (not Windows)'
+      condition: and(succeeded(), ne(variables.matrixName, 'Windows'))
+      continueOnError: true
+      inputs:
+        command: test
+        arguments: '--no-restore --verbosity normal --configuration ${{ parameters.buildConfiguration }} --filter TestCategory!="WindowsOnly"'
+        projects: '$(System.DefaultWorkingDirectory)/**/*.Tests.csproj'
+        publishTestResults: true
+        testRunTitle: 'Tests ($(matrixName))'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Run tests (Windows)'
+      condition: and(succeeded(), eq(variables.matrixName, 'Windows'))
       continueOnError: true
       inputs:
         command: test

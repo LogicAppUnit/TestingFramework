@@ -65,6 +65,11 @@ jobs:
     # Run tests
 
     - name: Run tests
+      if: success() && matrix.os != 'windows-latest'
+      run: dotnet test --no-restore --verbosity normal --logger "trx" --filter TestCategory!="WindowsOnly"
+
+    - name: Run tests
+      if: success() && matrix.os == 'windows-latest'
       run: dotnet test --no-restore --verbosity normal --logger "trx"
 
     # Publish artefacts and test results
