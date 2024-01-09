@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "LogicAppUnit"
+		},
+		{
+			"path": "LogicAppUnit.Samples.LogicApps"
+		},
+		{
+			"path": "LogicAppUnit.Samples.LogicApps.Tests"
+		},
+		{
+			"path": "LogicAppUnit.Samples.Functions"
+		}
+	],
+	"settings": {}
+}
