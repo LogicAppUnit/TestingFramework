@@ -27,7 +27,7 @@
                                 "Succeeded"
                             ]
                         },
-                        "operationOptions": "DisableAsyncPattern, SuppressWorkflowHeaders"
+                        "operationOptions": "DisableAsyncPattern"
                     },
                     "Append_response_to_systemOneResponses": {
                         "type": "AppendToArrayVariable",

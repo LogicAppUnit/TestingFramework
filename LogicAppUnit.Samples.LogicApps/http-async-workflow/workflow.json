@@ -13,7 +13,7 @@
                     }
                 },
                 "runAfter": {},
-                "operationOptions": "DisableAsyncPattern, SuppressWorkflowHeaders",
+                "operationOptions": "DisableAsyncPattern",
                 "trackedProperties": {
                     "recordType": "customer",
                     "recordId": "@{triggerBody()?['customerId']}",
@@ -143,7 +143,7 @@
                                 "SUCCEEDED"
                             ]
                         },
-                        "operationOptions": "DisableAsyncPattern, SuppressWorkflowHeaders"
+                        "operationOptions": "DisableAsyncPattern"
                     },
                     "Success_Response_(Async)": {
                         "type": "Response",

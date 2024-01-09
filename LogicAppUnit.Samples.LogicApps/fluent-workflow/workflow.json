@@ -24,7 +24,7 @@
                 },
                 "runAfter": {}
             },
-            "Response": {
+            "Response_Success": {
                 "type": "Response",
                 "kind": "Http",
                 "inputs": {
@@ -39,6 +39,20 @@
                 "runAfter": {
                     "Call_Service_One": [
                         "SUCCEEDED"
+                    ]
+                }
+            },
+            "Response_Failure": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": "@outputs('Call_Service_One')?['statusCode']",
+                    "body": "@body('Call_Service_One')"
+                },
+                "runAfter": {
+                    "Call_Service_One": [
+                        "TIMEDOUT",
+                        "FAILED"
                     ]
                 }
             }
