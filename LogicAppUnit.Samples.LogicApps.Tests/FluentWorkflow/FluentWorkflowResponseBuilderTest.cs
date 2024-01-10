@@ -2,6 +2,7 @@
 using LogicAppUnit.Mocking;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -419,6 +420,37 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
                 // Check workflow response
                 Assert.AreEqual(HttpStatusCode.OK, workflowResponse.StatusCode);
                 Assert.AreEqual("", workflowResponse.Content.ReadAsStringAsync().Result);
+            }
+        }
+
+        /// <summary>
+        /// Tests the response when an exception is thrown in the mock HTTP server. A HTTP 500 (Internal Server Error) response should be received with no content.
+        /// </summary>
+        [TestMethod]
+        public void FluentWorkflowTest_ResponseBuilder_ThrowsException()
+        {
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Configure mock responses
+                // The request matcher will match all requests because there are no match criteria
+                testRunner
+                    .AddMockResponse(
+                        MockRequestMatcher.Create())
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .ThrowsException(new InvalidOperationException("This is an exception message")));
+
+                // Run the workflow
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    GetRequest(),
+                    HttpMethod.Post);
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Failed, testRunner.WorkflowRunStatus);
+
+                // Check workflow response
+                // The exception message is not passed to the HTTP action by the workflow runtime, therefore there is no response content to validate
+                Assert.AreEqual(HttpStatusCode.InternalServerError, workflowResponse.StatusCode);
             }
         }
 

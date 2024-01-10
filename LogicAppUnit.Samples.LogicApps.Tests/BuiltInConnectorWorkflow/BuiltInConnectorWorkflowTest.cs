@@ -1,4 +1,5 @@
 ﻿using LogicAppUnit.Helper;
+using LogicAppUnit.Mocking;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Net;
@@ -34,17 +35,14 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflow
             {
                 // Mock the SQL and Service Bus actions and customize responses
                 // For both types of actions, the URI in the request matches the action name
-                testRunner.AddApiMocks = (request) =>
-                {
-                    HttpResponseMessage mockedResponse = new HttpResponseMessage();
-                    if (request.RequestUri.AbsolutePath == "/Send_message_to_Topic")
-                    {
-                        // No response content for Service Bus actions
-                        mockedResponse.RequestMessage = request;
-                        mockedResponse.StatusCode = HttpStatusCode.OK;
-                    }
-                    return mockedResponse;
-                };
+                testRunner
+                    .AddMockResponse("MockServiceBusSendMessage",
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .WithPath(PathMatchType.Exact, "/Send_message_to_Topic")
+                        .FromAction("Send_message_to_Topic"))
+                    // No response content for Service Bus actions
+                    .RespondWithDefault();
 
                 // Run the workflow
                 // The Service Bus trigger has been replaced with a HTTP trigger that uses a POST method

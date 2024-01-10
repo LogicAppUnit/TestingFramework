@@ -199,6 +199,73 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.FluentWorkflow
         }
 
         /// <summary>
+        /// Tests the matching of requests using the workflow action name, when the first request is matched.
+        /// </summary>
+        [TestMethod]
+        public void FluentWorkflowTest_RequestMatcher_ActionNameMatched()
+        {
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Configure mock responses
+                // The last matcher is a 'catch-all' and only matches when the previous mock responses are not matched
+                testRunner
+                    .AddMockResponse("MockToTestActionName",
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .FromAction("An_Action_Name")
+                        .FromAction("Another_Action_Name", "Call_Service_One", "And_Another_Action_Name"))
+                    .RespondWithDefault();
+                testRunner
+                    .AddMockResponse("Default-Error",
+                        MockRequestMatcher.Create())
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
+
+                // Run the workflow
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    GetRequest(),
+                    HttpMethod.Post);
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Succeeded, testRunner.WorkflowRunStatus);
+            }
+        }
+
+        /// <summary>
+        /// Tests the matching of requests using the workflow action name, when the first request is not matched.
+        /// </summary>
+        [TestMethod]
+        public void FluentWorkflowTest_RequestMatcher_ActionNameNotMatched()
+        {
+            using (ITestRunner testRunner = CreateTestRunner())
+            {
+                // Configure mock responses
+                // The last matcher is a 'catch-all' and only matches when the previous mock responses are not matched
+                testRunner
+                    .AddMockResponse("MockToTestActionName",
+                        MockRequestMatcher.Create()
+                        .UsingPost()
+                        .FromAction("This_Is_Not_My_Action", "And_Neither_Is_This"))
+                    .RespondWithDefault();
+                testRunner
+                    .AddMockResponse("Default-Error",
+                        MockRequestMatcher.Create())
+                    .RespondWith(
+                        MockResponseBuilder.Create()
+                        .WithInternalServerError());
+
+                // Run the workflow
+                var workflowResponse = testRunner.TriggerWorkflow(
+                    GetRequest(),
+                    HttpMethod.Post);
+
+                // Check workflow run status
+                Assert.AreEqual(WorkflowRunStatus.Failed, testRunner.WorkflowRunStatus);
+            }
+        }
+
+        /// <summary>
         /// Tests the matching of requests using the content type.
         /// </summary>
         [TestMethod]

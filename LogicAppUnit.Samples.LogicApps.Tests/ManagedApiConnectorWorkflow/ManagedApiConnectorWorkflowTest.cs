@@ -44,14 +44,18 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.ManagedApiConnectorWorkflow
                     .AddMockResponse(
                         MockRequestMatcher.Create()
                         .UsingPatch()
-                        .WithPath(PathMatchType.EndsWith, "/default/tables/Account_Staging__c/externalIdFields/External_Id__c/54624"))
+                        .WithPath(PathMatchType.EndsWith, "/default/tables/Account_Staging__c/externalIdFields/External_Id__c/54624")
+                        // We can match actions using managed API connections using the action name
+                        .FromAction("Upsert_Customer"))
                     // No response content for Salesforce actions
                     .RespondWithDefault();
                 testRunner
                     .AddMockResponse(
                         MockRequestMatcher.Create()
                         .UsingPost()
-                        .WithPath(PathMatchType.EndsWith, "/v2/Mail"))
+                        .WithPath(PathMatchType.EndsWith, "/v2/Mail")
+                        // We can match actions using managed API connections using the action name
+                        .FromAction("Send_a_confirmation_email"))
                     // No response content for Send Email actions
                     .RespondWithDefault();
 
@@ -117,7 +121,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.ManagedApiConnectorWorkflow
                     // No response content for Send Email actions
                     .RespondWith(
                         MockResponseBuilder.Create()
-                        .WithUnauthorized());
+                        .WithInternalServerError());
 
                 // Run the workflow
                 var workflowResponse = testRunner.TriggerWorkflow(GetRequest(), HttpMethod.Post);
