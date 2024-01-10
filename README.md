@@ -16,7 +16,7 @@ The testing framework has been designed to make it easier to perform isolated un
 - Replace non-HTTP triggers with HTTP triggers to enable automated testing of every workflow, irrespective of the trigger type.
 - Remove external service dependencies for built-in service provider connectors by replacing these actions with HTTP actions and a mock HTTP server that is managed by the framework.
 - Remove external service dependencies for managed API connectors by automatically re-configuring managed API connections to use a mock HTTP server that is managed by the framework.
-- Remove dependencies on invoked workflows by replacing the Invoke Workflow actions with HTTP actions and a mock HTTP server that is managed by the framework.
+- Remove dependencies on invoked workflows and called local functions by replacing the Invoke Workflow and Call Local Function actions with HTTP actions and a mock HTTP server that is managed by the framework.
 - Remove all retry policies to ensure that tests exercising failure scenarios do not take a long time to execute.
 - A fluent API to configure request matching and the creation of responses for the mock HTTP server.
 - Detailed test execution logging to help with workflow test authoring and debugging.
@@ -27,13 +27,14 @@ The testing framework has been designed to make it easier to perform isolated un
 
 ## Projects
 
-This code repository includes three projects:
+This code repository includes four projects:
 
 | Name | Description |
 |:-----|:------------|
 | LogicAppUnit | The testing framework. |
-| LogicAppUnit.Samples.LogicApps.Tests | Sample test project that demonstrates the features of the testing framework. 
+| LogicAppUnit.Samples.LogicApps.Tests | Test project that demonstrates the features of the testing framework. 
 | LogicAppUnit.Samples.LogicApps | Workflows that are tested by the sample test project. |
+| LogicAppUnit.Samples.Functions | Local .NET Framework functions that are called by workflows. |
 
 
 ## Packages
@@ -50,6 +51,10 @@ The framework has been tested with these environments:
 - Windows
 - Linux (Ubuntu)
 - MacOS
+
+
+## Give a Star :star:
+If you like or are using this project please give it a star. Thanks.
 
 
 ## Main Contributors
@@ -69,7 +74,5 @@ The best way to understand how the framework works and how to write tests using 
 This is a list of possible future improvements and changes for the framework. Please create a [new issue](https://github.com/LogicAppUnit/TestingFramework/issues) if there are other features that you would like to see.
 
 - Add more features to the fluent API for request matching and the creation of mock responses.
-- Add a feature to the fluent API to allow a mock response to be matched using just the name of the workflow action that created the request. This would make it easier to match the request, compared to using multiple properties of the request such as the HTTP method, URI path and/or request content.
 - Add a `Verifiable()` feature to the fluent API so that a test case can assert that a test execution did send a request to the mock HTTP server that was successfully matched. This would work in a simialar way to the `Verifiable()` feature in the [moq](https://github.com/devlooped/moq) unit testing framework.
-- Support the `Call a local function` action when calling a .NET Framework function from a Logic App workflow.
 - Auto-generate C# test cases based on a workflow's run history in the local development environment.
