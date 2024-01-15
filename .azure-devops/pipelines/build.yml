@@ -47,14 +47,14 @@ jobs:
       inputs:
         command: restore
         verbosityRestore: Normal
-        projects: '$(System.DefaultWorkingDirectory)/**/*.csproj'
+        projects: '$(System.DefaultWorkingDirectory)/src/LogicAppUnit.sln'
 
     - task: DotNetCoreCLI@2
       displayName: 'Build (${{ parameters.buildConfiguration }})'
       inputs:
         command: build
         arguments: '--no-restore --configuration ${{ parameters.buildConfiguration }}'
-        projects: '$(System.DefaultWorkingDirectory)/**/*.csproj'
+        projects: '$(System.DefaultWorkingDirectory)/src/LogicAppUnit.sln'
 
     # Install and configure Logic Apps runtime environment
 
@@ -100,7 +100,7 @@ jobs:
       inputs:
         command: test
         arguments: '--no-restore --verbosity normal --configuration ${{ parameters.buildConfiguration }} --filter TestCategory!="WindowsOnly"'
-        projects: '$(System.DefaultWorkingDirectory)/**/*.Tests.csproj'
+        projects: '$(System.DefaultWorkingDirectory)/src/LogicAppUnit.sln'
         publishTestResults: true
         testRunTitle: 'Tests ($(matrixName))'
 
@@ -111,7 +111,7 @@ jobs:
       inputs:
         command: test
         arguments: '--no-restore --verbosity normal --configuration ${{ parameters.buildConfiguration }}'
-        projects: '$(System.DefaultWorkingDirectory)/**/*.Tests.csproj'
+        projects: '$(System.DefaultWorkingDirectory)/src/LogicAppUnit.sln'
         publishTestResults: true
         testRunTitle: 'Tests ($(matrixName))'
 
@@ -121,6 +121,6 @@ jobs:
       displayName: 'Publish NuGet package (Release build only)'
       condition: and(succeeded(), eq('${{ parameters.buildConfiguration }}', 'Release'))
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/LogicAppUnit/bin/${{ parameters.buildConfiguration }}'
+        targetPath: '$(System.DefaultWorkingDirectory)/src/LogicAppUnit/bin/${{ parameters.buildConfiguration }}'
         artifact: 'NuGetPackage-$(matrixName)'
         publishLocation: 'pipeline'
