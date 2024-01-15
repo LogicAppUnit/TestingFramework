@@ -10,7 +10,7 @@ LogicAppUnit Testing Framework:
  - The `testConfiguration.json` file is now optional. If the file does not exist, or contains an empty JSON document (`{}`), the default values are used for all settings. Previous versions of the framework would fail a test if the configuration file did not exist. [[Issue #28](https://github.com/LogicAppUnit/TestingFramework/issues/28)]
  - `Call a local function` actions are now mocked using HTTP actions. This means that the dependencies between a workflow and a .NET Framework function can be broken to enable better unit testing of the workflow.
  - Added `IMockResponseBuilder.ThrowsException(Exception exceptionToThrow)` to simulate an exception being thrown by a local .NET Framework function.
- - Fixed a typo in the name of the `logging.writeFunctionRuntimeStartupLogs` configuration setting. Previously the setting was named `logging.writeFunctionRuntineStartupLogs` (note the incorrect spelling `Runtine)`. [[PR #29](https://github.com/LogicAppUnit/TestingFramework/pull/29), [@jeanpaulsmit](https://github.com/jeanpaulsmit)]
+ - Fixed a typo in the name of the `logging.writeFunctionRuntimeStartupLogs` configuration setting. Previously the setting was named `logging.writeFunctionRuntineStartupLogs` (note the incorrect spelling `Runtine`). [[PR #29](https://github.com/LogicAppUnit/TestingFramework/pull/29), [@jeanpaulsmit](https://github.com/jeanpaulsmit)]
   <br />
   :warning: ***This is a breaking change. Any use of the `writeFunctionRuntineStartupLogs` setting in the `testConfiguration.json` file will need to be updated.***
 
