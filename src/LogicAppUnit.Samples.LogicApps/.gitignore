@@ -1,0 +1,12 @@
+
+# Azure Functions artifacts
+bin
+obj
+appsettings.json
+# local.settings.json
+
+# Logic App debug symbols
+.debug
+
+# Build output from local Function project
+lib/custom

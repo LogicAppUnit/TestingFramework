@@ -1,8 +1,27 @@
+# 1.9.0 (23rd January 2024)
+
+LogicAppUnit Testing Framework:
+
+- Improved the logging when using the Fluent API to match requests based on request headers or query parameters. When the actual and expected header or query parameter values do not match, both values are logged to make it easier to diagnose any test issues. Previous versions of the framework logged the match failure but did not log the actual and expected values.
+- Added `IMockRequestMatcher.FromAction(string[] actionNames)` to allow a mock request matcher to match a request based on the name of the workflow action that created the request. This feature depends on the `x-ms-workflow-operation-name` header being present in the request. Refer to the [wiki](https://github.com/LogicAppUnit/TestingFramework/wiki) for details of when the Logic App runtime creates this header.
+- Retry policies for actions using a managed API connection are removed and replaced with a `none` policy. This is the same pre-processing that is applied to HTTP actions. Previous versions of the framework did not remove the retry policies for actions using a managed API connection which meant that tests could take a long time to complete if they were testing failure scenarios.
+- The framework checks the `connections.json` file and will fail a test if there are any managed API connections that are configured using the `ManagedServiceIdentity` authentication type. The Logic Apps runtime only supports the `Raw`
+ and `ActiveDirectoryOAuth` authentication types when running in a local developer environment. [[Issue #30](https://github.com/LogicAppUnit/TestingFramework/issues/30)]
+ - The `testConfiguration.json` file is now optional. If the file does not exist, or contains an empty JSON document (`{}`), the default values are used for all settings. Previous versions of the framework would fail a test if the configuration file did not exist. [[Issue #28](https://github.com/LogicAppUnit/TestingFramework/issues/28)]
+ - `Call a local function` actions are now mocked using HTTP actions. This means that the dependencies between a workflow and a .NET Framework function can be broken to enable better unit testing of the workflow.
+ - Added `IMockResponseBuilder.ThrowsException(Exception exceptionToThrow)` to simulate an exception being thrown by a local .NET Framework function.
+ - Fixed a typo in the name of the `logging.writeFunctionRuntimeStartupLogs` configuration setting. Previously the setting was named `logging.writeFunctionRuntineStartupLogs` (note the incorrect spelling `Runtine`). [[PR #29](https://github.com/LogicAppUnit/TestingFramework/pull/29), [@jeanpaulsmit](https://github.com/jeanpaulsmit)] <br /> :warning: ***This is a breaking change. Any use of the `writeFunctionRuntineStartupLogs` setting in the `testConfiguration.json` file will need to be updated.***
+
+LogicAppUnit.Samples.LogicApps.Tests:
+
+- Added a `call-local-function-workflow` workflow and unit tests to demonstrate the mocking of a local .NET Framework function.
+
+
 # 1.8.0 (24th October 2023)
 
 LogicAppUnit Testing Framework:
 
-- Added new methods `TestRunner.WorkflowWasTerminated`, `TestRunner.WorkflowTerminationCode` and `TestRunner.WorkflowTerminationMessage` to allow the effects of a `Terminate` action in a workflow to be tested.
+- Added new properties `TestRunner.WorkflowWasTerminated`, `TestRunner.WorkflowTerminationCode` and `TestRunner.WorkflowTerminationMessage` to allow the effects of a _Terminate_ action in a workflow to be tested.
 - Mock responses can be configured using the fluent API in the test class initialization method, using the `WorkflowTestBase.AddMockResponse()` method. Mock responses configured using this method will be used by every test runner that is created in the same test class, and have a lower priority compared to the mock responses created using `ITestRunner.AddMockResponse()` and `ITestRunner.AddApiMocks`. This feature removes the need to repeatedly configure the same mocked responses in multiple tests in a test class.
 - The HTTP status code for the default mock response can now be set in the `testConfiguration.json` file using the `runner.defaultHttpResponseStatusCode` option. Previously the status code was hard-coded to HTTP 200 (OK). The default value for this option is HTTP 200 (OK) to ensure backwards compatibility.
 - Added a new feature to remove the chunking configuration for HTTP actions (`runtimeConfiguration.contentTransfer.transferMode`). This feature is enabled/disabled in the `testConfiguration.json` file using the `workflow.removeHttpChunkingConfiguration` option. The default value for this option is `true`. [[Issue #24](https://github.com/LogicAppUnit/TestingFramework/issues/24)]

@@ -32,10 +32,10 @@ jobs:
         dotnet-version: 6.0.x
   
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore ${{ github.workspace }}/src/LogicAppUnit.sln
   
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build ${{ github.workspace }}/src/LogicAppUnit.sln --no-restore
 
     # Install and configure Logic Apps runtime environment
 
@@ -65,7 +65,12 @@ jobs:
     # Run tests
 
     - name: Run tests
-      run: dotnet test --no-restore --verbosity normal --logger "trx"
+      if: success() && matrix.os != 'windows-latest'
+      run: dotnet test ${{ github.workspace }}/src/LogicAppUnit.sln --no-restore --verbosity normal --logger "trx" --filter TestCategory!="WindowsOnly"
+
+    - name: Run tests
+      if: success() && matrix.os == 'windows-latest'
+      run: dotnet test ${{ github.workspace }}/src/LogicAppUnit.sln --no-restore --verbosity normal --logger "trx"
 
     # Publish artefacts and test results
 
@@ -74,13 +79,13 @@ jobs:
       if: success() || failure()
       with:
         name: test-results.${{ matrix.os }}
-        path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
+        path: ${{ github.workspace }}/src/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
 
     - name: Publish test results
       if: (success() || failure()) && github.event_name != 'pull_request'
       uses: dorny/test-reporter@v1
       with:
         name: Test Results (${{ matrix.os }})
-        path: ${{ github.workspace }}/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
+        path: ${{ github.workspace }}/src/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
         path-replace-backslashes: true
         reporter: dotnet-trx

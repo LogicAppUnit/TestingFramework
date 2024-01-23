@@ -1,0 +1,57 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Get_Weather_Forecast": {
+                "type": "InvokeFunction",
+                "inputs": {
+                    "functionName": "WeatherForecast",
+                    "parameters": {
+                        "zipCode": "@triggerOutputs()['queries']['zipCode']",
+                        "temperatureScale": "@{triggerOutputs()['queries']['tempScale']}"
+                    }
+                },
+                "runAfter": {}
+            },
+            "Response_Success": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": 200,
+                    "body": "@body('Get_Weather_Forecast')"
+                },
+                "runAfter": {
+                    "Get_Weather_Forecast": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Response_Failure": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": "@coalesce(outputs('Get_Weather_Forecast')?['statusCode'], 500)",
+                    "body": "@body('Get_Weather_Forecast')"
+                },
+                "runAfter": {
+                    "Get_Weather_Forecast": [
+                        "FAILED",
+                        "TIMEDOUT"
+                    ]
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_a_HTTP_request_is_received": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "method": "GET"
+                }
+            }
+        }
+    },
+    "kind": "Stateful"
+}

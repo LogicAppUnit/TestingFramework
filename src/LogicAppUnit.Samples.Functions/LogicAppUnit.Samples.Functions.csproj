@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <OutputType>Library</OutputType>
+    <PlatformTarget>x64</PlatformTarget>
+    <RootNamespace>LogicAppUnit.Samples.Functions</RootNamespace>
+    <AzureFunctionsVersion>v4</AzureFunctionsVersion>
+    <IsPackable>false</IsPackable>
+    <!-- Code analysis -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <!-- Please replace 'LogicAppFolder' with the name of your folder that contains your logic app project. -->
+    <LogicAppFolder>LogicAppUnit.Samples.LogicApps</LogicAppFolder>
+    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+ </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.WebJobs.Core" Version="3.0.33" />
+    <PackageReference Include="Microsoft.Azure.Workflows.WebJobs.Sdk" Version="1.0.2-preview" />
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.2.0" />
+  </ItemGroup>
+
+<Target Name="Task" AfterTargets="Compile">
+    <ItemGroup>
+        <DirsToClean2 Include="..\$(LogicAppFolder)\lib\custom" />
+      </ItemGroup>
+      <RemoveDir Directories="@(DirsToClean2)" />
+ </Target>
+ 
+  <Target Name="CopyExtensionFiles" AfterTargets="ParameterizedFunctionJsonGenerator">
+    <ItemGroup>
+        <CopyFiles Include="$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\**\*.*" CopyToOutputDirectory="PreserveNewest" Exclude="$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\*.*" />
+      <CopyFiles2 Include="$(MSBuildProjectDirectory)\bin\$(Configuration)\net472\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(CopyFiles)" DestinationFolder="..\$(LogicAppFolder)\lib\custom\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(CopyFiles2)" DestinationFolder="..\$(LogicAppFolder)\lib\custom\net472\" SkipUnchangedFiles="true" />
+    <ItemGroup>
+        <MoveFiles Include="..\$(LogicAppFolder)\lib\custom\bin\*.*" />
+    </ItemGroup>
+
+   <Move SourceFiles="@(MoveFiles)" DestinationFolder="..\$(LogicAppFolder)\lib\custom\net472" />
+    <ItemGroup>
+       <DirsToClean Include="..\$(LogicAppFolder)\lib\custom\bin" />
+     </ItemGroup>
+       <RemoveDir Directories="@(DirsToClean)" />
+  </Target>
+ 
+  <ItemGroup>
+      <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bin\$(Configuration)\net472\" />
+  </ItemGroup>
+</Project>
