@@ -1,5 +1,4 @@
-﻿using LogicAppUnit;
-using LogicAppUnit.InternalHelper;
+﻿using LogicAppUnit.InternalHelper;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -44,7 +43,7 @@ namespace LogicAppUnit.Hosting
         public WorkflowTestHost(
             WorkflowTestInput[] inputs = null,
             string localSettings = null, string parameters = null, string connectionDetails = null, string host = null,
-            DirectoryInfo artifactsDirectory = null, DirectoryInfo customLibraryDirectory = null,
+            CsxTestInput[] csxTestInputs = null, DirectoryInfo artifactsDirectory = null, DirectoryInfo customLibraryDirectory = null,
             bool writeFunctionRuntimeStartupLogsToConsole = false)
         {
             this.OutputData = new List<string>();
@@ -52,7 +51,7 @@ namespace LogicAppUnit.Hosting
             this.WriteFunctionRuntimeStartupLogsToConsole = writeFunctionRuntimeStartupLogsToConsole;
 
             this.WorkingDirectory = CreateWorkingFolder();
-            CreateWorkingFilesRequiredForTest(inputs, localSettings, parameters, connectionDetails, host, artifactsDirectory, customLibraryDirectory);
+            CreateWorkingFilesRequiredForTest(inputs, localSettings, parameters, connectionDetails, host, csxTestInputs, artifactsDirectory, customLibraryDirectory);
             StartFunctionRuntime();
         }
 
@@ -61,7 +60,7 @@ namespace LogicAppUnit.Hosting
         /// </summary>
         protected void CreateWorkingFilesRequiredForTest(WorkflowTestInput[] inputs,
             string localSettings, string parameters, string connectionDetails, string host,
-            DirectoryInfo artifactsDirectory, DirectoryInfo customLibraryDirectory)
+            CsxTestInput[] csxTestInputs, DirectoryInfo artifactsDirectory, DirectoryInfo customLibraryDirectory)
         {
             if (inputs != null && inputs.Length > 0)
             {
@@ -77,6 +76,7 @@ namespace LogicAppUnit.Hosting
             CreateWorkingFile(parameters, Constants.PARAMETERS);
             CreateWorkingFile(connectionDetails, Constants.CONNECTIONS);
 
+            WriteCsxFilesToWorkingFolder(csxTestInputs);
             CopySourceFolderToWorkingFolder(artifactsDirectory, Constants.ARTIFACTS_FOLDER);
             CopySourceFolderToWorkingFolder(customLibraryDirectory, Constants.CUSTOM_LIB_FOLDER);
         }
@@ -200,7 +200,7 @@ namespace LogicAppUnit.Hosting
                 // The path to the 'func' executable can be in any of the environment variable scopes, depending on how the Functions Core Tools were installed.
                 // If a DevOps build pipeline has updated the PATH environment variable for the 'Machine' or 'User' scopes, the 'Process' scope is not automatically updated to reflect the change.
                 // So merge all three scopes to be sure!
-                environmentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process) + Path.PathSeparator + 
+                environmentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process) + Path.PathSeparator +
                                     Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User) + Path.PathSeparator +
                                     Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine);
                 exeName = $"{FunctionsExecutableName}.exe";
@@ -301,6 +301,20 @@ namespace LogicAppUnit.Hosting
             {
                 var destinationDir = Path.Combine(destination.FullName, dir.Name);
                 DeepCopyDirectory(dir, new DirectoryInfo(destinationDir));
+            }
+        }
+
+        /// <summary>
+        /// Writes the C# script files to the working folder
+        /// </summary>
+        /// <param name="csxTestInputs"></param>
+        private void WriteCsxFilesToWorkingFolder(CsxTestInput[] csxTestInputs)
+        {
+            foreach (var csxTestInput in csxTestInputs)
+            {
+                var directory = Path.Combine(this.WorkingDirectory, csxTestInput.RelativePath);
+                Directory.CreateDirectory(directory);
+                CreateWorkingFile(csxTestInput.Script, Path.Combine(directory, csxTestInput.Filename), true);
             }
         }
 

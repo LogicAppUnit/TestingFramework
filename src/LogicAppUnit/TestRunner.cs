@@ -149,6 +149,7 @@ namespace LogicAppUnit
         /// <param name="host">The contents of the host file.</param>
         /// <param name="parameters">The contents of the parameters file, or <c>null</c> if the file does not exist.</param>
         /// <param name="connections">The connections file, or <c>null</c> if the file does not exist.</param>
+        /// <param name="csxTestInputs">A collection of C# script files or <c>null</c> if there are none.</param>
         /// <param name="artifactsDirectory">The (optional) artifacts directory containing maps and schemas that are used by the workflow being tested.</param>
         /// <param name="customLibraryDirectory">The (optional) custom library (lib/custom) directory containing custom components that are used by the workflow being tested.</param>
         internal TestRunner(
@@ -157,8 +158,13 @@ namespace LogicAppUnit
             HttpClient client,
             List<MockResponse> mockResponsesFromBase,
             WorkflowDefinitionWrapper workflowDefinition,
-            LocalSettingsWrapper localSettings, string host, string parameters = null, ConnectionsWrapper connections = null,
-            DirectoryInfo artifactsDirectory = null, DirectoryInfo customLibraryDirectory = null)
+            LocalSettingsWrapper localSettings,
+            string host,
+            string parameters = null,
+            ConnectionsWrapper connections = null,
+            CsxTestInput[] csxTestInputs = null,
+            DirectoryInfo artifactsDirectory = null,
+            DirectoryInfo customLibraryDirectory = null)
         {
             if (loggingConfig == null)
                 throw new ArgumentNullException(nameof(loggingConfig));
@@ -185,7 +191,7 @@ namespace LogicAppUnit
 
             var workflowTestInput = new WorkflowTestInput[] { new WorkflowTestInput(workflowDefinition.WorkflowName, workflowDefinition.ToString()) };
             _workflowTestHost = new WorkflowTestHost(workflowTestInput, localSettings.ToString(), parameters, connections.ToString(), host,
-                                                        artifactsDirectory, customLibraryDirectory, loggingConfig.WriteFunctionRuntimeStartupLogs);
+                                                        csxTestInputs, artifactsDirectory, customLibraryDirectory, loggingConfig.WriteFunctionRuntimeStartupLogs);
             _apiHelper = new WorkflowApiHelper(client, workflowDefinition.WorkflowName);
 
             // Create the mock definition and mock HTTP host
