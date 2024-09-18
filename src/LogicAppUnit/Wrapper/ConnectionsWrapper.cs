@@ -46,7 +46,9 @@ namespace LogicAppUnit.Wrapper
 
         /// <summary>
         /// Update the <i>connections</i> by replacing all URL references to managed API connectors with the URL reference for the mock test server.
+        ///         /// <param name="managedApisToMock">The list of managed API connections to mock, or <c>null</c> if the file does not exist.</param>
         /// </summary>
+        
         public void ReplaceManagedApiConnectionUrlsWithMockServer(List<string> managedApisToMock)
         {
             if (_jObjectConnection == null)
