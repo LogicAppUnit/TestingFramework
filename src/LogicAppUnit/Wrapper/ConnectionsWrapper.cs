@@ -52,10 +52,12 @@ namespace LogicAppUnit.Wrapper
             if (_jObjectConnection == null)
                 return;
 
-            var managedApiConnections = _jObjectConnection.SelectToken("managedApiConnections").Children<JProperty>()
-                                                            .Where(con => managedApisToMock
-                                                            .Contains(con.Name.ToString()))
-                                                            .ToList();
+            var managedApiConnections = _jObjectConnection.SelectToken("managedApiConnections").Children<JProperty>().ToList();
+
+            // If no managed apis are specified then all managed apis are mocked
+            if (managedApisToMock != null && managedApisToMock.Count > 0)
+                managedApiConnections = managedApiConnections.Where(con => managedApisToMock.Contains(con.Name)).ToList();
+
             if (managedApiConnections.Count > 0)
             {
                 Console.WriteLine("Updating connections file for managed API connectors:");
