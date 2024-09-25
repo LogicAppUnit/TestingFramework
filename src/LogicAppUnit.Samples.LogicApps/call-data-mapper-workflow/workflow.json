@@ -1,0 +1,54 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Transform_using_Data_Mapper": {
+                "type": "Xslt",
+                "kind": "DataMapper",
+                "inputs": {
+                    "content": "@triggerBody()",
+                    "map": {
+                        "source": "LogicApp",
+                        "name": "CustomerCampaignToCampaignRequest.xslt"
+                    }
+                },
+                "runAfter": {}
+            },
+            "Response_Success": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": 200,
+                    "body": "@body('Transform_using_Data_Mapper')"
+                },
+                "runAfter": {
+                    "Transform_using_Data_Mapper": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Response_Failure": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": 500
+                },
+                "runAfter": {
+                    "Transform_using_Data_Mapper": [
+                        "TIMEDOUT",
+                        "FAILED"
+                    ]
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_a_HTTP_request_is_received": {
+                "type": "Request",
+                "kind": "Http"
+            }
+        }
+    },
+    "kind": "Stateful"
+}

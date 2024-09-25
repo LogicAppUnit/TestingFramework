@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-16"?>
+<xs:schema xmlns:tns="http://schemas.logicappunit.net/CampaignRequest" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://schemas.logicappunit.net/CampaignRequest" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="campaignListType">
+    <xs:sequence>
+      <xs:element name="campaign" type="tns:campaignType" minOccurs="1" maxOccurs="unbounded" />
+    </xs:sequence>
+    <xs:attribute name="numberOfCampaigns" type="xs:int" />
+  </xs:complexType>
+  <xs:complexType name="campaignType">
+    <xs:all>
+      <xs:element name="campaignDetails" type="tns:campaignDetailsType" />
+      <xs:element name="customer" type="tns:customerType" />
+      <xs:element name="premisesid" type="xs:integer" />
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="campaignDetailsType">
+    <xs:all>
+      <xs:element name="id" type="xs:integer" />
+      <xs:element name="name" type="tns:string20" />
+      <xs:element name="launchDate" type="xs:date" minOccurs="0" />
+      <xs:element name="durationDays" type="xs:integer" minOccurs="0" />
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="customerType">
+    <xs:all>
+      <xs:element name="id" type="xs:integer" />
+      <xs:element name="forename" type="tns:string40" />
+      <xs:element name="surname" type="tns:string40" />
+      <xs:element name="email" type="xs:string" />
+      <xs:element name="age" type="xs:integer" />
+    </xs:all>
+  </xs:complexType>
+  <xs:simpleType name="string20">
+      <xs:restriction base="xs:string">
+          <xs:maxLength value="20"/>
+      </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="string40">
+      <xs:restriction base="xs:string">
+          <xs:maxLength value="40"/>
+      </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="campaignRequest" type="tns:campaignListType" />
+</xs:schema>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:campaignRequest xmlns:tns="http://schemas.logicappunit.net/CampaignRequest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                     numberOfCampaigns="3">
+   <tns:campaign>
+      <tns:campaignDetails>
+         <tns:id>7612</tns:id>
+         <tns:name>This is a really lo</tns:name>
+      </tns:campaignDetails>
+      <tns:customer>
+         <tns:id>100567</tns:id>
+         <tns:forename>Peter</tns:forename>
+         <tns:surname>Smith</tns:surname>
+         <tns:email>peter.smith@example.com</tns:email>
+         <tns:age>45</tns:age>
+      </tns:customer>
+      <tns:premisesid>982</tns:premisesid>
+   </tns:campaign>
+   <tns:campaign>
+      <tns:campaignDetails>
+         <tns:id>7613</tns:id>
+         <tns:name>Another campaign</tns:name>
+      </tns:campaignDetails>
+      <tns:customer>
+         <tns:id>100845</tns:id>
+         <tns:forename>John</tns:forename>
+         <tns:surname>Jackson</tns:surname>
+         <tns:email>jjackson@example.com</tns:email>
+         <tns:age>29</tns:age>
+      </tns:customer>
+      <tns:premisesid>1908</tns:premisesid>
+   </tns:campaign>
+   <tns:campaign>
+      <tns:campaignDetails>
+         <tns:id>7614</tns:id>
+         <tns:name>Another campaign</tns:name>
+      </tns:campaignDetails>
+      <tns:customer>
+         <tns:id>104009</tns:id>
+         <tns:forename>Simon</tns:forename>
+         <tns:surname>Atkins</tns:surname>
+         <tns:email>simon.a@example.com</tns:email>
+         <tns:age>50</tns:age>
+      </tns:customer>
+      <tns:premisesid>1908</tns:premisesid>
+   </tns:campaign>
+</tns:campaignRequest>

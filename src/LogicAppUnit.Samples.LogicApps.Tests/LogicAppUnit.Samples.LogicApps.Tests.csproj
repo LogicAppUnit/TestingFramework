@@ -25,6 +25,8 @@
     <None Remove="BuiltInConnectorWorkflow\MockData\SQL_Request.json" />
     <None Remove="BuiltInConnectorWorkflow\MockData\SQL_Request_en_GB.json" />
     <None Remove="BuiltInConnectorWorkflow\MockData\SQL_Request_xx_GB.json" />
+    <None Remove="CallDataMapperWorkflow\MockData\WorkflowRequest.xml" />
+    <None Remove="CallDataMapperWorkflow\MockData\WorkflowResponse.xml" />
     <None Remove="FluentWorkflow\MockData\Response.ClueXml.xml" />
     <None Remove="FluentWorkflow\MockData\Response.json" />
     <None Remove="FluentWorkflow\MockData\Response.txt" />
@@ -46,6 +48,8 @@
     <EmbeddedResource Include="BuiltInConnectorWorkflow\MockData\ServiceBus_Request_NoLanguageCode.json" />
     <EmbeddedResource Include="BuiltInConnectorWorkflow\MockData\SQL_Request_xx_GB.json" />
     <EmbeddedResource Include="BuiltInConnectorWorkflow\MockData\SQL_Request_en_GB.json" />
+    <EmbeddedResource Include="CallDataMapperWorkflow\MockData\WorkflowRequest.xml" />
+    <EmbeddedResource Include="CallDataMapperWorkflow\MockData\WorkflowResponse.xml" />
     <EmbeddedResource Include="FluentWorkflow\MockData\Response.ClueXml.xml" />
     <EmbeddedResource Include="FluentWorkflow\MockData\Response.json" />
     <EmbeddedResource Include="FluentWorkflow\MockData\Response.txt" />
