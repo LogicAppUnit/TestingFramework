@@ -277,7 +277,7 @@ namespace LogicAppUnit
 
             _connections = new ConnectionsWrapper(ReadFromPath(Path.Combine(logicAppBasePath, Constants.CONNECTIONS), optional: true), _localSettings);
 
-            _connections.ReplaceManagedApiConnectionUrlsWithMockServer();
+            _connections.ReplaceManagedApiConnectionUrlsWithMockServer(_testConfig.Workflow?.ManagedApisToMock);
 
             // The Functions runtime will not start if there are any Managed API connections using the 'ManagedServiceIdentity' authentication type
             // Check for this so that the test will fail early with a meaningful error message
