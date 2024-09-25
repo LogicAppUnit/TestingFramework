@@ -93,6 +93,22 @@ namespace LogicAppUnit.Hosting
         }
 
         /// <summary>
+        /// Gets the request URI for the 'Get Workflow Run' operation.
+        /// </summary>
+        /// <param name="workflowName">The workflow name.</param>
+        /// <param name="runId">The run id.</param>
+        public static string GetGetWorkflowRunRequestUri(string workflowName, string runId)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "{0}/{1}/runs/{2}?api-version={3}",
+                    TestEnvironment.ManagementWorkflowBaseUrl,
+                    workflowName,
+                    runId,
+                    TestEnvironment.EdgePreview20191001ApiVersion);
+        }
+
+        /// <summary>
         /// Gets the request URI for the 'List Workflow Run Actions' operation.
         /// </summary>
         /// <param name="workflowName">The workflow name.</param>

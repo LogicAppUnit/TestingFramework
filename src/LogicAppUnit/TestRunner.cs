@@ -502,16 +502,28 @@ namespace LogicAppUnit
         /// <returns>The response from the workflow.</returns>
         private HttpResponseMessage PollAndReturnFinalWorkflowResponse(HttpRequestMessage httpRequestMessage)
         {
+            HttpResponseMessage initialWorkflowResponse;
             HttpResponseMessage asyncWorkflowResponse = null;
 
             // Call the endpoint for the HTTP trigger
             // If a workflow doesn't include a Response action, the endpoint responds immediately with a HTTP 202 (Accepted) status
             // If a workflow includes an asynchronous Response action, the endpoint responds immediately with a HTTP 202 (Accepted) status and a callback URL to get the asynchronous response
-            var initialWorkflowResponse = _client.SendAsync(httpRequestMessage).Result;
+            try
+            {
+                initialWorkflowResponse = _client.SendAsync(httpRequestMessage).Result;
+            }
+            catch (AggregateException aex) when (aex.InnerException is System.Threading.Tasks.TaskCanceledException)
+            {
+                // This occurs when the trigger API does not respond
+                throw new TestException($"The API call to the workflow trigger did not respond within the required time. URL: {httpRequestMessage.RequestUri.AbsoluteUri}.");
+            }
 
             // Store some of the run metadata for test assertions, this may not exist for stateless workflows or for workflows with asynchronous responses 
             _runId = GetHeader(initialWorkflowResponse.Headers, "x-ms-workflow-run-id");
             _clientTrackingId = GetHeader(initialWorkflowResponse.Headers, "x-ms-client-tracking-id");
+
+            //if (string.IsNullOrEmpty(_runId))
+            //    throw new TestException("The Run Id was not provided in the response when triggering the workflow.");
 
             // Check for and handle asynchronous response
             var callbackLocation = initialWorkflowResponse.Headers?.Location;
@@ -556,9 +568,11 @@ namespace LogicAppUnit
             while (stopwatch.Elapsed < TimeSpan.FromSeconds(_runnerConfig.MaxWorkflowExecutionDuration))
             {
                 using (var latestWorkflowHttpResponse = _client.GetAsync(TestEnvironment.GetListWorkflowRunsRequestUri(_workflowDefinition.WorkflowName)).Result)
+                //using (var latestWorkflowHttpResponse = _client.GetAsync(TestEnvironment.GetGetWorkflowRunRequestUri(_workflowDefinition.WorkflowName, _runId)).Result)
                 {
                     var latestWorkflowHttpResponseContent = latestWorkflowHttpResponse.Content.ReadAsAsync<JToken>().Result;
                     var runStatusOfWorkflow = latestWorkflowHttpResponseContent["value"]?[0]?["properties"]?["status"]?.ToString();
+                    //var runStatusOfWorkflow = latestWorkflowHttpResponseContent["properties"]?["status"]?.ToString();
 
                     if (string.IsNullOrEmpty(runStatusOfWorkflow))
                     {
