@@ -132,6 +132,13 @@ namespace LogicAppUnit
         /// </summary>
         public List<string> BuiltInConnectorsToMock { get; set; } = new List<string>();
 
+
+        /// <summary>
+        /// List of managed api connectors where the actions are to be replaced with HTTP actions referencing the test mock server.
+        /// </summary>
+        public List<string> ManagedApisToMock { get; set; } = new List<string>();
+
+
         /// <summary>
         /// <c>true</c> if the test framework automatically configures the <i>OperationOptions</i> setting to <i>WithStatelessRunHistory</i> for a stateless workflow, otherwise <c>false</c>.
         /// </summary>

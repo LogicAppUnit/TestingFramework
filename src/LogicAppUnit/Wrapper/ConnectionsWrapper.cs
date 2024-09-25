@@ -46,13 +46,20 @@ namespace LogicAppUnit.Wrapper
 
         /// <summary>
         /// Update the <i>connections</i> by replacing all URL references to managed API connectors with the URL reference for the mock test server.
+        /// <param name="managedApisToMock">The list of managed API connections to mock, or <c>null</c> if the file does not exist.</param>
         /// </summary>
-        public void ReplaceManagedApiConnectionUrlsWithMockServer()
+        
+        public void ReplaceManagedApiConnectionUrlsWithMockServer(List<string> managedApisToMock)
         {
             if (_jObjectConnection == null)
                 return;
 
             var managedApiConnections = _jObjectConnection.SelectToken("managedApiConnections").Children<JProperty>().ToList();
+
+            // If no managed apis are specified then all managed apis are mocked
+            if (managedApisToMock != null && managedApisToMock.Count > 0)
+                managedApiConnections = managedApiConnections.Where(con => managedApisToMock.Contains(con.Name)).ToList();
+
             if (managedApiConnections.Count > 0)
             {
                 Console.WriteLine("Updating connections file for managed API connectors:");
