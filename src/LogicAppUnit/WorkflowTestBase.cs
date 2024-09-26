@@ -30,7 +30,7 @@ namespace LogicAppUnit
 
         private string _parameters;
         private string _host;
-
+        private CsxTestInput[] _csxTestInputs;
         private bool _workflowIsInitialised = false;
 
         #region Lifetime management
@@ -158,6 +158,11 @@ namespace LogicAppUnit
             _parameters = ReadFromPath(Path.Combine(logicAppBasePath, Constants.PARAMETERS), optional: true);
             _host = ReadFromPath(Path.Combine(logicAppBasePath, Constants.HOST));
 
+            _csxTestInputs = new DirectoryInfo(logicAppBasePath)
+                .GetFiles("*.csx", SearchOption.AllDirectories)
+                .Select(x => new CsxTestInput(File.ReadAllText(x.FullName), Path.GetRelativePath(logicAppBasePath, x.DirectoryName), x.Name))
+                .ToArray();
+
             // If this is a stateless workflow and the 'OperationOptions' is not 'WithStatelessRunHistory'...
             if (_workflowDefinition.WorkflowType == WorkflowType.Stateless && _localSettings.GetWorkflowOperationOptionsValue(_workflowDefinition.WorkflowName) != workflowOperationOptionsRunHistory)
             {
@@ -218,10 +223,18 @@ namespace LogicAppUnit
             }
 
             return new TestRunner(
-                _testConfig.Logging, _testConfig.Runner,
+                _testConfig.Logging,
+                _testConfig.Runner,
                 _client,
                 _mockResponses,
-                _workflowDefinition, _localSettings, _host, _parameters, _connections, _artifactDirectory, _customLibraryDirectory);
+                _workflowDefinition,
+                _localSettings,
+                _host,
+                _parameters,
+                _connections,
+                _csxTestInputs,
+                _artifactDirectory,
+                _customLibraryDirectory);
         }
 
         #endregion Create test runner

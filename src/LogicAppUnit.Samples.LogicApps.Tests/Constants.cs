@@ -15,6 +15,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests
         public static readonly string FLUENT_REQUEST_MATCHING_WORKFLOW = "fluent-workflow";
         public static readonly string HTTP_WORKFLOW = "http-workflow";
         public static readonly string HTTP_ASYNC_WORKFLOW = "http-async-workflow";
+        public static readonly string INLINE_SCRIPT_WORKFLOW = "inline-script-workflow";
         public static readonly string INVOKE_WORKFLOW = "invoke-workflow";
         public static readonly string LOOP_WORKFLOW = "loop-workflow";
         public static readonly string MANAGED_API_CONNECTOR_WORKFLOW = "managed-api-connector-workflow";

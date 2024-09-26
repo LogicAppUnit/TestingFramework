@@ -54,6 +54,7 @@
     <EmbeddedResource Include="FluentWorkflow\MockData\Response.json" />
     <EmbeddedResource Include="FluentWorkflow\MockData\Response.txt" />
     <EmbeddedResource Include="HttpWorkflow\MockData\SystemTwo_Request.json" />
+    <EmbeddedResource Include="InlineScriptWorkflow\MockData\Execute_CSharp_Script_Code_Output.json" />
     <EmbeddedResource Include="InvokeWorkflow\MockData\AddToPriorityQueueRequest.json" />
     <EmbeddedResource Include="InvokeWorkflow\MockData\InvokeWorkflowNotPriorityRequest.json" />
     <EmbeddedResource Include="InvokeWorkflow\MockData\InvokeWorkflowPriorityRequest.json" />
