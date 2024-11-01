@@ -162,7 +162,7 @@ namespace LogicAppUnit
             string host,
             string parameters = null,
             ConnectionsWrapper connections = null,
-            CsxTestInput[] csxTestInputs = null,
+            CsxWrapper[] csxTestInputs = null,
             DirectoryInfo artifactsDirectory = null,
             DirectoryInfo customLibraryDirectory = null)
         {

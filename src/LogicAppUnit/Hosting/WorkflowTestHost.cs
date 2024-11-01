@@ -1,4 +1,5 @@
 ﻿using LogicAppUnit.InternalHelper;
+using LogicAppUnit.Wrapper;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -43,7 +44,7 @@ namespace LogicAppUnit.Hosting
         public WorkflowTestHost(
             WorkflowTestInput[] inputs = null,
             string localSettings = null, string parameters = null, string connectionDetails = null, string host = null,
-            CsxTestInput[] csxTestInputs = null, DirectoryInfo artifactsDirectory = null, DirectoryInfo customLibraryDirectory = null,
+            CsxWrapper[] csxTestInputs = null, DirectoryInfo artifactsDirectory = null, DirectoryInfo customLibraryDirectory = null,
             bool writeFunctionRuntimeStartupLogsToConsole = false)
         {
             this.OutputData = new List<string>();
@@ -60,7 +61,7 @@ namespace LogicAppUnit.Hosting
         /// </summary>
         protected void CreateWorkingFilesRequiredForTest(WorkflowTestInput[] inputs,
             string localSettings, string parameters, string connectionDetails, string host,
-            CsxTestInput[] csxTestInputs, DirectoryInfo artifactsDirectory, DirectoryInfo customLibraryDirectory)
+            CsxWrapper[] csxTestInputs, DirectoryInfo artifactsDirectory, DirectoryInfo customLibraryDirectory)
         {
             if (inputs != null && inputs.Length > 0)
             {
@@ -77,6 +78,7 @@ namespace LogicAppUnit.Hosting
             CreateWorkingFile(connectionDetails, Constants.CONNECTIONS);
 
             WriteCsxFilesToWorkingFolder(csxTestInputs);
+
             CopySourceFolderToWorkingFolder(artifactsDirectory, Constants.ARTIFACTS_FOLDER);
             CopySourceFolderToWorkingFolder(customLibraryDirectory, Constants.CUSTOM_LIB_FOLDER);
         }
@@ -309,10 +311,10 @@ namespace LogicAppUnit.Hosting
         }
 
         /// <summary>
-        /// Writes the C# script files to the working folder
+        /// Writes the C# script files to the working folder.
         /// </summary>
-        /// <param name="csxTestInputs"></param>
-        private void WriteCsxFilesToWorkingFolder(CsxTestInput[] csxTestInputs)
+        /// <param name="csxTestInputs">The csx files.</param>
+        private void WriteCsxFilesToWorkingFolder(CsxWrapper[] csxTestInputs)
         {
             foreach (var csxTestInput in csxTestInputs)
             {
