@@ -2,7 +2,7 @@
 
 LogicAppUnit Testing Framework:
 
-- The testing of workflows that call in-line C# script (.csx) files is now supported. The .csx script files are copies to the test working directory and are not mocked. [[PR #35](https://github.com/LogicAppUnit/TestingFramework/pull/35), [@sschutten](https://github.com/sschutten)]
+- The testing of workflows that call in-line C# is now supported. The .csx script files are copied to the test working directory and are not mocked. [[PR #35](https://github.com/LogicAppUnit/TestingFramework/pull/35), [@sschutten](https://github.com/sschutten)]
 - Added a new configuration option `workflow.managedApisToMock` in the `testConfiguration.json` file to control which Managed API connectors are mocked. If this configuration is not set, all Managed API connectors are mocked - this ensures backwards compatabiity with previous versions. [[PR #38](https://github.com/LogicAppUnit/TestingFramework/pull/38), [@zzznz27](https://github.com/zzznz27)]
 
 LogicAppUnit.Samples.LogicApps.Tests:
