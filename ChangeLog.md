@@ -1,3 +1,16 @@
+# 1.10.0 (4th November 2024)
+
+LogicAppUnit Testing Framework:
+
+- The testing of workflows that call in-line C# script (.csx) files is now supported. The .csx script files are copies to the test working directory and are not mocked. [[PR #35](https://github.com/LogicAppUnit/TestingFramework/pull/35), [@sschutten](https://github.com/sschutten)]
+- Added a new configuration option `workflow.managedApisToMock` in the `testConfiguration.json` file to control which Managed API connectors are mocked. If this configuration is not set, all Managed API connectors are mocked - this ensures backwards compatabiity with previous versions. [[PR #38](https://github.com/LogicAppUnit/TestingFramework/pull/38), [@zzznz27](https://github.com/zzznz27)]
+
+LogicAppUnit.Samples.LogicApps.Tests:
+
+- Added a `call-data-mapper-workflow` workflow and unit tests to test workflows that call the data mapper.
+- Added a `inline-script-workflow` workflow and unit tests to test workflows that call in-line C# script (.csx) files.
+
+
 # 1.9.0 (23rd January 2024)
 
 LogicAppUnit Testing Framework:
