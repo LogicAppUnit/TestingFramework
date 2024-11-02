@@ -1,17 +1,11 @@
 ﻿using LogicAppUnit.Helper;
-using LogicAppUnit.Mocking;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 
 namespace LogicAppUnit.Samples.LogicApps.Tests.InlineScriptWorkflow
 {
     /// <summary>
-    /// Test cases for the <i>http-workflow</i> workflow which uses a synchronous response for the HTTP trigger.
+    /// Test cases for the <i>inline-script-workflow</i> workflow which calls a C# script (.csx).
     /// </summary>
     [TestClass]
     public class InlineScriptWorkflowTest : WorkflowTestBase
@@ -29,7 +23,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.InlineScriptWorkflow
         }
 
         /// <summary>
-        /// Tests that the correct response is returned when the HTTP call to the Service Two API to update the customer details is successful.
+        /// Tests that the correct response is returned when the call to the C# script (.csx) is successful.
         /// </summary>
         [TestMethod]
         public void InlineScriptWorkflowTest_When_Successful()
