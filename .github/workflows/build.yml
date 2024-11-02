@@ -56,7 +56,7 @@ jobs:
       run: 'func'
 
     - name: Install Azurite
-      run: 'npm install -g azurite@3.24.0'
+      run: 'npm install -g azurite@3.33.0'
 
     - name: Start Azurite services
       run: 'azurite &'
