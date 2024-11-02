@@ -115,8 +115,8 @@ namespace LogicAppUnit.Hosting
                     var outputData = args.Data;
 
                     // Ignore the performance counter logging which is just noise in the function logs
-                    // if (outputData.Contains("App perf counters:"))
-                    //     return;
+                    if (outputData != null && outputData.Contains("App perf counters:"))
+                        return;
         
                     if (WriteFunctionRuntimeStartupLogsToConsole || processStarted.Task.IsCompleted)
                     {
