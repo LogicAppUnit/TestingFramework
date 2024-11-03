@@ -1,6 +1,6 @@
 ﻿{
   "logging": {
-    "writeFunctionRuntimeStartupLogs": true,
+    "writeFunctionRuntimeStartupLogs": false,
     "WriteMockRequestMatchingLogs":  true
   },
 
