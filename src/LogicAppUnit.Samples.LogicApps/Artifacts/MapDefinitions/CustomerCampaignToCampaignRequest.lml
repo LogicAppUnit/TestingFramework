@@ -1,0 +1,26 @@
+$version: 1
+$input: XML
+$output: XML
+$sourceSchema: CustomerCampaign.xsd
+$targetSchema: CampaignRequest.xsd
+$sourceNamespaces:
+  ns0: http://schemas.logicappunit.net/CustomerCampaign/v1
+  xs: http://www.w3.org/2001/XMLSchema
+$targetNamespaces:
+  tns: http://schemas.logicappunit.net/CampaignRequest
+  xs: http://www.w3.org/2001/XMLSchema
+tns:campaignRequest:
+  $@numberOfCampaigns: count(/ns0:CustomerCampaigns/ns0:Campaign)
+  $for(/ns0:CustomerCampaigns/ns0:Campaign):
+    tns:campaign:
+      tns:campaignDetails:
+        tns:id: ns0:CampaignId
+        tns:name: substring(ns0:CampaignName, 0, 20)
+      tns:customer:
+        tns:id: ns0:CustomerId
+        tns:forename: substring(ns0:FirstName, 0, 40)
+        tns:surname: substring(ns0:LastName, 0, 40)
+        tns:email: ns0:Email
+        tns:age: ns0:Age
+      tns:premisesid: ns0:SiteCode
+

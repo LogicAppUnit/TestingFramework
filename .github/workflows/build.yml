@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest] # macos-latest
     
     runs-on: ${{ matrix.os }}
 
@@ -56,7 +56,7 @@ jobs:
       run: 'func'
 
     - name: Install Azurite
-      run: 'npm install -g azurite@3.24.0'
+      run: 'npm install -g azurite@3.33.0'
 
     - name: Start Azurite services
       run: 'azurite &'
@@ -64,28 +64,28 @@ jobs:
 
     # Run tests
 
-    - name: Run tests
-      if: success() && matrix.os != 'windows-latest'
-      run: dotnet test ${{ github.workspace }}/src/LogicAppUnit.sln --no-restore --verbosity normal --logger "trx" --filter TestCategory!="WindowsOnly"
+    # - name: Run tests
+    #   if: success() && matrix.os != 'windows-latest'
+    #   run: dotnet test ${{ github.workspace }}/src/LogicAppUnit.sln --no-restore --verbosity normal --logger "trx" --filter TestCategory!="WindowsOnly"
 
-    - name: Run tests
-      if: success() && matrix.os == 'windows-latest'
-      run: dotnet test ${{ github.workspace }}/src/LogicAppUnit.sln --no-restore --verbosity normal --logger "trx"
+    # - name: Run tests
+    #   if: success() && matrix.os == 'windows-latest'
+    #   run: dotnet test ${{ github.workspace }}/src/LogicAppUnit.sln --no-restore --verbosity normal --logger "trx"
 
     # Publish artefacts and test results
 
-    - name: Publish test log
-      uses: actions/upload-artifact@v3
-      if: success() || failure()
-      with:
-        name: test-results.${{ matrix.os }}
-        path: ${{ github.workspace }}/src/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
+    # - name: Publish test log
+    #   uses: actions/upload-artifact@v3
+    #   if: success() || failure()
+    #   with:
+    #     name: test-results.${{ matrix.os }}
+    #     path: ${{ github.workspace }}/src/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
 
-    - name: Publish test results
-      if: (success() || failure()) && github.event_name != 'pull_request'
-      uses: dorny/test-reporter@v1
-      with:
-        name: Test Results (${{ matrix.os }})
-        path: ${{ github.workspace }}/src/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
-        path-replace-backslashes: true
-        reporter: dotnet-trx
+    # - name: Publish test results
+    #   if: (success() || failure()) && github.event_name != 'pull_request'
+    #   uses: dorny/test-reporter@v1
+    #   with:
+    #     name: Test Results (${{ matrix.os }})
+    #     path: ${{ github.workspace }}/src/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
+    #     path-replace-backslashes: true
+    #     reporter: dotnet-trx

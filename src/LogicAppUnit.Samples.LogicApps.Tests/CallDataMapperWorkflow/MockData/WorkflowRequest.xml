@@ -1,0 +1,32 @@
+<CustomerCampaigns xmlns="http://schemas.logicappunit.net/CustomerCampaign/v1">
+  <Campaign>
+    <CampaignId>7612</CampaignId>
+    <CampaignName>This is a really long campaign name that will be shortened</CampaignName>
+    <CustomerId>100567</CustomerId>
+    <FirstName>Peter</FirstName>
+    <LastName>Smith</LastName>
+    <Email>peter.smith@example.com</Email>
+    <Age>45</Age>
+    <SiteCode>982</SiteCode>
+  </Campaign>
+  <Campaign>
+    <CampaignId>7613</CampaignId>
+    <CampaignName>Another campaign</CampaignName>
+    <CustomerId>100845</CustomerId>
+    <FirstName>John</FirstName>
+    <LastName>Jackson</LastName>
+    <Email>jjackson@example.com</Email>
+    <Age>29</Age>
+    <SiteCode>1908</SiteCode>
+  </Campaign>
+  <Campaign>
+    <CampaignId>7614</CampaignId>
+    <CampaignName>Another campaign</CampaignName>
+    <CustomerId>104009</CustomerId>
+    <FirstName>Simon</FirstName>
+    <LastName>Atkins</LastName>
+    <Email>simon.a@example.com</Email>
+    <Age>50</Age>
+    <SiteCode>1908</SiteCode>
+  </Campaign>
+</CustomerCampaigns>

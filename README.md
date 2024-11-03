@@ -41,7 +41,7 @@ This code repository includes four projects:
 
 Download the *LogicAppUnit* testing framework package from nuget: https://www.nuget.org/packages/LogicAppUnit/
 
-[![NuGet Badge](https://buildstats.info/nuget/LogicAppUnit)](https://www.nuget.org/packages/LogicAppUnit)
+[![NuGet Version Badge](https://img.shields.io/nuget/v/LogicAppUnit)](https://www.nuget.org/packages/LogicAppUnit) [![NuGet Download Badge](https://img.shields.io/nuget/dt/LogicAppUnit)](https://www.nuget.org/packages/LogicAppUnit)
 
 
 ## Compatibility

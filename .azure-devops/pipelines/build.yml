@@ -77,7 +77,7 @@ jobs:
       displayName: 'Install Azurite'
       inputs:
         command: 'custom'
-        customCommand: 'install -g azurite@3.24.0'
+        customCommand: 'install -g azurite@3.33.0'
 
     - task: CmdLine@2
       displayName: 'Start Azurite services (not Windows)'

@@ -27,10 +27,10 @@ namespace LogicAppUnit
         private WorkflowDefinitionWrapper _workflowDefinition;
         private LocalSettingsWrapper _localSettings;
         private ConnectionsWrapper _connections;
+        private CsxWrapper[] _csxTestInputs;
 
         private string _parameters;
         private string _host;
-        private CsxTestInput[] _csxTestInputs;
         private bool _workflowIsInitialised = false;
 
         #region Lifetime management
@@ -158,9 +158,11 @@ namespace LogicAppUnit
             _parameters = ReadFromPath(Path.Combine(logicAppBasePath, Constants.PARAMETERS), optional: true);
             _host = ReadFromPath(Path.Combine(logicAppBasePath, Constants.HOST));
 
+            // Find all of the csx files that are used by the Logic App
+            // These files can be located anywhere in the folder structure
             _csxTestInputs = new DirectoryInfo(logicAppBasePath)
                 .GetFiles("*.csx", SearchOption.AllDirectories)
-                .Select(x => new CsxTestInput(File.ReadAllText(x.FullName), Path.GetRelativePath(logicAppBasePath, x.DirectoryName), x.Name))
+                .Select(x => new CsxWrapper(File.ReadAllText(x.FullName), Path.GetRelativePath(logicAppBasePath, x.DirectoryName), x.Name))
                 .ToArray();
 
             // If this is a stateless workflow and the 'OperationOptions' is not 'WithStatelessRunHistory'...
@@ -290,7 +292,7 @@ namespace LogicAppUnit
 
             _connections = new ConnectionsWrapper(ReadFromPath(Path.Combine(logicAppBasePath, Constants.CONNECTIONS), optional: true), _localSettings);
 
-            _connections.ReplaceManagedApiConnectionUrlsWithMockServer(_testConfig.Workflow?.ManagedApisToMock);
+            _connections.ReplaceManagedApiConnectionUrlsWithMockServer(_testConfig.Workflow.ManagedApisToMock);
 
             // The Functions runtime will not start if there are any Managed API connections using the 'ManagedServiceIdentity' authentication type
             // Check for this so that the test will fail early with a meaningful error message
