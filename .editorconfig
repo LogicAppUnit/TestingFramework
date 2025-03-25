@@ -1,12 +1,13 @@
 ; This file is for unifying the coding style for different editors and IDEs.
 ; More information at http://EditorConfig.org
 
-# top-most EditorConfig file
 root = true
 
-# Don't use tabs for indentation
+# All files
 [*]
 indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
 
 # Code files
 [*.{cs,csx}]
@@ -38,3 +39,13 @@ dotnet_diagnostic.CA1310.severity = none
 #   Underscores are acceptable for unit test names.
 [*.cs]
 dotnet_diagnostic.CA1707.severity = none
+
+# CA1852: Seal internal types
+#   Sealing classes provides minimal performance improvements and is not a concern.
+[*.cs]
+dotnet_diagnostic.CA1852.severity = none
+
+# CA1866: Use 'string.Method(char)' instead of 'string.Method(string)' for string with single char
+#   Implementing this causes the unit tests to break on macOS and Linux platforms!
+[*.cs]
+dotnet_diagnostic.CA1866.severity = none

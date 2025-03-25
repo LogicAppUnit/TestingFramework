@@ -152,7 +152,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.ManagedApiConnectorWorkflow
             }
         }
 
-        private static HttpContent GetRequest()
+        private static StringContent GetRequest()
         {
             return ContentHelper.CreateJsonStringContent(new
             {
