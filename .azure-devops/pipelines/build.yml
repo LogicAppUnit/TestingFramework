@@ -24,9 +24,9 @@ jobs:
       Windows:
         imageName: 'windows-latest'
         matrixName: Windows
-      #Mac:
-      #  imageName: 'macOS-latest'
-      #  matrixName: Mac
+      Mac:
+       imageName: 'macOS-latest'
+       matrixName: Mac
 
   pool:
     vmImage: $(imageName)
@@ -34,13 +34,6 @@ jobs:
   steps:
 
     # Build .NET solution
-
-    - task: UseDotNet@2
-      displayName: 'Setup .NET'
-      inputs:
-        packageType: sdk
-        version: '6.x'
-        installationPath: $(Agent.ToolsDirectory)/dotnet
 
     - task: DotNetCoreCLI@2
       displayName: 'Restore dependencies'
@@ -58,26 +51,16 @@ jobs:
 
     # Install and configure Logic Apps runtime environment
 
-    - task: NodeTool@0
-      displayName: 'Setup node'
-      inputs:
-        versionSpec: '18.x'
-
     - task: FuncToolsInstaller@0
       displayName: 'Install Functions core tools'
       inputs:
         version: 'latest'
 
-    - task: CmdLine@2
-      displayName: 'Check Functions Core tools installation'
-      inputs:
-        script: func
-
     - task: Npm@1
       displayName: 'Install Azurite'
       inputs:
         command: 'custom'
-        customCommand: 'install -g azurite@3.33.0'
+        customCommand: 'install -g azurite@3.34.0'
 
     - task: CmdLine@2
       displayName: 'Start Azurite services (not Windows)'
@@ -90,6 +73,23 @@ jobs:
       condition: and(succeeded(), eq(variables.matrixName, 'Windows'))
       inputs:
         script: 'start /b azurite'
+
+    # Check software versions
+
+    - task: CmdLine@2
+      displayName: 'Check dotnet SDK installation'
+      inputs:
+        script: dotnet --info
+
+    - task: CmdLine@2
+      displayName: 'Check node installation'
+      inputs:
+        script: node --version
+
+    - task: CmdLine@2
+      displayName: 'Check Functions Core tools installation'
+      inputs:
+        script: func --version
 
     # Run tests and publish test results to Azure DevOps
 
@@ -104,16 +104,16 @@ jobs:
         publishTestResults: true
         testRunTitle: 'Tests ($(matrixName))'
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Run tests (Windows)'
-      condition: and(succeeded(), eq(variables.matrixName, 'Windows'))
-      continueOnError: true
-      inputs:
-        command: test
-        arguments: '--no-restore --verbosity normal --configuration ${{ parameters.buildConfiguration }}'
-        projects: '$(System.DefaultWorkingDirectory)/src/LogicAppUnit.sln'
-        publishTestResults: true
-        testRunTitle: 'Tests ($(matrixName))'
+    # - task: DotNetCoreCLI@2                            # there is an issue with Azurite ports being blocked when running tests on Windows build servers
+    #   displayName: 'Run tests (Windows)'
+    #   condition: and(succeeded(), eq(variables.matrixName, 'Windows'))
+    #   continueOnError: true
+    #   inputs:
+    #     command: test
+    #     arguments: '--no-restore --verbosity normal --configuration ${{ parameters.buildConfiguration }}'
+    #     projects: '$(System.DefaultWorkingDirectory)/src/LogicAppUnit.sln'
+    #     publishTestResults: true
+    #     testRunTitle: 'Tests ($(matrixName))'
 
     # Publish NuGet package
 

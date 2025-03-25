@@ -155,8 +155,7 @@ namespace LogicAppUnit.Mocking
         /// <returns>The HTTP response message.</returns>
         public async Task<HttpResponseMessage> MatchRequestAndBuildResponseAsync(HttpRequestMessage request)
         {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
+            ArgumentNullException.ThrowIfNull(request);
 
             // Cache the mock request to enable test assertions
             // Include anything that might be useful to the test author to validate the workflow

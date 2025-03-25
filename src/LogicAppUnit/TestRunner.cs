@@ -102,7 +102,7 @@ namespace LogicAppUnit
         {
             get
             {
-                return (WorkflowRunStatus)Enum.Parse(typeof(WorkflowRunStatus), _apiHelper.WorkflowRunContent()["properties"]["status"].ToString());
+                return Enum.Parse<WorkflowRunStatus>(_apiHelper.WorkflowRunContent()["properties"]["status"].ToString());
             }
         }
 
@@ -143,12 +143,12 @@ namespace LogicAppUnit
         /// <param name="loggingConfig">The logging configuration for the test execution.</param>
         /// <param name="runnerConfig">The test runner configuration for the test execution.</param>
         /// <param name="client">The HTTP client.</param>
+        /// <param name="host">The contents of the host file.</param>
         /// <param name="mockResponsesFromBase">Mock responses that have been configured in the test base class.</param>
         /// <param name="workflowDefinition">The workflow definition file.</param>
-        /// <param name="localSettings">The local settings file.</param>
-        /// <param name="host">The contents of the host file.</param>
-        /// <param name="parameters">The contents of the parameters file, or <c>null</c> if the file does not exist.</param>
-        /// <param name="connections">The connections file, or <c>null</c> if the file does not exist.</param>
+        /// <param name="localSettings">The local settings file wrapper.</param>
+        /// <param name="parameters">The parameters file wrapper.</param>
+        /// <param name="connections">The connections file wrapper.</param>
         /// <param name="csxTestInputs">A collection of C# script files or <c>null</c> if there are none.</param>
         /// <param name="artifactsDirectory">The (optional) artifacts directory containing maps and schemas that are used by the workflow being tested.</param>
         /// <param name="customLibraryDirectory">The (optional) custom library (lib/custom) directory containing custom components that are used by the workflow being tested.</param>
@@ -156,28 +156,22 @@ namespace LogicAppUnit
             TestConfigurationLogging loggingConfig,
             TestConfigurationRunner runnerConfig,
             HttpClient client,
+            string host,
             List<MockResponse> mockResponsesFromBase,
             WorkflowDefinitionWrapper workflowDefinition,
             LocalSettingsWrapper localSettings,
-            string host,
-            string parameters = null,
-            ConnectionsWrapper connections = null,
+            ParametersWrapper parameters,
+            ConnectionsWrapper connections,
             CsxWrapper[] csxTestInputs = null,
             DirectoryInfo artifactsDirectory = null,
             DirectoryInfo customLibraryDirectory = null)
         {
-            if (loggingConfig == null)
-                throw new ArgumentNullException(nameof(loggingConfig));
-            if (runnerConfig == null)
-                throw new ArgumentNullException(nameof(runnerConfig));
-            if (client == null)
-                throw new ArgumentNullException(nameof(client));
-            if (mockResponsesFromBase == null)
-                throw new ArgumentNullException(nameof(mockResponsesFromBase));
-            if (workflowDefinition == null)
-                throw new ArgumentNullException(nameof(workflowDefinition));
-            if (localSettings == null)
-                throw new ArgumentNullException(nameof(localSettings));
+            ArgumentNullException.ThrowIfNull(loggingConfig);
+            ArgumentNullException.ThrowIfNull(runnerConfig);
+            ArgumentNullException.ThrowIfNull(client);
+            ArgumentNullException.ThrowIfNull(mockResponsesFromBase);
+            ArgumentNullException.ThrowIfNull(workflowDefinition);
+            ArgumentNullException.ThrowIfNull(localSettings);
 
             LoggingHelper.LogBanner("Starting test runner");
             //Console.WriteLine($"Max workflow duration: {runnerConfig.MaxWorkflowExecutionDuration} seconds");
@@ -190,8 +184,11 @@ namespace LogicAppUnit
             _runnerConfig = runnerConfig;
 
             var workflowTestInput = new WorkflowTestInput[] { new WorkflowTestInput(workflowDefinition.WorkflowName, workflowDefinition.ToString()) };
-            _workflowTestHost = new WorkflowTestHost(workflowTestInput, localSettings.ToString(), parameters, connections.ToString(), host,
-                                                        csxTestInputs, artifactsDirectory, customLibraryDirectory, loggingConfig.WriteFunctionRuntimeStartupLogs);
+            _workflowTestHost = new WorkflowTestHost(workflowTestInput,
+                                                        localSettings.ToString(), parameters.ToString(), connections.ToString(),
+                                                        host,
+                                                        csxTestInputs, artifactsDirectory, customLibraryDirectory,
+                                                        loggingConfig.WriteFunctionRuntimeStartupLogs);
             _apiHelper = new WorkflowApiHelper(client, workflowDefinition.WorkflowName);
 
             // Create the mock definition and mock HTTP host
@@ -218,7 +215,7 @@ namespace LogicAppUnit
             if (string.IsNullOrEmpty(actionName))
                 throw new ArgumentNullException(nameof(actionName));
 
-            JToken getActionFromRunHistory = _apiHelper.ActionsContent(WorkflowRunId).Where(actionResult => actionResult["name"].ToString().Equals(actionName)).FirstOrDefault();
+            JToken getActionFromRunHistory = _apiHelper.ActionsContent(WorkflowRunId).Where(actionResult => actionResult["name"].ToString().Equals(actionName, StringComparison.Ordinal)).FirstOrDefault();
 
             if (getActionFromRunHistory == null)
                 throw new TestException($"Action '{actionName}' was not found in the workflow run history.");
@@ -230,7 +227,7 @@ namespace LogicAppUnit
         public ActionStatus GetWorkflowActionStatus(string actionName)
         {
             JToken actionRunProperties = GetWorkflowAction(actionName);
-            return (ActionStatus)Enum.Parse(typeof(ActionStatus), actionRunProperties["status"].ToString());
+            return Enum.Parse<ActionStatus>(actionRunProperties["status"].ToString());
         }
 
         /// <inheritdoc cref="ITestRunner.GetWorkflowActionInput(string)" />
@@ -307,7 +304,7 @@ namespace LogicAppUnit
         public ActionStatus GetWorkflowActionStatus(string actionName, int repetitionNumber)
         {
             JToken actionRunRepetitionProperties = GetWorkflowActionRepetition(actionName, repetitionNumber);
-            return (ActionStatus)Enum.Parse(typeof(ActionStatus), actionRunRepetitionProperties["status"].ToString());
+            return Enum.Parse<ActionStatus>(actionRunRepetitionProperties["status"].ToString());
         }
 
         /// <inheritdoc cref="ITestRunner.GetWorkflowActionInput(string, int)" />
@@ -442,7 +439,8 @@ namespace LogicAppUnit
             {
                 // Include a list of the failed workflow actions to help with the investigations
                 List<JToken> failedActions = _apiHelper.ActionsContent(WorkflowRunId).Where(actionResult =>
-                    actionResult["properties"]["status"].ToString().Equals("Failed") || actionResult["properties"]["status"].ToString().Equals("Running")).ToList();
+                    actionResult["properties"]["status"].ToString().Equals("Failed", StringComparison.Ordinal) || 
+                    actionResult["properties"]["status"].ToString().Equals("Running", StringComparison.Ordinal)).ToList();
 
                 if (failedActions.Count > 0)
                 {

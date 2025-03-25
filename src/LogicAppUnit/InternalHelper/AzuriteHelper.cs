@@ -21,8 +21,7 @@ namespace LogicAppUnit.InternalHelper
         /// </remarks>
         internal static bool IsRunning(TestConfigurationAzurite config)
         {
-            if (config == null)
-                throw new ArgumentNullException(nameof(config));
+            ArgumentNullException.ThrowIfNull(config);
 
             // If Azurite is running, it will run on localhost (127.0.0.1)
             IPAddress expectedIp = new IPAddress(new byte[] { 127, 0, 0, 1 });

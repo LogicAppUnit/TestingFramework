@@ -25,11 +25,6 @@ jobs:
       uses: actions/checkout@v3
   
     # Build .NET solution
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 6.0.x
   
     - name: Restore dependencies
       run: dotnet restore ${{ github.workspace }}/src/LogicAppUnit.sln
@@ -39,11 +34,6 @@ jobs:
 
     # Install and configure Logic Apps runtime environment
 
-    - name: Setup node
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
-
     - name: Install Functions Core tools
       run: 'npm install -g azure-functions-core-tools@4 --unsafe-perm true'
 
@@ -52,40 +42,48 @@ jobs:
       run: 'setx /m Path "C:\npm\prefix\node_modules\azure-functions-core-tools\bin;%Path%"'
       shell: cmd
 
-    - name: Check Functions Core tools installation
-      run: 'func'
-
     - name: Install Azurite
-      run: 'npm install -g azurite@3.33.0'
+      run: 'npm install -g azurite@3.34.0'
 
     - name: Start Azurite services
       run: 'azurite &'
       shell: bash
 
+    # Check software versions
+
+    - name: Check dotnet SDK installation
+      run: 'dotnet --info'
+
+    - name: Check node installation
+      run: 'node --version'
+
+    - name: Check Functions Core tools installation
+      run: 'func --version'
+
     # Run tests
 
-    # - name: Run tests
-    #   if: success() && matrix.os != 'windows-latest'
-    #   run: dotnet test ${{ github.workspace }}/src/LogicAppUnit.sln --no-restore --verbosity normal --logger "trx" --filter TestCategory!="WindowsOnly"
+    - name: Run tests
+      if: success() && matrix.os != 'windows-latest'
+      run: dotnet test ${{ github.workspace }}/src/LogicAppUnit.sln --no-restore --verbosity normal --logger "trx" --filter TestCategory!="WindowsOnly"
 
-    # - name: Run tests
-    #   if: success() && matrix.os == 'windows-latest'
-    #   run: dotnet test ${{ github.workspace }}/src/LogicAppUnit.sln --no-restore --verbosity normal --logger "trx"
+    - name: Run tests
+      if: success() && matrix.os == 'windows-latest'
+      run: dotnet test ${{ github.workspace }}/src/LogicAppUnit.sln --no-restore --verbosity normal --logger "trx"
 
     # Publish artefacts and test results
 
-    # - name: Publish test log
-    #   uses: actions/upload-artifact@v3
-    #   if: success() || failure()
-    #   with:
-    #     name: test-results.${{ matrix.os }}
-    #     path: ${{ github.workspace }}/src/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
+    - name: Publish test log
+      uses: actions/upload-artifact@v4
+      if: success() || failure()
+      with:
+        name: test-results.${{ matrix.os }}
+        path: ${{ github.workspace }}/src/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
 
-    # - name: Publish test results
-    #   if: (success() || failure()) && github.event_name != 'pull_request'
-    #   uses: dorny/test-reporter@v1
-    #   with:
-    #     name: Test Results (${{ matrix.os }})
-    #     path: ${{ github.workspace }}/src/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
-    #     path-replace-backslashes: true
-    #     reporter: dotnet-trx
+    - name: Publish test results
+      if: (success() || failure()) && github.event_name != 'pull_request'
+      uses: dorny/test-reporter@v2
+      with:
+        name: Test Results (${{ matrix.os }})
+        path: ${{ github.workspace }}/src/LogicAppUnit.Samples.LogicApps.Tests/TestResults/*.trx
+        path-replace-backslashes: true
+        reporter: dotnet-trx
