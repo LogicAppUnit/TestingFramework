@@ -194,9 +194,9 @@ namespace LogicAppUnit.Helper
                 CommentHandling = CommentHandling.Ignore
             };
 
-            // Format the JSON by loading into a JObject and then extracting it as a string.
+            // Format the JSON by loading into a JToken and then extracting it as a string.
             // Perhaps a little heavy-handed, but it does the trick.
-            var obj = JObject.Parse(json, settings);
+            var obj = JToken.Parse(json, settings);
             return obj.ToString();
         }
 
