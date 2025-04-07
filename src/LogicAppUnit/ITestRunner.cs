@@ -72,10 +72,16 @@ namespace LogicAppUnit
         bool WorkflowWasTerminated { get; }
 
         /// <summary>
-        /// Gets the workflow termination code. This only applies when a workflow was terminated with failure.
+        /// Gets the workflow termination code as an integer value. This only applies when a workflow was terminated with failure.
         /// </summary>
         /// <returns>The workflow termination code, or <c>null</c> if the workflow was not terminated, or terminated with a status that was not failed.</returns>
         int? WorkflowTerminationCode { get; }
+
+        /// <summary>
+        /// Gets the workflow termination code as a string value. This only applies when a workflow was terminated with failure.
+        /// </summary>
+        /// <returns>The workflow termination code, or <c>null</c> if the workflow was not terminated, or terminated with a status that was not failed.</returns>
+        string WorkflowTerminationCodeAsString { get; }
 
         /// <summary>
         /// Gets the workflow termination message. This only applies when a workflow was terminated with failure.

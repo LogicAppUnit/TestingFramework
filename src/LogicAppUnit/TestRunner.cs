@@ -124,6 +124,15 @@ namespace LogicAppUnit
             }
         }
 
+        /// <inheritdoc cref="ITestRunner.WorkflowTerminationCodeAsString" />
+        public string WorkflowTerminationCodeAsString
+        {
+            get
+            {
+                return _apiHelper.WorkflowRunContent()["properties"]["error"]?["code"]?.ToObject<string>();
+            }
+        }
+
         /// <inheritdoc cref="ITestRunner.WorkflowTerminationMessage" />
         public string WorkflowTerminationMessage
         {
