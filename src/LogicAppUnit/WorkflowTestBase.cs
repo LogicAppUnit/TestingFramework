@@ -26,12 +26,12 @@ namespace LogicAppUnit
 
         private WorkflowDefinitionWrapper _workflowDefinition;
         private LocalSettingsWrapper _localSettings;
+        private ParametersWrapper _parameters;
         private ConnectionsWrapper _connections;
         private CsxWrapper[] _csxTestInputs;
 
-        private string _parameters;
         private string _host;
-        private bool _workflowIsInitialised = false;
+        private bool _workflowIsInitialised; // default = false
 
         #region Lifetime management
 
@@ -145,17 +145,17 @@ namespace LogicAppUnit
             if (_testConfig.Azurite.EnableAzuritePortCheck && !AzuriteHelper.IsRunning(_testConfig.Azurite))
                 throw new TestException($"Azurite is not running on ports {_testConfig.Azurite.BlobServicePort} (Blob service), {_testConfig.Azurite.QueueServicePort} (Queue service) and {_testConfig.Azurite.TableServicePort} (Table service). Logic App workflows cannot run unless all three services are running in Azurite");
 
-            // Process the workflow definition, local settings ans connection files
+            // Process the workflow definition, local settings, parameters and connection files
             ProcessWorkflowDefinitionFile(logicAppBasePath, workflowName);
             ProcessLocalSettingsFile(logicAppBasePath, localSettingsFilename);
+            ProcessParametersFile(logicAppBasePath);
             ProcessConnectionsFile(logicAppBasePath);
 
             // Set up the artifacts (schemas, maps) and custom library folders
             _artifactDirectory = SetSourceDirectory(logicAppBasePath, Constants.ARTIFACTS_FOLDER, "artifacts");
             _customLibraryDirectory = SetSourceDirectory(logicAppBasePath, Constants.CUSTOM_LIB_FOLDER, "custom library");
 
-            // Other files needed to test the workflow, but we don't need to update these
-            _parameters = ReadFromPath(Path.Combine(logicAppBasePath, Constants.PARAMETERS), optional: true);
+            // Other files needed to test the workflow, but we don't need to read or modify these
             _host = ReadFromPath(Path.Combine(logicAppBasePath, Constants.HOST));
 
             // Find all of the csx files that are used by the Logic App
@@ -228,10 +228,10 @@ namespace LogicAppUnit
                 _testConfig.Logging,
                 _testConfig.Runner,
                 _client,
+                _host,
                 _mockResponses,
                 _workflowDefinition,
                 _localSettings,
-                _host,
                 _parameters,
                 _connections,
                 _csxTestInputs,
@@ -283,6 +283,15 @@ namespace LogicAppUnit
         }
 
         /// <summary>
+        /// Process a workflow parameters file before the test is run.
+        /// </summary>
+        /// <param name="logicAppBasePath">Path to the root folder containing the workflows.</param>
+        private void ProcessParametersFile(string logicAppBasePath)
+        {
+            _parameters = new ParametersWrapper(ReadFromPath(Path.Combine(logicAppBasePath, Constants.PARAMETERS), optional: true));
+        }
+
+        /// <summary>
         /// Process a workflow connections file before the test is run.
         /// </summary>
         /// <param name="logicAppBasePath">Path to the root folder containing the workflows.</param>
@@ -290,7 +299,7 @@ namespace LogicAppUnit
         {
             const string invalidConnectionsMsg = "configured to use the 'ManagedServiceIdentity' authentication type. Only the 'Raw' and 'ActiveDirectoryOAuth' authentication types are allowed in a local developer environment";
 
-            _connections = new ConnectionsWrapper(ReadFromPath(Path.Combine(logicAppBasePath, Constants.CONNECTIONS), optional: true), _localSettings);
+            _connections = new ConnectionsWrapper(ReadFromPath(Path.Combine(logicAppBasePath, Constants.CONNECTIONS), optional: true), _localSettings, _parameters);
 
             _connections.ReplaceManagedApiConnectionUrlsWithMockServer(_testConfig.Workflow.ManagedApisToMock);
 

@@ -25,7 +25,7 @@ namespace LogicAppUnit.Mocking
         private Func<string, bool> _requestContentStringMatcherDelegate;
         private Func<JToken, bool> _requestContentJsonMatcherDelegate;
 
-        private int _requestMatchCounter = 0;
+        private int _requestMatchCounter;  // default is 0
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MockRequestMatcher"/> class.
@@ -231,8 +231,7 @@ namespace LogicAppUnit.Mocking
         /// <inheritdoc cref="IMockRequestMatcher.WithContentAsString(Func{string, bool})" />
         public IMockRequestMatcher WithContentAsString(Func<string, bool> requestContentMatch)
         {
-            if (requestContentMatch == null)
-                throw new ArgumentNullException(nameof(requestContentMatch));
+            ArgumentNullException.ThrowIfNull(requestContentMatch);
 
             _requestContentStringMatcherDelegate = requestContentMatch;
             return this;
@@ -241,8 +240,7 @@ namespace LogicAppUnit.Mocking
         /// <inheritdoc cref="IMockRequestMatcher.WithContentAsJson(Func{JToken, bool})" />
         public IMockRequestMatcher WithContentAsJson(Func<JToken, bool> requestContentMatch)
         {
-            if (requestContentMatch == null)
-                throw new ArgumentNullException(nameof(requestContentMatch));
+            ArgumentNullException.ThrowIfNull(requestContentMatch);
 
             _requestContentJsonMatcherDelegate = requestContentMatch;
             return this;

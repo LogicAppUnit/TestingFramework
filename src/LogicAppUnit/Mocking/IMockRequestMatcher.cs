@@ -109,7 +109,7 @@ namespace LogicAppUnit.Mocking
         /// </summary>
         /// <param name="matchCounts">The match count numbers.</param>
         /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
-        /// <remarks>This match is the logical inverse of <see cref="M:IMockRequestMatcher.WithNotMatchCount()"/>.</remarks>
+        /// <remarks>This match is the logical inverse of <see cref="WithNotMatchCount(int[])"/>.</remarks>
         IMockRequestMatcher WithMatchCount(params int[] matchCounts);
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace LogicAppUnit.Mocking
         /// </summary>
         /// <param name="matchCounts">The match count numbers.</param>
         /// <returns>The <see cref="IMockRequestMatcher"/>.</returns>
-        /// <remarks>This match is the logical inverse of <see cref="M:IMockRequestMatcher.WithMatchCount()"/>.</remarks>
+        /// <remarks>This match is the logical inverse of <see cref="WithMatchCount(int[])"/>.</remarks>
         IMockRequestMatcher WithNotMatchCount(params int[] matchCounts);
 
         /// <summary>

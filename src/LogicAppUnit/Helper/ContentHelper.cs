@@ -29,8 +29,7 @@ namespace LogicAppUnit.Helper
         /// <returns>The HTTP content.</returns>
         public static StreamContent CreateStreamContent(Stream stream, string contentType)
         {
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
+            ArgumentNullException.ThrowIfNull(stream);
             if (string.IsNullOrEmpty(contentType))
                 throw new ArgumentNullException(nameof(contentType));
 
@@ -72,8 +71,7 @@ namespace LogicAppUnit.Helper
         /// <returns>The HTTP content.</returns>
         public static StringContent CreateStringContent(string value, string contentType, Encoding encoding = null)
         {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
+            ArgumentNullException.ThrowIfNull(value);
             if (string.IsNullOrEmpty(contentType))
                 throw new ArgumentNullException(nameof(contentType));
 
@@ -87,8 +85,7 @@ namespace LogicAppUnit.Helper
         /// <returns>The HTTP content.</returns>
         public static StringContent CreateJsonStringContent(string jsonString)
         {
-            if (jsonString == null)
-                throw new ArgumentNullException(nameof(jsonString));
+            ArgumentNullException.ThrowIfNull(jsonString);
 
             return new StringContent(jsonString, Encoding.UTF8, JsonContentType);
         }
@@ -123,8 +120,7 @@ namespace LogicAppUnit.Helper
         public static StringContent CreateJsonStringContent(object jsonObject)
         {
             // The name of this method is inconsistent
-            if (jsonObject == null)
-                throw new ArgumentNullException(nameof(jsonObject));
+            ArgumentNullException.ThrowIfNull(jsonObject);
 
             var json = JsonConvert.SerializeObject(jsonObject);
             return new StringContent(json, Encoding.UTF8, JsonContentType);
@@ -138,8 +134,7 @@ namespace LogicAppUnit.Helper
         public static StringContent CreateXmlStringContent(XmlDocument xmlDoc)
         {
             // The name of this method is inconsistent
-            if (xmlDoc == null)
-                throw new ArgumentNullException(nameof(xmlDoc));
+            ArgumentNullException.ThrowIfNull(xmlDoc);
 
             return new StringContent(xmlDoc.ToString(), Encoding.UTF8, XmlContentType);
         }
@@ -153,8 +148,7 @@ namespace LogicAppUnit.Helper
         /// <returns>The stream content as a <see cref="string"/>.</returns>
         public static string ConvertStreamToString(Stream input)
         {
-            if (input == null)
-                throw new ArgumentNullException(nameof(input));
+            ArgumentNullException.ThrowIfNull(input);
 
             string convertedValue = string.Empty;
             using (var sr = new StreamReader(input))
@@ -172,8 +166,7 @@ namespace LogicAppUnit.Helper
         /// <returns>The stream representation.</returns>
         public static Stream ConvertStringToStream(string input)
         {
-            if (input == null)
-                throw new ArgumentNullException(nameof(input));
+            ArgumentNullException.ThrowIfNull(input);
 
             byte[] byteArray = Encoding.ASCII.GetBytes(input);
             return new MemoryStream(byteArray);
@@ -201,9 +194,9 @@ namespace LogicAppUnit.Helper
                 CommentHandling = CommentHandling.Ignore
             };
 
-            // Format the JSON by loading into a JObject and then extracting it as a string.
+            // Format the JSON by loading into a JToken and then extracting it as a string.
             // Perhaps a little heavy-handed, but it does the trick.
-            var obj = JObject.Parse(json, settings);
+            var obj = JToken.Parse(json, settings);
             return obj.ToString();
         }
 
@@ -217,8 +210,7 @@ namespace LogicAppUnit.Helper
         /// </remarks>
         public static string FormatXml(Stream xmlStream)
         {
-            if (xmlStream == null)
-                throw new ArgumentNullException(nameof(xmlStream));
+            ArgumentNullException.ThrowIfNull(xmlStream);
 
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load(xmlStream);
@@ -236,8 +228,7 @@ namespace LogicAppUnit.Helper
         /// </remarks>
         public static string FormatXml(string xml)
         {
-            if (xml == null)
-                throw new ArgumentNullException(nameof(xml));
+            ArgumentNullException.ThrowIfNull(xml);
 
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(xml);
@@ -252,8 +243,7 @@ namespace LogicAppUnit.Helper
         /// <returns>The formatted XML.</returns>
         private static string FormatXml(XmlDocument xmlDoc)
         {
-            if (xmlDoc == null)
-                throw new ArgumentNullException(nameof(xmlDoc));
+            ArgumentNullException.ThrowIfNull(xmlDoc);
 
             XmlDsigC14NTransform xmlTransform = new XmlDsigC14NTransform();
             xmlTransform.LoadInput(xmlDoc);

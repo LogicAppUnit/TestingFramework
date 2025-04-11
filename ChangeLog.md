@@ -1,3 +1,14 @@
+# 1.11.0 (11th April 2025)
+
+LogicAppUnit Testing Framework:
+
+- The framework now supports parameterised connections that are created by the Standard Logic App extension. [[Issue #42](https://github.com/LogicAppUnit/TestingFramework/issues/42)]
+- Bumped versions of NuGet packages to remove critical vulnerabilities in some of the transitive packages.
+- Added configuration for NuGet Audit so that any future vulnerabilities are logged as build warnings and do not break the LogicAppUnit build. [[Issue #40](https://github.com/LogicAppUnit/TestingFramework/issues/40)]
+- Updated method `ContentHelper.FormatJson()` to use `JToken.Parse()` instead of `JObject.Parse()`. [[Issue #45](https://github.com/LogicAppUnit/TestingFramework/issues/45)]
+- Added new property `TestRunner.WorkflowTerminationCodeAsString` that returns the workflow termination code as a string value. The existing property `TestRunner.WorkflowTerminationCode` returns the code as an integer value, but the code is defined as a string data type in the workflow schema reference documentation. [[Issue #46](https://github.com/LogicAppUnit/TestingFramework/issues/46)]
+
+
 # 1.10.0 (4th November 2024)
 
 LogicAppUnit Testing Framework:

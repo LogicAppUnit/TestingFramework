@@ -135,8 +135,7 @@ namespace LogicAppUnit.Mocking
         /// <inheritdoc cref="IMockResponseBuilder.WithContent(Func{HttpContent})" />
         public IMockResponseBuilder WithContent(Func<HttpContent> content)
         {
-            if (content == null)
-                throw new ArgumentNullException(nameof(content));
+            ArgumentNullException.ThrowIfNull(content);
 
             _contentDelegate = content;
             return this;
@@ -203,12 +202,11 @@ namespace LogicAppUnit.Mocking
         }
 
         /// <inheritdoc cref="IMockResponseBuilder.ThrowsException(Exception)" />
-        public IMockResponseBuilder ThrowsException(Exception excpetionToThrow)
+        public IMockResponseBuilder ThrowsException(Exception exceptionToThrow)
         {
-            if (excpetionToThrow == null)
-                throw new ArgumentNullException(nameof(excpetionToThrow));
+            ArgumentNullException.ThrowIfNull(exceptionToThrow);
 
-            _excpetionToThrow = excpetionToThrow;
+            _excpetionToThrow = exceptionToThrow;
             return this;
         }
 
@@ -223,8 +221,7 @@ namespace LogicAppUnit.Mocking
         /// <returns>The <see cref="IMockResponseBuilder"/>.</returns>
         internal IMockResponseBuilder AfterDelay(Func<TimeSpan> delay)
         {
-            if (delay == null)
-                throw new ArgumentNullException(nameof(delay));
+            ArgumentNullException.ThrowIfNull(delay);
 
             _delayDelegate = delay;
             return this;

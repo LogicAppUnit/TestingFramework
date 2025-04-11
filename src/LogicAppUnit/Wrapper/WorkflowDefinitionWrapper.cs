@@ -61,7 +61,7 @@ namespace LogicAppUnit.Wrapper
         {
             get
             {
-                return (WorkflowType)Enum.Parse(typeof(WorkflowType), _jObjectWorkflow["kind"].ToString());
+                return Enum.Parse<WorkflowType>(_jObjectWorkflow["kind"].ToString());
             }
         }
 

@@ -26,8 +26,7 @@ namespace LogicAppUnit.Mocking
         /// <param name="mockRequestMatcher">The request matcher.</param>
         internal MockResponse(string name, IMockRequestMatcher mockRequestMatcher)
         {
-            if (mockRequestMatcher == null)
-                throw new ArgumentNullException(nameof(mockRequestMatcher));
+            ArgumentNullException.ThrowIfNull(mockRequestMatcher);
 
             _mockName = name;
             _mockRequestMatcher = (MockRequestMatcher)mockRequestMatcher;
@@ -36,8 +35,7 @@ namespace LogicAppUnit.Mocking
         /// <inheritdoc cref="IMockResponse.RespondWith(IMockResponseBuilder)" />
         public void RespondWith(IMockResponseBuilder mockResponseBuilder)
         {
-            if (mockResponseBuilder == null)
-                throw new ArgumentNullException(nameof(mockResponseBuilder));
+            ArgumentNullException.ThrowIfNull(mockResponseBuilder);
 
             _mockResponseBuilder = (MockResponseBuilder)mockResponseBuilder;
         }
@@ -57,10 +55,8 @@ namespace LogicAppUnit.Mocking
         /// <returns>The response for the matching request, or <c>null</c> if there was no match.</returns>
         internal async Task<HttpResponseMessage> MatchRequestAndCreateResponseAsync(HttpRequestMessage request, MockRequestCache requestCache, List<string> requestMatchingLog)
         {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-            if (requestCache == null)
-                throw new ArgumentNullException(nameof(requestCache));
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(requestCache);
 
             if (_mockRequestMatcher == null)
                 throw new TestException("A request matcher has not been configured");

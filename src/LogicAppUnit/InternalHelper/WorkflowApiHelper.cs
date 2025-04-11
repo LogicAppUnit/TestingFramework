@@ -31,8 +31,7 @@ namespace LogicAppUnit.InternalHelper
         /// <param name="workflowName">The name of the workflow being tested.</param>
         public WorkflowApiHelper(HttpClient client, string workflowName)
         {
-            if (client == null)
-                throw new ArgumentNullException(nameof(client));
+            ArgumentNullException.ThrowIfNull(client);
             if (string.IsNullOrEmpty(workflowName))
                 throw new ArgumentNullException(nameof(workflowName));
 

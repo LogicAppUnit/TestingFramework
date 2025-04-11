@@ -189,7 +189,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflow
             }
         }
 
-        private static HttpContent GetServiceBusMessageForTriggerNoLanguageCode()
+        private static StringContent GetServiceBusMessageForTriggerNoLanguageCode()
         {
             return ContentHelper.CreateJsonStringContent(new
             {
@@ -228,7 +228,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflow
             });
         }
 
-        private static HttpContent GetServiceBusMessageForTriggerWithValidLanguageCode()
+        private static StringContent GetServiceBusMessageForTriggerWithValidLanguageCode()
         {
             return ContentHelper.CreateJsonStringContent(new
             {
@@ -268,7 +268,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflow
             });
         }
 
-        private static HttpContent GetServiceBusMessageForTriggerWithInvalidLanguageCode()
+        private static StringContent GetServiceBusMessageForTriggerWithInvalidLanguageCode()
         {
             return ContentHelper.CreateJsonStringContent(new
             {
@@ -308,7 +308,7 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflow
             });
         }
 
-        private static object GetSQLExecuteResponse()
+        private static object[] GetSQLExecuteResponse()
         {
             return new object[]
             {
@@ -323,11 +323,9 @@ namespace LogicAppUnit.Samples.LogicApps.Tests.BuiltInConnectorWorkflow
             };
         }
 
-        private static object GetSQLExecuteResponseNoRecords()
+        private static object[] GetSQLExecuteResponseNoRecords()
         {
-            return new object[]
-            {
-            };
+            return System.Array.Empty<object>();
         }
     }
 }

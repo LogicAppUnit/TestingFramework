@@ -76,8 +76,7 @@ namespace LogicAppUnit.Wrapper
         /// <param name="settingsToUpdate">The settings to be updated.</param>
         public void ReplaceSettingOverrides(Dictionary<string, string> settingsToUpdate)
         {
-            if (settingsToUpdate == null)
-                throw new ArgumentNullException(nameof(settingsToUpdate));
+            ArgumentNullException.ThrowIfNull(settingsToUpdate);
 
             Console.WriteLine($"Updating local settings file with test overrides:");
 
@@ -105,8 +104,7 @@ namespace LogicAppUnit.Wrapper
         /// <returns>The value of the setting, or <c>null</c> if the setting does not exist.</returns>
         public string GetSettingValue(string settingName)
         {
-            if (settingName == null)
-                throw new ArgumentNullException(nameof(settingName));
+            ArgumentNullException.ThrowIfNull(settingName);
 
             var setting = _jObjectSettings.SelectToken("Values").Children<JProperty>().Where(x => x.Name == settingName).FirstOrDefault();
 
@@ -120,8 +118,7 @@ namespace LogicAppUnit.Wrapper
         /// <returns>The value of the setting, or <c>null</c> if the setting does not exist.</returns>
         public string GetWorkflowOperationOptionsValue(string workflowName)
         {
-            if (workflowName == null)
-                throw new ArgumentNullException(nameof(workflowName));
+            ArgumentNullException.ThrowIfNull(workflowName);
 
             return GetSettingValue($"Workflows.{workflowName}.OperationOptions");
         }
@@ -134,10 +131,8 @@ namespace LogicAppUnit.Wrapper
         /// <returns>The setting that has been created.</returns>
         public string SetWorkflowOperationOptionsValue(string workflowName, string value)
         {
-            if (workflowName == null)
-                throw new ArgumentNullException(nameof(workflowName));
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
+            ArgumentNullException.ThrowIfNull(workflowName);
+            ArgumentNullException.ThrowIfNull(value);
 
             string settingName = $"Workflows.{workflowName}.OperationOptions";
             _jObjectSettings["Values"][settingName] = value;

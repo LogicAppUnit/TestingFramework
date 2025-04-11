@@ -27,10 +27,8 @@ namespace LogicAppUnit.Helper
         /// <returns>The resource data.</returns>
         public static Stream GetAssemblyResourceAsStream(string resourceName, Assembly containingAssembly)
         {
-            if (resourceName == null)
-                throw new ArgumentNullException(nameof(resourceName));
-            if (containingAssembly == null)
-                throw new ArgumentNullException(nameof(containingAssembly));
+            ArgumentNullException.ThrowIfNull(resourceName);
+            ArgumentNullException.ThrowIfNull(containingAssembly);
 
             Stream resourceData = containingAssembly.GetManifestResourceStream(resourceName);
             if (resourceData == null)

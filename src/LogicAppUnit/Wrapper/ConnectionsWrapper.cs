@@ -13,16 +13,17 @@ namespace LogicAppUnit.Wrapper
     {
         private readonly JObject _jObjectConnection;
         private readonly LocalSettingsWrapper _localSettings;
+        private readonly ParametersWrapper _parameters;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionsWrapper"/> class.
         /// </summary>
         /// <param name="connectionsContent">The contents of the connections file, or <c>null</c> if the file does not exist.</param>
-        /// <param name="localSettings">The settings helper that is used to manage the local application settings.</param>
-        public ConnectionsWrapper(string connectionsContent, LocalSettingsWrapper localSettings)
+        /// <param name="localSettings">The local settings wrapper that is used to manage the local application settings.</param>
+        /// <param name="parameters">The parameters wrapper that is used to manage the parameters.</param>
+        public ConnectionsWrapper(string connectionsContent, LocalSettingsWrapper localSettings, ParametersWrapper parameters)
         {
-            if (localSettings == null)
-                throw new ArgumentNullException(nameof(localSettings));
+            ArgumentNullException.ThrowIfNull(localSettings);
 
             if (!string.IsNullOrEmpty(connectionsContent))
             {
@@ -30,6 +31,7 @@ namespace LogicAppUnit.Wrapper
             }
 
             _localSettings = localSettings;
+            _parameters = parameters;
         }
 
         /// <summary>
@@ -70,9 +72,9 @@ namespace LogicAppUnit.Wrapper
                     string connectionUrl = connection.Value["connectionRuntimeUrl"].Value<string>();
 
                     Uri validatedConnectionUri;
-                    if (!connectionUrl.Contains("@appsetting"))
+                    if (!connectionUrl.Contains("@appsetting") && !connectionUrl.Contains("@parameters"))
                     {
-                        // This connection runtime URL must be a valid URL since it is not using any appsetting substitution
+                        // This connection runtime URL must be a valid URL since it is not using any substitution
                         var isValidUrl = Uri.TryCreate(connectionUrl, UriKind.Absolute, out validatedConnectionUri);
                         if (!isValidUrl)
                             throw new TestException($"The connection runtime URL for managed connection '{connection.Name}' is not a valid URL. The URL is '{connectionUrl}'");
@@ -80,10 +82,11 @@ namespace LogicAppUnit.Wrapper
                     else
                     {
                         // Check that the expanded connection runtime URL is a valid URL
-                        string expandedConnectionUrl = _localSettings.ExpandAppSettingsValues(connectionUrl);
+                        // Expand parameters first because parameters can reference app settings
+                        string expandedConnectionUrl = _localSettings.ExpandAppSettingsValues(_parameters.ExpandParametersAsString(connectionUrl));
                         var isValidUrl = Uri.TryCreate(expandedConnectionUrl, UriKind.Absolute, out validatedConnectionUri);
                         if (!isValidUrl)
-                            throw new TestException($"The connection runtime URL for managed connection '{connection.Name}' is not a valid URL, even when the app settings have been expanded. The expanded URL is '{expandedConnectionUrl}'");
+                            throw new TestException($"The connection runtime URL for managed connection '{connection.Name}' is not a valid URL, even when the parameters and app settings have been expanded. The expanded URL is '{expandedConnectionUrl}'");
                     }
 
                     // Replace the host with the mock URL
@@ -105,8 +108,32 @@ namespace LogicAppUnit.Wrapper
             if (_jObjectConnection == null)
                 return null;
 
-            var managedApiConnectionsUsingMsi = _jObjectConnection.SelectTokens("managedApiConnections.*").Where(x => x["authentication"]["type"].ToString() == "ManagedServiceIdentity").ToList();
-            return managedApiConnectionsUsingMsi.Select(x => ((JProperty)x.Parent).Name);
+            List<string> returnValue = new();
+            var managedApiConnections = _jObjectConnection.SelectToken("managedApiConnections").Children<JProperty>().ToList();
+
+            managedApiConnections.ForEach((connection) =>
+            {
+                JObject connAuthTypeObject = null;
+                JToken connAuth = ((JObject)connection.Value)["authentication"];
+
+                switch (connAuth.Type)
+                {
+                    case JTokenType.String:
+                        // Connection object structure is parameterised
+                        connAuthTypeObject = _parameters.ExpandParameterAsObject(connAuth.Value<string>());
+                        break;
+                    
+                    case JTokenType.Object:
+                        // Connection object structure is not parameterised
+                        connAuthTypeObject = connAuth.Value<JObject>();
+                        break;
+                }
+
+                if (connAuthTypeObject["type"].Value<string>() == "ManagedServiceIdentity")
+                    returnValue.Add(connection.Name);
+            });
+
+            return returnValue;
         }
     }
 }

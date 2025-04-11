@@ -18,5 +18,21 @@
   "ServiceTwo-Authentication-APIKey": {
     "type": "String",
     "value": "@appsetting('ServiceTwo-Authentication-APIKey')"
+  },
+  "salesforce-ConnectionRuntimeUrl": {
+    "type": "String",
+    "value": "@appsetting('Salesforce-ConnectionRuntimeUrl')"
+  },
+  "outlook-ConnectionRuntimeUrl": {
+    "type": "String",
+    "value": "@appsetting('Outlook-ConnectionRuntimeUrl')"
+  },
+  "outlook-Authentication": {
+    "type": "Object",
+    "value": {
+      "type": "Raw",
+      "scheme": "Key",
+      "parameter": "@appsetting('Outlook-ConnectionKey')"
+    }
   }
 }
