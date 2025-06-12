@@ -296,5 +296,29 @@ namespace LogicAppUnit.Wrapper
                 });
             }
         }
+
+        /// <summary>
+        /// Update all HTTP actions with authentication type <i>ManagedServiceIdentity</i> to use <i>None</i> as the authentication type.
+        /// </summary>
+        /// <remarks>
+        /// The <i>ManagedServiceIdentity</i> is not supported.
+        /// </remarks>
+        public void ReplaceManagedIdentityAuthenticationTypeWithNone()
+        {
+            var httpActionsWithManagedIdentityAuthenticationType = _jObjectWorkflow.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "Http")
+                .Where(x => x["inputs"]?["authentication"]?["type"].ToString() == "ManagedServiceIdentity").Select(x => x["inputs"]?["authentication"] as JObject).ToList();
+
+            if (httpActionsWithManagedIdentityAuthenticationType.Count > 0)
+            {
+                Console.WriteLine("Updating workflow HTTP actions to replace authentication type `ManagedServiceIdentity` with `None`:");
+
+                httpActionsWithManagedIdentityAuthenticationType.ForEach(x =>
+                {
+                    x["type"] = "None";
+
+                    Console.WriteLine($"    {((JProperty)x.Parent.Parent.Parent.Parent.Parent).Name}");
+                });
+            }
+        }
     }
 }

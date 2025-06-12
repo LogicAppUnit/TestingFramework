@@ -1,0 +1,49 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Get_Customers_from_Service_One": {
+                "type": "Http",
+                "description": "Track some properties in this action",
+                "inputs": {
+                    "uri": "@{parameters('ServiceOne-Url')}/customers",
+                    "method": "GET",
+                    "headers": {
+                        "x-api-key": "ApiKey @{parameters('ServiceOne-Authentication-APIKey')}"
+                    },
+                    "authentication": {
+                        "type": "ManagedServiceIdentity",
+                        "audience": "api://sample-audience"
+                    }
+                },
+                "runAfter": {},
+                "operationOptions": "DisableAsyncPattern"
+            },
+            "Success_Response": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": 200
+                },
+                "runAfter": {
+                    "Get_Customers_from_Service_One": [
+                        "SUCCEEDED"
+                    ]
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "Receive_HTTP_request": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "method": "POST"
+                },
+                "operationOptions": "SuppressWorkflowHeadersOnResponse"
+            }
+        }
+    },
+    "kind": "Stateful"
+}

@@ -267,6 +267,7 @@ namespace LogicAppUnit
             _workflowDefinition.ReplaceInvokeWorkflowActionsWithHttp();
             _workflowDefinition.ReplaceCallLocalFunctionActionsWithHttp();
             _workflowDefinition.ReplaceBuiltInConnectorActionsWithHttp(_testConfig.Workflow.BuiltInConnectorsToMock);
+            _workflowDefinition.ReplaceManagedIdentityAuthenticationTypeWithNone();
         }
 
         /// <summary>
