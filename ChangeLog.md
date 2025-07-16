@@ -1,3 +1,15 @@
+# 1.12.0 (18th July 2025)
+
+LogicAppUnit Testing Framework:
+
+- HTTP actions with the authentication type set to `ManagedServiceIdentity` are updated to use the `None` authentication type. [[Issue #49](https://github.com/LogicAppUnit/TestingFramework/issues/49)], [[Issue #50](https://github.com/LogicAppUnit/TestingFramework/issues/50)] and [[PR #51](https://github.com/LogicAppUnit/TestingFramework/pull/51), [@ronaldbosma ](https://github.com/ronaldbosma)]
+
+
+LogicAppUnit.Samples.LogicApps.Tests:
+
+- Added a `http-with-managed-identity-workflow` workflow and unit test to test a workflow that includes a HTTP action with the authentication type set to `ManagedServiceIdentity`.
+
+
 # 1.11.0 (11th April 2025)
 
 LogicAppUnit Testing Framework:
