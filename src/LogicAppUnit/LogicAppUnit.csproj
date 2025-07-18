@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>LogicAppUnit</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Version>1.11.0</Version>
+    <Version>1.12.0</Version>
     <Title>Logic App Unit Testing Framework</Title>
     <Description>Unit testing framework for Standard Logic Apps.</Description>
     <RepositoryUrl>https://github.com/LogicAppUnit/TestingFramework</RepositoryUrl>

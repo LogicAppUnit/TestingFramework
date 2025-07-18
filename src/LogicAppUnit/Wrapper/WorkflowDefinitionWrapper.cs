@@ -244,8 +244,10 @@ namespace LogicAppUnit.Wrapper
         /// </remarks>
         public void RemoveHttpChunkingConfiguration()
         {
-            var httpActionsWithChunking = _jObjectWorkflow.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "Http")
-                .Where(x => x["runtimeConfiguration"]?["contentTransfer"]?["transferMode"].ToString() == "Chunked").Select(x => x["runtimeConfiguration"] as JObject).ToList();
+            var httpActionsWithChunking = _jObjectWorkflow.SelectTokens("$..actions.*")
+                .Where(x => x["type"].ToString() == "Http")
+                .Where(x => x["runtimeConfiguration"]?["contentTransfer"]?["transferMode"].ToString() == "Chunked")
+                .Select(x => x["runtimeConfiguration"] as JObject).ToList();
 
             if (httpActionsWithChunking.Count > 0)
             {
@@ -266,7 +268,9 @@ namespace LogicAppUnit.Wrapper
         /// </summary>
         public void ReplaceCallLocalFunctionActionsWithHttp()
         {
-            var callLocalFunctionActions = _jObjectWorkflow.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "InvokeFunction").Select(x => x as JObject).ToList();
+            var callLocalFunctionActions = _jObjectWorkflow.SelectTokens("$..actions.*")
+                .Where(x => x["type"].ToString() == "InvokeFunction")
+                .Select(x => x as JObject).ToList();
 
             if (callLocalFunctionActions.Count > 0)
             {
@@ -305,8 +309,10 @@ namespace LogicAppUnit.Wrapper
         /// </remarks>
         public void ReplaceManagedIdentityAuthenticationTypeWithNone()
         {
-            var httpActionsWithManagedIdentityAuthenticationType = _jObjectWorkflow.SelectTokens("$..actions.*").Where(x => x["type"].ToString() == "Http")
-                .Where(x => x["inputs"]?["authentication"]?["type"].ToString() == "ManagedServiceIdentity").Select(x => x["inputs"]?["authentication"] as JObject).ToList();
+            var httpActionsWithManagedIdentityAuthenticationType = _jObjectWorkflow.SelectTokens("$..actions.*")
+                .Where(x => x["type"].ToString() == "Http")
+                .Where(x => x["inputs"]?["authentication"]?["type"].ToString() == "ManagedServiceIdentity")
+                .Select(x => x["inputs"]?["authentication"] as JObject).ToList();
 
             if (httpActionsWithManagedIdentityAuthenticationType.Count > 0)
             {
