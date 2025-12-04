@@ -1,0 +1,27 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "APP_KIND": "workflowapp",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "WORKFLOWS_SUBSCRIPTION_ID": "c1661296-a732-44b9-8458-d1a0dd19815e",
+    "WORKFLOWS_LOCATION_NAME": "uksouth",
+    "WORKFLOWS_RESOURCE_GROUP_NAME": "rg-uks-01",
+    "AzureBlob-ConnectionString": "any-blob-connection-string",
+    "AzureQueue-ConnectionString": "any-queue-connection-string",
+    "Outlook-ConnectionKey": "any-outlook-connection-key",
+    "Outlook-SubjectPrefix": "INFORMATION",
+    "Outlook-ConnectionRuntimeUrl": "https://7606763fdc09952f.10.common.logic-uksouth.azure-apihub.net/apim/outlook/79a0bc680716416e90e17323b581695d/",
+    "Salesforce-ConnectionKey": "any-salesforce-connection-key",
+    "Salesforce-ConnectionRuntimeUrl": "https://7606763fdc09952f.10.common.logic-uksouth.azure-apihub.net/apim/salesforce/fba515601ef14f9193eee596a9dcfd1c/",
+    "ServiceOne-Url": "https://external-service-one1.testing.net/api/v1",
+    "ServiceOne-Authentication-APIKey": "serviceone-auth-apikey",
+    "ServiceOne-Authentication-WebHook-APIKey": "serviceone-auth-webhook-apikey",
+    "ServiceTwo-Url": "https://external-service-two.testing.net/api/v1.1",
+    "ServiceTwo-Verison2Url": "https://external-service-two.testing.net/api/v2.0",
+    "ServiceTwo-Authentication-APIKey": "servicetwo-auth-apikey",
+    "ServiceTwo-DefaultAddressType": "business",
+    "Sql_ConnectionString": "any-sql-connection-string-custom",
+    "ServiceBus_ConnectionString": "any-servicebus-connection-custom-string"
+  }
+}

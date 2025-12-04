@@ -7,7 +7,9 @@
   "workflow": {
     "externalApiUrlsToMock": [
       "https://external-service-one.testing.net",
-      "https://external-service-two.testing.net"
+      "https://external-service-two.testing.net",
+      "https://external-service-one1.testing.net"
+
     ],
     "builtInConnectorsToMock": [
       "executeQuery",
@@ -18,5 +20,7 @@
       "CreateOrUpdateDocument"
     ],
     "autoConfigureWithStatelessRunHistory": true
-  }
+  },
+
+  "localSettingsFilename": "local.settings.dev.json"
 }

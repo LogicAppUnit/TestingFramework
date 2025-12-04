@@ -1,0 +1,66 @@
+{
+  "serviceProviderConnections": {
+    "serviceBus": {
+      "parameterValues": {
+        "connectionString": "@appsetting('ServiceBus_ConnectionString')"
+      },
+      "serviceProvider": {
+        "id": "/serviceProviders/serviceBus"
+      },
+      "displayName": "serviceBusConnection"
+    },
+    "sql": {
+      "parameterValues": {
+        "connectionString": "@appsetting('Sql_ConnectionString')"
+      },
+      "serviceProvider": {
+        "id": "/serviceProviders/sql"
+      },
+      "displayName": "sqlConnection"
+    },
+    "azureBlob": {
+      "parameterValues": {
+        "connectionString": "@appsetting('AzureBlob-ConnectionString')"
+      },
+      "serviceProvider": {
+        "id": "/serviceProviders/AzureBlob"
+      },
+      "displayName": "storageBlobConnection"
+    },
+    "azureQueue": {
+      "parameterValues": {
+        "connectionString": "@appsetting('AzureQueue-ConnectionString')"
+      },
+      "serviceProvider": {
+        "id": "/serviceProviders/azurequeues"
+      },
+      "displayName": "storageQueueConnection"
+    }
+  },
+  "managedApiConnections": {
+    "salesforce": {
+      "api": {
+        "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/providers/Microsoft.Web/locations/@{appsetting('WORKFLOWS_LOCATION_NAME')}/managedApis/salesforce"
+      },
+      "connection": {
+        "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/resourceGroups/@{appsetting('WORKFLOWS_RESOURCE_GROUP_NAME')}/providers/Microsoft.Web/connections/salesforce01"
+      },
+      "connectionRuntimeUrl": "@parameters('salesforce-ConnectionRuntimeUrl')",
+      "authentication": {
+        "type": "Raw",
+        "scheme": "Key",
+        "parameter": "@appsetting('Salesforce-ConnectionKey')"
+      }
+    },
+    "outlook": {
+      "api": {
+        "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/providers/Microsoft.Web/locations/@{appsetting('WORKFLOWS_LOCATION_NAME')}/managedApis/outlook"
+      },
+      "connection": {
+        "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/resourceGroups/@{appsetting('WORKFLOWS_RESOURCE_GROUP_NAME')}/providers/Microsoft.Web/connections/outlook01"
+      },
+      "connectionRuntimeUrl": "@parameters('outlook-ConnectionRuntimeUrl')",
+      "authentication": "@parameters('outlook-Authentication')"
+    }
+  }
+}

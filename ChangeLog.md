@@ -1,14 +1,23 @@
+# 1.13.0 (4th December 2025)
+
+LogicAppUnit Testing Framework:
+
+- Added support for custom configuration files in test projects. The `Initialize()` method now accepts optional parameters to specify custom filenames for `local.settings.json`, `parameters.json`, and `connections.json`. Configuration files are resolved by checking the test project directory first, then falling back to the Logic App project directory. When custom-named configuration files are found in the test project, they are automatically copied to the Logic App directory with standard filenames (`parameters.json`, `connections.json`) to ensure the Logic App runtime uses the correct test-specific configurations. This allows tests to use test-specific configurations that override the Logic App project defaults. This enables unified test suites across environments - use the same test code for DEV, QA, and PROD by simply swapping configuration files (e.g., `parameters-dev.json`, `parameters-qa.json`, `parameters-prod.json`).
+
+LogicAppUnit.Samples.LogicApps.Tests:
+
+- Added example custom configuration files (`local.settings-custom.json`, `parameters-custom.json`, `connections-custom.json`) in the test project.
+- Added `HttpWorkflowCustomConfigTest` and `ManagedApiConnectorWorkflowCustomConfigTest` to demonstrate the custom configuration file feature.
+
 # 1.12.0 (18th July 2025)
 
 LogicAppUnit Testing Framework:
 
 - HTTP actions with the authentication type set to `ManagedServiceIdentity` are updated to use the `None` authentication type. [[Issue #49](https://github.com/LogicAppUnit/TestingFramework/issues/49)], [[Issue #50](https://github.com/LogicAppUnit/TestingFramework/issues/50)] and [[PR #51](https://github.com/LogicAppUnit/TestingFramework/pull/51), [@ronaldbosma ](https://github.com/ronaldbosma)]
 
-
 LogicAppUnit.Samples.LogicApps.Tests:
 
 - Added a `http-with-managed-identity-workflow` workflow and unit test to test a workflow that includes a HTTP action with the authentication type set to `ManagedServiceIdentity`.
-
 
 # 1.11.0 (11th April 2025)
 
@@ -19,7 +28,6 @@ LogicAppUnit Testing Framework:
 - Added configuration for NuGet Audit so that any future vulnerabilities are logged as build warnings and do not break the LogicAppUnit build. [[Issue #40](https://github.com/LogicAppUnit/TestingFramework/issues/40)]
 - Updated method `ContentHelper.FormatJson()` to use `JToken.Parse()` instead of `JObject.Parse()`. [[Issue #45](https://github.com/LogicAppUnit/TestingFramework/issues/45)]
 - Added new property `TestRunner.WorkflowTerminationCodeAsString` that returns the workflow termination code as a string value. The existing property `TestRunner.WorkflowTerminationCode` returns the code as an integer value, but the code is defined as a string data type in the workflow schema reference documentation. [[Issue #46](https://github.com/LogicAppUnit/TestingFramework/issues/46)]
-
 
 # 1.10.0 (4th November 2024)
 
@@ -33,7 +41,6 @@ LogicAppUnit.Samples.LogicApps.Tests:
 - Added a `call-data-mapper-workflow` workflow and unit tests to test workflows that call the data mapper.
 - Added a `inline-script-workflow` workflow and unit tests to test workflows that call in-line C# script (.csx) files.
 
-
 # 1.9.0 (23rd January 2024)
 
 LogicAppUnit Testing Framework:
@@ -42,16 +49,15 @@ LogicAppUnit Testing Framework:
 - Added `IMockRequestMatcher.FromAction(string[] actionNames)` to allow a mock request matcher to match a request based on the name of the workflow action that created the request. This feature depends on the `x-ms-workflow-operation-name` header being present in the request. Refer to the [wiki](https://github.com/LogicAppUnit/TestingFramework/wiki) for details of when the Logic App runtime creates this header.
 - Retry policies for actions using a managed API connection are removed and replaced with a `none` policy. This is the same pre-processing that is applied to HTTP actions. Previous versions of the framework did not remove the retry policies for actions using a managed API connection which meant that tests could take a long time to complete if they were testing failure scenarios.
 - The framework checks the `connections.json` file and will fail a test if there are any managed API connections that are configured using the `ManagedServiceIdentity` authentication type. The Logic Apps runtime only supports the `Raw`
- and `ActiveDirectoryOAuth` authentication types when running in a local developer environment. [[Issue #30](https://github.com/LogicAppUnit/TestingFramework/issues/30)]
- - The `testConfiguration.json` file is now optional. If the file does not exist, or contains an empty JSON document (`{}`), the default values are used for all settings. Previous versions of the framework would fail a test if the configuration file did not exist. [[Issue #28](https://github.com/LogicAppUnit/TestingFramework/issues/28)]
- - `Call a local function` actions are now mocked using HTTP actions. This means that the dependencies between a workflow and a .NET Framework function can be broken to enable better unit testing of the workflow.
- - Added `IMockResponseBuilder.ThrowsException(Exception exceptionToThrow)` to simulate an exception being thrown by a local .NET Framework function.
- - Fixed a typo in the name of the `logging.writeFunctionRuntimeStartupLogs` configuration setting. Previously the setting was named `logging.writeFunctionRuntineStartupLogs` (note the incorrect spelling `Runtine`). [[PR #29](https://github.com/LogicAppUnit/TestingFramework/pull/29), [@jeanpaulsmit](https://github.com/jeanpaulsmit)] <br /> :warning: ***This is a breaking change. Any use of the `writeFunctionRuntineStartupLogs` setting in the `testConfiguration.json` file will need to be updated.***
+  and `ActiveDirectoryOAuth` authentication types when running in a local developer environment. [[Issue #30](https://github.com/LogicAppUnit/TestingFramework/issues/30)]
+- The `testConfiguration.json` file is now optional. If the file does not exist, or contains an empty JSON document (`{}`), the default values are used for all settings. Previous versions of the framework would fail a test if the configuration file did not exist. [[Issue #28](https://github.com/LogicAppUnit/TestingFramework/issues/28)]
+- `Call a local function` actions are now mocked using HTTP actions. This means that the dependencies between a workflow and a .NET Framework function can be broken to enable better unit testing of the workflow.
+- Added `IMockResponseBuilder.ThrowsException(Exception exceptionToThrow)` to simulate an exception being thrown by a local .NET Framework function.
+- Fixed a typo in the name of the `logging.writeFunctionRuntimeStartupLogs` configuration setting. Previously the setting was named `logging.writeFunctionRuntineStartupLogs` (note the incorrect spelling `Runtine`). [[PR #29](https://github.com/LogicAppUnit/TestingFramework/pull/29), [@jeanpaulsmit](https://github.com/jeanpaulsmit)] <br /> :warning: **_This is a breaking change. Any use of the `writeFunctionRuntineStartupLogs` setting in the `testConfiguration.json` file will need to be updated._**
 
 LogicAppUnit.Samples.LogicApps.Tests:
 
 - Added a `call-local-function-workflow` workflow and unit tests to demonstrate the mocking of a local .NET Framework function.
-
 
 # 1.8.0 (24th October 2023)
 
@@ -63,12 +69,11 @@ LogicAppUnit Testing Framework:
 - Added a new feature to remove the chunking configuration for HTTP actions (`runtimeConfiguration.contentTransfer.transferMode`). This feature is enabled/disabled in the `testConfiguration.json` file using the `workflow.removeHttpChunkingConfiguration` option. The default value for this option is `true`. [[Issue #24](https://github.com/LogicAppUnit/TestingFramework/issues/24)]
 - Added `IMockResponseBuilder.WithAccepted()` as a short-cut when creating a response with a HTTP 202 (Accepted) status code.
 
-
 # 1.7.0 (27th July 2023)
 
 LogicAppUnit Testing Framework:
 
-- Mock responses can be configured using `ITestRunner.AddMockResponse()` and a fluent API, this includes the definition of the request matching conditions and the response. 
+- Mock responses can be configured using `ITestRunner.AddMockResponse()` and a fluent API, this includes the definition of the request matching conditions and the response.
 - Removed public methods `ContentHelper.SerializeObject()`, `ContentHelper.DeserializeObject()` and `ContentHelper.JClone()`, these were for internal use only and are now obsolete.
 - Include the LogicAppUnit version at the end of the test log.
 - The maximum execution time for a workflow can now be set in the `testConfiguration.json` file using the `runner.maxWorkflowExecutionDuration` option. Previously this duration was hard-coded to 5 minutes. The default value for this option is 300 seconds (5 minutes).
@@ -77,7 +82,6 @@ LogicAppUnit Testing Framework:
 LogicAppUnit.Samples.LogicApps.Tests:
 
 - Added a `fluent-workflow` workflow and unit tests to demonstrate the use of the fluent API.
-
 
 # 1.6.0 (5th June 2023)
 
@@ -89,12 +93,11 @@ LogicAppUnit Testing Framework:
 - Added support for workflows using a HTTP trigger where the response action is not the last action in the workflow. Previous versions of the framework assumed that the workflow was complete once the response was received. Now the framework polls the workflow status to ensure that the workflow has completed. [[PR #15](https://github.com/LogicAppUnit/TestingFramework/pull/15), [@atthevergeof](https://github.com/atthevergeof)]
 - Fixed a bug in `TestRunner.TriggerWorkflow()` where the return value was being incorrectly set to the (disposed) workflow run history API response. The response is now correctly set to the workflow trigger API response. This bug only occurred for workflows that have a non-HTTP trigger (which is then replaced by a HTTP trigger by the framework).
   <br />
-  :warning: ***This is a breaking change. Previously the status code for the response would have been HTTP 200 (OK), now it will be HTTP 202 (Accepted).***
+  :warning: **_This is a breaking change. Previously the status code for the response would have been HTTP 200 (OK), now it will be HTTP 202 (Accepted)._**
 
 LogicAppUnit.Samples.LogicApps.Tests:
 
 - Added a `http-async-workflow` workflow and unit tests to demonstrate the use of the testing framework with HTTP triggers and asynchronous responses.
-
 
 # 1.5.0 (14th April 2023)
 
@@ -109,13 +112,11 @@ LogicAppUnit.Samples.LogicApps.Tests:
 
 - Added an `invoke-workflow` workflow and unit tests to demonstrate the use of the testing framework with child workflows that are invoked from a parent workflow.
 
-
 # 1.4.0 (21st February 2023)
 
 LogicAppUnit Testing Framework:
 
 - Changed the logic that updates the `connectionRuntimeUrl` for Managed API connectors so that it works with URL values that include `@appsetting()` references. [[Issue #9](https://github.com/LogicAppUnit/TestingFramework/issues/9)]
-
 
 # 1.3.0 (1st February 2023)
 
@@ -129,7 +130,6 @@ LogicAppUnit.Samples.LogicApps.Tests:
 
 - Updated the `http-workflow` workflow and unit tests to include tracked properties.
 
-
 # 1.2.0 (9th January 2023)
 
 LogicAppUnit Testing Framework:
@@ -142,7 +142,6 @@ LogicAppUnit Testing Framework:
 LogicAppUnit.Samples.LogicApps.Tests:
 
 - Added a `loop-workflow` workflow and unit tests to demonstrate the use of the testing framework with a workflow containing actions in an `Until` loop and a `ForEach` loop.
-
 
 # 1.1.0 (16th December 2022)
 
@@ -161,7 +160,6 @@ LogicAppUnit Testing Framework:
 LogicAppUnit.Samples.LogicApps.Tests:
 
 - Added a `stateless-workflow` workflow and unit tests to demonstrate the use of the testing framework with a stateless workflow, a custom client tracking id and a relative path configured in the HTTP trigger.
-
 
 # 1.0.0 (9th December 2022)
 
